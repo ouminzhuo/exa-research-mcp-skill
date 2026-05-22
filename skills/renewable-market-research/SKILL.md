@@ -36,21 +36,17 @@ Load only the reference needed for the current step:
    - Optionally add/maintain `feature_list.json` entries for: collection, aggregation, full report, lite report, PDF rendering.
 
 3. **Split research dimensions**
-   Use 7-15 focused dimensions depending on scope. For OEM/commercial-entry asks (for example Mingyang), use **demand-first framing**: start from electricity demand gap and monetizable offtake, then validate resource/technology constraints.
-   - demand-load-gap (generation, consumption, peak load, imports/exports, 5-10 year outlook)
-   - power-mix-replacement (retirements, thermal constraints, hydro flexibility, wind/solar complementarity)
-   - grid-storage-transmission (curtailment risk, substations/lines, storage requirement, cross-border corridors)
-   - policy-ppa-economics (auction/FIT/PPA, tariff history, FX risk, localization, IRR/ROE if estimable)
-   - project-pipeline-layered (operational, under-construction, awarded/PPA, MOU, early stage)
-   - owners-partners-routes (state entities, IPPs, EPC/developer networks, contact pathways)
-   - competitor-oem-landscape (OEM supply, turbine platforms, localization and tie strength)
-   - epc-om-logistics-lifting (transport routes, heavy-lift constraints, installation window risks)
-   - localization-supply-chain (tower/blade/nacelle/BESS ecosystem and JV options)
-   - esg-land-community (ESIA, biodiversity, land/community, IFI social constraints)
-   - carbon-greenpower-hydrogen (I-REC, CBAM, enterprise PPA, hydrogen/ammonia links)
-   - china-finance-ecosystem (Chinese EPC/developers/financiers and policy-bank support)
-   - regional-benchmark (Kazakhstan vs peer markets)
-   - mingyang-entry-strategy (12/36/60 month actions across turbine, hybrid, EPC, O&M, local manufacturing)
+   Use 7-15 focused dimensions depending on scope:
+   - project pipeline
+   - national plans and policy
+   - developers and sponsors
+   - IFI/project financing
+   - technology/equipment/EPC/O&M
+   - grid/storage/transmission
+   - environmental/social/ESIA
+   - carbon markets, I-REC, CBAM, green hydrogen
+   - Chinese company participation
+   - regional benchmark markets
 
 4. **Collect in file mode**
    - Prefer Exa semantic search/fetch/deep-search tools for broad discovery.
@@ -68,7 +64,6 @@ Load only the reference needed for the current step:
    - Merge depth files into `{slug}.json` using the schema in `references/data-model.md`.
    - Export project rows to `{slug}.csv`; use `scripts/export_projects_csv.py` when convenient.
    - Deduplicate by project name, location, sponsor, capacity, and source URL.
-   - For project pipeline, classify each project evidence layer as one of: `news-announcement`, `mou-framework`, `ppa-signed`, `financing-closed`, `construction-started`, `cod-operational`.
 
 7. **Generate reports**
    - Write `{slug}-report.md` for the full internal report.
@@ -81,7 +76,6 @@ Load only the reference needed for the current step:
    - Confirm both report files exist.
    - If PDFs were requested, confirm both PDFs exist or document why PDF rendering was skipped.
    - Summarize new files, coverage, gaps, and next update path.
-   - Ensure every key fact contains source URL, date, confidence, and uncertainty notes.
 
 ## Default Output Paths
 
@@ -126,131 +120,3 @@ py -3 -m json.tool data/renewable-market/index.json > $env:TEMP\renewable-index.
 ```
 
 Do not require WSL, Git Bash, `make.sh`, or Bash-only syntax for the standard workflow.
-
-## Multi-Agent Harness Rules
-
-When running long-form market research, use a harness-based multi-agent file workflow.
-
-### Required Skills (when available)
-
-1. `effective-harnesses`
-   - Manage feature decomposition, task status, recovery points, and validation state.
-   - Maintain `feature_list.json` and `agent-progress.md`.
-2. `renewable-market-research`
-   - Run market research file mode.
-   - Produce depth JSON files, master JSON, CSV, project timeline CSV, full report, lite report, and PDFs.
-3. `company-research`
-   - Support owner/developer/competitor/EPC/logistics/crane/financing/partner analysis.
-
-### Agent Roles and File Ownership
-
-Main agent responsibilities:
-- initialize harness and schemas
-- create/update build scripts
-- assign worker modules
-- normalize worker outputs
-- merge depth files
-- produce master JSON, CSV, timeline CSV, markdown reports, and PDFs
-- run validations and final business judgment
-
-Worker agent responsibilities:
-- only the assigned research module
-- only the assigned `data/renewable-market/depth/*.json` files
-- only evidence-backed findings
-
-Worker agents MUST NOT:
-- edit master JSON
-- edit final Markdown reports
-- edit PDF outputs
-- edit build scripts
-- edit harness files
-- edit other workers' depth files
-
-### Required Evidence and Facts Schema
-
-Every key fact must include:
-- `statement`
-- `sources[]` with `url`, `title`, `publisher`, `accessedAt`, `sourceLanguage`, `collectionMethod`
-- `confidence`
-- `uncertainty`
-
-Facts schema:
-
-```json
-{
-  "topic": "...",
-  "facts": [
-    {
-      "statement": "...",
-      "sources": [],
-      "confidence": "high | medium | low",
-      "uncertainty": "..."
-    }
-  ]
-}
-```
-
-Project pipeline timeline schema:
-
-```json
-{
-  "project": "...",
-  "stage": "...",
-  "auctionDate": "...",
-  "ppaDate": "...",
-  "fidDate": "...",
-  "constructionStart": "...",
-  "codOrTargetCod": "...",
-  "timingConfidence": "...",
-  "timingUncertainty": "..."
-}
-```
-
-### Required Outputs (Kazakhstan wind example)
-
-- `data/renewable-market/index.json`
-- `data/renewable-market/kazakhstan-wind.json`
-- `data/renewable-market/kazakhstan-wind.csv`
-- `data/renewable-market/kazakhstan-wind-project-timeline.csv`
-- `data/renewable-market/kazakhstan-wind-report.md`
-- `data/renewable-market/kazakhstan-wind-lite.md`
-- `data/renewable-market/kazakhstan-wind-report.pdf`
-- `data/renewable-market/kazakhstan-wind-lite.pdf`
-
-### Main-Agent Normalization Layer
-
-Main agent should implement/maintain:
-- `normalize_sources`
-- `normalize_facts`
-- `humanize_value`
-- `dedupe_projects`
-- `project_timeline_records`
-- `validate_depth_files`
-
-### Report Quality Gates
-
-- Markdown/CSV/PDF must be human-readable outputs, not raw JSON object dumps.
-- Do not render raw structures such as `{\"claim\": ...}` or `{\"sources\": ...}` directly in reports.
-- Keep structured evidence in JSON/depth files only.
-- Missing values must be `unavailable` or `not found`.
-- Any inference must be marked as `assumption`.
-- Never fabricate sources.
-
-### Acceptance Commands
-
-Use commands like:
-
-```text
-uv run python scripts/build_kazakhstan_wind_outputs.py
-uv run python -m json.tool data/renewable-market/index.json
-uv run python -m json.tool data/renewable-market/kazakhstan-wind.json
-```
-
-And verify:
-- all depth JSON files parse
-- master JSON parses
-- CSV opens
-- project timeline CSV exists
-- full and lite Markdown reports exist
-- PDFs exist when PDF toolchain is available
-- reports do not contain raw JSON object artifacts

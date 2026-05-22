@@ -99,13 +99,9 @@ data/renewable-market/
         }
       ],
       "confidence": "high",
-      "evidenceStage": "ppa-signed",
-      "mingyangOpportunityWindow": "Medium-term turbine + EPC consortium window",
-      "uncertainty": "SPV equity split not fully disclosed",
       "lastVerified": "2026-05-16"
     }
   ],
-  "demandLoadGap": [],
   "nationalPlans": [],
   "policyFramework": [],
   "forecasts": [],
@@ -114,8 +110,7 @@ data/renewable-market/
   "technology": [],
   "environmentSocial": [],
   "carbonHydrogen": [],
-  "risks": [],
-  "entryStrategy": []
+  "risks": []
 }
 ```
 
@@ -141,8 +136,6 @@ Depth files are arrays. Keep them narrow and source-rich:
       }
     ],
     "confidence": "high",
-    "uncertainty": "Public source lacks complete term-sheet details",
-    "evidenceStage": "financing-closed",
     "notes": "Any conflict or gap"
   }
 ]
