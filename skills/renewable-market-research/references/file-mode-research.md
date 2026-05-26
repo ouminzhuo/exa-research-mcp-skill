@@ -33,10 +33,14 @@ Useful Exa-style categories:
 
 ## Dimension Split
 
-For a comprehensive country/technology task, use 7-15 dimensions:
+For a comprehensive country/technology task, use 7-15 dimensions. For commercial-entry tasks, use a demand-first order (demand gap -> replacement space -> grid delivery -> project conversion paths):
 
 | Dimension | Search target | Example |
 |---|---|---|
+| demand-load-gap | power demand growth, peak, imports/exports, deficit | `Kazakhstan electricity demand peak load import export trend` |
+| power-mix-replacement | current mix, retirements, thermal limits | `Kazakhstan coal retirement plan gas constraints power mix` |
+| grid-storage | storage, transmission, grid bottlenecks | `Kazakhstan wind grid curtailment storage transmission plan` |
+| policy-ppa-economics | auction/FIT/PPA/tariff/FX/IRR | `Kazakhstan renewable auction tariff PPA currency risk` |
 | project-pipeline | all known projects and statuses | `Uzbekistan wind farm list capacity MW 2026` |
 | policy-plans | targets, laws, auctions, tariffs | `Uzbekistan renewable energy target 2030` |
 | developers | sponsor portfolio by company | `ACWA Power Uzbekistan portfolio wind` |
@@ -47,6 +51,7 @@ For a comprehensive country/technology task, use 7-15 dimensions:
 | carbon-hydrogen | I-REC, carbon, CBAM, green H2 | `Uzbekistan green hydrogen I-REC carbon CBAM` |
 | china-participation | Chinese OEM/EPC/developer role | `POWERCHINA Uzbekistan wind solar EPC Goldwind` |
 | regional-benchmark | compare neighboring markets | `Uzbekistan Kazakhstan wind market comparison` |
+| entry-strategy | OEM/system/developer/EPC/O&M/localization pathways | `Kazakhstan wind OEM localization manufacturing opportunities` |
 
 ## Child Agent Prompt Template
 
@@ -62,6 +67,7 @@ Write an array of records. Each record must include:
 - key facts with numbers and dates when available
 - source title, url, publisher, accessedAt
 - confidence: high/medium/low
+- uncertainty: what is estimated or unavailable
 - notes/gaps
 
 Do not return raw search results in chat. After writing and validating JSON, reply only: DONE.

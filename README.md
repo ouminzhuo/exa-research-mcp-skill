@@ -150,111 +150,46 @@ py -3 -m json.tool feature_list.json > $env:TEMP\feature_list.validated.json
 
 ## 使用示例
 
-最可复用的一句话模板是：
+```text
+使用 $company-research 调研 Cursor、Windsurf、Continue 的竞品格局，输出表格并标注来源。
+```
 
-```使用 effective-harnesses 管理任务状态，使用 renewable-market-research 文件模式执行研究，使用 company-research 支撑公司/竞品/合作方分析。采用多 agent 分工：worker 只写各自 depth JSON，主 agent 负责整合、判断、生成和校验。每条事实必须带来源、日期、语言、采集方式、置信度和不确定性。输出主 JSON、CSV、项目时间轴 CSV、完整版报告、交付版报告和 PDF，并用 uv run python 完成全量校验。```
+```text
+使用 $foreign-trade-research 调研巴西太阳能逆变器市场，排除中国公司，输出中文市场进入报告。
+```
 
-## 使用建议
+```text
+使用 $renewable-market-research 调研乌兹别克斯坦风电市场，采用文件模式采集，生成完整版和交付版报告。
+```
 
-1. 先明确使用哪些 skill
-你指定了：
+```text
+使用 $effective-harnesses + $renewable-market-research + $company-research 调研哈萨克斯坦风电市场（明阳视角），采用多 agent 文件模式；worker 只写各自 depth JSON，主 agent 统一归一化并输出主 JSON/CSV/项目时间轴 CSV/Full+Lite 报告（如环境支持再输出 PDF）。
+```
 
-effective-harnesses：管理长任务、进度、恢复点、测试状态。
-renewable-market-research：主研究流程，负责文件模式、depth JSON、主 JSON、CSV、完整版/交付版、PDF。
-company-research：补强业主、竞品、EPC、吊装公司、金融机构、合作伙伴分析。
-关键点是你后来补了一句：“我在 skill 中也要求不同 agent 做不一样的内容，主 agent 做整合和思考。”
-这句话让任务从“单 agent 研究”升级成了真正的多 agent 文件模式。
+### 可复用的多 Agent 研究骨架（推荐）
 
-2. 再明确主 agent / worker 分工
-你给的核心结构是：
+针对长周期市场研究，推荐显式声明以下约束：
 
-主 Agent：初始化 harness、重写生成脚本、定义 schema、分派任务、整合 depth、生成 JSON/CSV/MD/PDF、做明阳机会判断。
-Worker Agent：只负责自己的一组 depth/*.json，不改主 JSON、报告、PDF、生成脚本和 harness 文件。
-这个分工非常关键，因为它避免了多个 agent 抢写同一个文件。
+- 主 agent：初始化 harness、定义 schema、分派模块、归一化合并、生成可读报告与验收。
+- worker agent：仅负责自己模块与 `data/renewable-market/depth/*.json` 文件。
+- worker 禁止修改：主 JSON、Markdown/PDF、build scripts、harness 文件、其他 worker 的 depth 文件。
+- 关键事实字段：`statement`、`sources[]`（含 `url/title/publisher/accessedAt/sourceLanguage/collectionMethod`）、`confidence`、`uncertainty`。
+- 项目时间轴字段：`stage/auctionDate/ppaDate/fidDate/constructionStart/codOrTargetCod/timingConfidence/timingUncertainty`。
 
-3. 明确 worker 文件所有权
-你把任务拆成 A-H：
+推荐验收产物（以哈萨克斯坦风电为例）：
 
-A：用电需求、电力缺口、电源结构
-B/C：电网、消纳、储能、政策、PPA、电价
-D/E/F：项目管线、业主、竞品、EPC、O&M
-G/H：物流吊装、本地化、ESG、碳/绿氢、中国金融、区域对比
-并且给每个 agent 指定了明确文件路径。这是本次最有效的部分。
+- `data/renewable-market/index.json`
+- `data/renewable-market/kazakhstan-wind.json`
+- `data/renewable-market/kazakhstan-wind.csv`
+- `data/renewable-market/kazakhstan-wind-project-timeline.csv`
+- `data/renewable-market/kazakhstan-wind-report.md`
+- `data/renewable-market/kazakhstan-wind-lite.md`
+- `data/renewable-market/kazakhstan-wind-report.pdf`（环境支持）
+- `data/renewable-market/kazakhstan-wind-lite.pdf`（环境支持）
 
-4. 明确证据字段
-你要求每条事实必须有：
-
-url
-title
-publisher
-accessedAt
-sourceLanguage
-collectionMethod
-confidence
-uncertainty
-这让后续聚合、报告、校验都能自动化。
-
-5. 明确验收命令
-你指定：
-
-uv run python scripts/build_kazakhstan_wind_outputs.py
-uv run python -m json.tool data/renewable-market/index.json
-uv run python -m json.tool data/renewable-market/kazakhstan-wind.json
-以及全量 depth JSON 校验。这让任务有了“完成标准”，不是只靠主观感觉。
-
-后续迭代 skill 时最需要注意：
-
-在 skill 里写死 worker 输出 schema
-这次出现了一个问题：不同 worker 写的 facts[] 有的直接是字符串，有的是 {claim, sources} 或 {statement, sources} 对象。虽然最后修好了，但 skill 应该明确规定统一格式，例如：
-{
-  "topic": "...",
-  "facts": [
-    {
-      "statement": "...",
-      "sources": [],
-      "confidence": "...",
-      "uncertainty": "..."
-    }
-  ]
-}
-明确“报告不能直接渲染 JSON 对象”
-skill 里应加一条质量门：
-Markdown / CSV / PDF 是人读文件，不允许出现 {"claim": ...}、{"sources": ...} 这种原始结构。
-JSON/depth 才保留结构化证据。
-项目管线必须单独有 timeline schema
-这次你后来指出 COD 更重要，这是对的。skill 里建议固定加：
-{
-  "project": "...",
-  "stage": "...",
-  "auctionDate": "...",
-  "ppaDate": "...",
-  "fidDate": "...",
-  "constructionStart": "...",
-  "codOrTargetCod": "...",
-  "timingConfidence": "...",
-  "timingUncertainty": "..."
-}
-并输出单独的 project-timeline.csv。
-
-多 agent 必须有“文件所有权规则”
-推荐写进 skill：
-worker 只能写自己的 depth 文件。
-主 agent 只能整合，不手动改 worker 结论，除非做格式规范化。
-worker 不生成报告，不改主 JSON，不改脚本。
-主 agent 要有“归一化层”
-因为不同 agent 输出风格一定会有差异，生成脚本必须内置：
-normalize_sources
-normalize_facts
-humanize_value
-dedupe_projects
-project_timeline_records
-这样 worker 写得稍微不一致也不会污染报告。
-
-页数不应该是硬目标，信息完整性优先
-这次经验是：详版 20-30 页更合理。skill 里可以写：
-详版优先保证项目管线、时间、来源和判断完整，PDF 20-30 页可接受。
-交付版控制在 4-6 页。
-不通过删关键信息来满足页数。
+```text
+使用 $effective-harnesses 初始化这个研究项目，把任务拆成 6 个 feature 并创建 feature_list.json。
+```
 
 ## 技能开发约定
 
@@ -264,6 +199,16 @@ project_timeline_records
 - Claude Code 专属版本继续保留在 `.claude/skills/`，不要依赖它们实现跨平台兼容。
 - 研究型技能应保持来源引用、置信度、事实/推断分离。
 
+## 示例研究输出
+
+仓库包含多份历史研究报告，例如：
+
+- 东南亚/巴西/越南等市场中国公司出海业务调研
+- 泡泡玛特全球竞争对手深度调研
+- 张雪机车（ZXMOTO）海外竞争对手调研
+- CNC 切割行业与阿联酋 CNC 产业链分析
+
+这些文件可作为报告结构和分析深度参考，但新研究必须重新检索和验证最新信息。
 
 ## 许可
 
