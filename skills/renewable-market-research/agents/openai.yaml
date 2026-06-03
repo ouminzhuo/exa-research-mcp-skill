@@ -1,0 +1,16 @@
+interface:
+  display_name: "Renewable Market Research"
+  short_description: "File-mode renewable market intelligence reports"
+  default_prompt: "Use $renewable-market-research to research a country renewable technology market and produce full/lite reports."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "exa"
+      description: "Exa MCP server for semantic web/company/news/research/financial search when available"
+      transport: "streamable_http"
+      url: "https://mcp.exa.ai/mcp"
+    - type: "mcp"
+      value: "chrome-mcp"
+      description: "User-configured sanitized Chrome MCP for human-browser verification and dynamic pages"
+policy:
+  allow_implicit_invocation: true

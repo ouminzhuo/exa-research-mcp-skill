@@ -1,0 +1,458 @@
+#!/usr/bin/env python3
+"""Plan and validate renewable-market research search coverage.
+
+This helper does not call external search APIs. It creates a deterministic,
+file-mode search plan that workers can execute with Exa, Chrome MCP, or other
+host search tools, then validates depth JSON files against that plan.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+from collections import Counter
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+DIMENSIONS = [
+    {
+        "id": "demand-load-gap",
+        "intent": "status",
+        "freshness": "py",
+        "focus": "electricity demand, peak load, generation, consumption, imports, exports, deficits",
+        "patterns": [
+            "{country} electricity demand peak load generation consumption import export {year}",
+            "{country} power deficit industrial demand mining oil gas data center green hydrogen forecast",
+            "{country} electricity demand forecast 2030 power balance report",
+        ],
+        "domainBoost": ["iea.org", "enerdata.net", "worldbank.org", "stat.gov.kz", "kegoc.kz"],
+    },
+    {
+        "id": "power-mix-replacement",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "current generation mix, retirements, coal/gas limits, hydro flexibility, wind/solar complementarity",
+        "patterns": [
+            "{country} power generation mix coal gas hydro wind solar retirement plan",
+            "{country} coal power plant retirement renewable target wind share",
+            "{country} hydro flexibility wind solar complementarity grid balancing",
+        ],
+        "domainBoost": ["irena.org", "iea.org", "ember-climate.org", "energycharter.org"],
+    },
+    {
+        "id": "grid-storage-transmission",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "grid topology, substations, high-voltage lines, curtailment, storage, cross-border corridors",
+        "patterns": [
+            "{country} wind grid connection transmission substations storage curtailment",
+            "{country} KEGOC transmission investment plan renewable integration",
+            "{country} cross-border electricity transmission green corridor wind solar storage",
+        ],
+        "domainBoost": ["kegoc.kz", "adb.org", "ebrd.com", "worldbank.org", "usaid.gov"],
+    },
+    {
+        "id": "policy-ppa-economics",
+        "intent": "status",
+        "freshness": "py",
+        "focus": "FIT, auctions, PPA, offtaker credit, tariffs, FX, guarantees, tax, land, localization, IRR/ROE",
+        "patterns": [
+            "{country} renewable energy auction wind tariff PPA offtaker currency guarantee",
+            "{country} wind power PPA auction results tariff FIT local content tax land policy",
+            "{country} renewable project IRR ROE wind financing assumptions",
+        ],
+        "domainBoost": ["rfc.kz", "korem.kz", "adilet.zan.kz", "ifc.org", "ebrd.com"],
+    },
+    {
+        "id": "project-pipeline-layered",
+        "intent": "status",
+        "freshness": "pm",
+        "focus": "operational, construction, awarded/PPA, MOU/framework, early-stage wind projects",
+        "patterns": [
+            "{country} wind farm project pipeline operational construction PPA MOU capacity MW",
+            "{country} wind power auction awarded PPA signed construction COD developer",
+            "site:acwapower.com {country} wind project PPA construction COD",
+        ],
+        "domainBoost": ["acwapower.com", "masdar.ae", "totalenergies.com", "eni.com", "powerchina.cn"],
+    },
+    {
+        "id": "owners-partners-routes",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "state entities, IPPs, Chinese developers, industrial offtakers, offices, partnerships",
+        "patterns": [
+            "{country} wind power developer IPP owner Samruk KEGOC offtaker partnership",
+            "{country} ACWA Masdar TotalEnergies ENI China Energy PowerChina wind portfolio",
+            "{country} corporate PPA mining metallurgy oil gas renewable electricity wind",
+        ],
+        "domainBoost": ["samruk-energy.kz", "samruk-kazyna.kz", "kegoc.kz", "acwapower.com"],
+    },
+    {
+        "id": "competitor-oem-landscape",
+        "intent": "comparison",
+        "freshness": "py",
+        "focus": "OEM supply, turbine platform, capacity, rotor, hub height, climate adaptation, localization, owner/EPC ties",
+        "patterns": [
+            "{country} wind turbine supplier Goldwind Envision SANY Mingyang Vestas GE Nordex project",
+            "{country} wind farm turbine model rotor diameter hub height low temperature dust",
+            "{country} wind OEM localization manufacturing tower blade nacelle",
+        ],
+        "domainBoost": ["goldwind.com", "envision-group.com", "myse.com.cn", "sanyglobal.com", "vestas.com"],
+    },
+    {
+        "id": "epc-om-logistics-lifting",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "EPC, O&M, oversized logistics routes, border crossings, heavy lifting, cranes, installation windows",
+        "patterns": [
+            "{country} wind farm EPC O&M logistics heavy lift crane transport route China",
+            "{country} oversized cargo wind turbine blade nacelle tower rail road border crossing",
+            "{country} Mammoet Sarens wind turbine installation crane project",
+        ],
+        "domainBoost": ["mammoet.com", "sarens.com", "powerchina.cn", "ceec.net.cn"],
+    },
+    {
+        "id": "localization-supply-chain",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "tower, blade, nacelle, BESS, converter manufacturing, local content, JV/service centers",
+        "patterns": [
+            "{country} wind tower blade nacelle manufacturing localization local content",
+            "{country} battery energy storage manufacturing converter renewable supply chain",
+            "{country} wind turbine service center training center spare parts joint venture",
+        ],
+        "domainBoost": ["invest.gov.kz", "kazakhinvest.gov.kz", "astanatimes.com"],
+    },
+    {
+        "id": "esg-land-community",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "land acquisition, community, biodiversity, birds, ESIA, cultural heritage, IFI standards",
+        "patterns": [
+            "{country} wind farm ESIA bird migration biodiversity community land acquisition",
+            "{country} wind project environmental social impact assessment cultural heritage",
+            "{country} wind farm IFC EBRD environmental social action plan",
+        ],
+        "domainBoost": ["ebrd.com", "ifc.org", "adb.org", "worldbank.org"],
+    },
+    {
+        "id": "carbon-greenpower-hydrogen",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "I-REC, carbon credits, CBAM, green hydrogen/ammonia, industrial decarbonization, corporate PPA",
+        "patterns": [
+            "{country} I-REC renewable energy certificate wind corporate PPA carbon credit",
+            "{country} CBAM mining metallurgy green electricity renewable PPA",
+            "{country} green hydrogen ammonia wind solar project industrial decarbonization",
+        ],
+        "domainBoost": ["irecstandard.org", "hydrogencouncil.com", "ebrd.com", "worldbank.org"],
+    },
+    {
+        "id": "china-finance-ecosystem",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "Chinese developers, EPCs, financiers, Sinosure, policy banks, BRI and industrial cooperation",
+        "patterns": [
+            "{country} China wind project EPC developer financing Sinosure Exim Bank CDB",
+            "{country} Belt and Road renewable wind power China Energy PowerChina Goldwind",
+            "{country} China Kazakhstan industrial capacity cooperation renewable energy wind",
+        ],
+        "domainBoost": ["powerchina.cn", "ceec.net.cn", "sinosure.com.cn", "eximbank.gov.cn"],
+    },
+    {
+        "id": "regional-benchmark",
+        "intent": "comparison",
+        "freshness": "py",
+        "focus": "peer market comparison and resource allocation priority",
+        "patterns": [
+            "{country} vs Uzbekistan wind market comparison renewable auction grid PPA",
+            "{country} Azerbaijan Mongolia Saudi wind market comparison OEM opportunity",
+            "Central Asia wind power market comparison Kazakhstan Uzbekistan Azerbaijan Mongolia",
+        ],
+        "domainBoost": ["irena.org", "iea.org", "ebrd.com", "adb.org"],
+    },
+    {
+        "id": "mingyang-entry-strategy",
+        "intent": "comparison",
+        "freshness": "py",
+        "focus": "turbine supply, hybrid systems, co-development, EPC consortium, O&M, storage, localization, 12/36/60 month actions",
+        "patterns": [
+            "{country} wind OEM market entry strategy turbine supply EPC O&M localization",
+            "{country} wind solar storage integrated solution opportunity industrial PPA",
+            "Mingyang {country} wind turbine opportunity partnership localization",
+        ],
+        "domainBoost": ["myse.com.cn", "invest.gov.kz", "kegoc.kz", "acwapower.com"],
+    },
+]
+
+TOOL_LANES = [
+    {
+        "id": "exa-search",
+        "priority": 1,
+        "use": "broad semantic discovery with category filters and highlighted snippets",
+        "record": {"collectionMethod": "exa-search", "requiredFields": ["title", "url", "publisher", "accessedAt"]},
+    },
+    {
+        "id": "exa-fetch",
+        "priority": 2,
+        "use": "full-text extraction for known official URLs and PDFs indexed by Exa",
+        "record": {"collectionMethod": "exa-fetch", "requiredFields": ["title", "url", "publisher", "accessedAt"]},
+    },
+    {
+        "id": "exa-deep-search",
+        "priority": 3,
+        "use": "selective cross-source synthesis for complex comparison, status, and exploratory gaps when quota allows",
+        "record": {"collectionMethod": "exa-deep-search", "requiredFields": ["title", "url", "publisher", "accessedAt"]},
+    },
+    {
+        "id": "chrome-mcp",
+        "priority": 4,
+        "use": "sanitized human-browser verification for dynamic pages, tables, maps, PDFs, downloads, and bot-sensitive pages",
+        "record": {"collectionMethod": "chrome-mcp", "requiredFields": ["title", "url", "publisher", "accessedAt"]},
+    },
+    {
+        "id": "general-web-search",
+        "priority": 5,
+        "use": "last-resort fallback when Exa and Chrome MCP are unavailable or insufficient",
+        "record": {"collectionMethod": "general-web-search", "requiredFields": ["title", "url", "publisher", "accessedAt"]},
+    },
+]
+
+INTENT_WEIGHTS = {
+    "status": {"freshness": 0.45, "authority": 0.35, "keyword": 0.20},
+    "news": {"freshness": 0.60, "authority": 0.25, "keyword": 0.15},
+    "comparison": {"freshness": 0.20, "authority": 0.40, "keyword": 0.40},
+    "exploratory": {"freshness": 0.20, "authority": 0.50, "keyword": 0.30},
+    "resource": {"freshness": 0.10, "authority": 0.40, "keyword": 0.50},
+}
+
+
+def slugify(value: str) -> str:
+    value = value.strip().lower()
+    value = re.sub(r"[^a-z0-9]+", "-", value)
+    return value.strip("-") or "market"
+
+
+def render_query(pattern: str, country: str, technology: str, year: int, audience: str) -> str:
+    query = pattern.format(country=country, technology=technology, year=year, audience=audience).strip()
+    if technology.lower() not in query.lower():
+        query = f"{query} {technology}"
+    return query
+
+
+def build_plan(country: str, technology: str, audience: str, output_slug: str | None) -> dict[str, Any]:
+    year = datetime.now(timezone.utc).year
+    slug = output_slug or f"{slugify(country)}-{slugify(technology)}"
+    dimensions = []
+    for dimension in DIMENSIONS:
+        intent = dimension["intent"]
+        queries = [render_query(pattern, country, technology, year, audience) for pattern in dimension["patterns"]]
+        dimensions.append(
+            {
+                "id": dimension["id"],
+                "intent": intent,
+                "freshness": dimension["freshness"],
+                "focus": dimension["focus"],
+                "queries": queries,
+                "domainBoost": dimension["domainBoost"],
+                "scoringWeights": INTENT_WEIGHTS[intent],
+                "depthFile": f"data/renewable-market/depth/{dimension['id']}.json",
+                "minimumEvidence": {
+                    "records": 3,
+                    "uniqueUrls": 3,
+                    "collectionMethods": ["exa-search", "chrome-mcp"],
+                    "requiredFields": ["topic", "facts", "sources", "confidence", "uncertainty"],
+                },
+            }
+        )
+    return {
+        "version": "1.0",
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
+        "country": country,
+        "technology": technology,
+        "audience": audience,
+        "slug": slug,
+        "toolLanes": TOOL_LANES,
+        "dimensions": dimensions,
+        "outputs": {
+            "index": "data/renewable-market/index.json",
+            "mainJson": f"data/renewable-market/{slug}.json",
+            "projectsCsv": f"data/renewable-market/{slug}.csv",
+            "timelineCsv": f"data/renewable-market/{slug}-project-timeline.csv",
+            "fullReportMd": f"data/renewable-market/{slug}-report.md",
+            "liteReportMd": f"data/renewable-market/{slug}-lite.md",
+            "fullReportPdf": f"data/renewable-market/{slug}-report.pdf",
+            "liteReportPdf": f"data/renewable-market/{slug}-lite.pdf",
+        },
+    }
+
+
+def load_json(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+SOURCE_REQUIRED_FIELDS = ["url", "title", "publisher", "accessedAt", "sourceLanguage"]
+
+
+def source_urls(record: dict[str, Any]) -> list[str]:
+    urls = []
+    sources = record.get("sources", [])
+    if isinstance(sources, list):
+        for source in sources:
+            if isinstance(source, dict) and source.get("url"):
+                urls.append(str(source["url"]))
+    facts = record.get("facts", [])
+    if isinstance(facts, list):
+        for fact in facts:
+            if isinstance(fact, dict):
+                fact_sources = fact.get("sources", [])
+                if isinstance(fact_sources, list):
+                    for source in fact_sources:
+                        if isinstance(source, dict) and source.get("url"):
+                            urls.append(str(source["url"]))
+    return urls
+
+
+
+def source_missing_fields(record: dict[str, Any]) -> list[str]:
+    issues = []
+    sources = record.get("sources", [])
+    if isinstance(sources, list):
+        for source_index, source in enumerate(sources):
+            if isinstance(source, dict):
+                missing = [field for field in SOURCE_REQUIRED_FIELDS if source.get(field) in (None, "", [])]
+                if missing:
+                    issues.append(f"source {source_index} missing fields: {', '.join(missing)}")
+    facts = record.get("facts", [])
+    if isinstance(facts, list):
+        for fact_index, fact in enumerate(facts):
+            if not isinstance(fact, dict):
+                continue
+            fact_sources = fact.get("sources", [])
+            if isinstance(fact_sources, list):
+                for source_index, source in enumerate(fact_sources):
+                    if isinstance(source, dict):
+                        missing = [field for field in SOURCE_REQUIRED_FIELDS if source.get(field) in (None, "", [])]
+                        if missing:
+                            issues.append(
+                                f"fact {fact_index} source {source_index} missing fields: {', '.join(missing)}"
+                            )
+    return issues
+
+def record_missing_fields(record: dict[str, Any], fields: list[str]) -> list[str]:
+    missing = []
+    for field in fields:
+        value = record.get(field)
+        if value in (None, "", []):
+            missing.append(field)
+    return missing
+
+
+def validate_depth_file(path: Path, minimum: dict[str, Any]) -> dict[str, Any]:
+    if not path.exists():
+        return {"path": str(path), "status": "missing", "records": 0, "uniqueUrls": 0, "issues": ["file not found"]}
+    data = load_json(path)
+    if not isinstance(data, list):
+        return {"path": str(path), "status": "invalid", "records": 0, "uniqueUrls": 0, "issues": ["depth file must be a JSON array"]}
+
+    required_fields = minimum.get("requiredFields", [])
+    urls: set[str] = set()
+    methods: Counter[str] = Counter()
+    issues = []
+    for index, record in enumerate(data):
+        if not isinstance(record, dict):
+            issues.append(f"record {index} is not an object")
+            continue
+        missing = record_missing_fields(record, required_fields)
+        if missing:
+            issues.append(f"record {index} missing fields: {', '.join(missing)}")
+        for source_issue in source_missing_fields(record):
+            issues.append(f"record {index} {source_issue}")
+        urls.update(source_urls(record))
+        method = record.get("collectionMethod")
+        if not method and isinstance(record.get("notes"), str) and "chrome" in record["notes"].lower():
+            method = "chrome-mcp"
+        if method:
+            methods[str(method)] += 1
+
+    min_records = int(minimum.get("records", 0))
+    min_urls = int(minimum.get("uniqueUrls", 0))
+    if len(data) < min_records:
+        issues.append(f"record count {len(data)} below minimum {min_records}")
+    if len(urls) < min_urls:
+        issues.append(f"unique URL count {len(urls)} below minimum {min_urls}")
+
+    status = "pass" if not issues else "needs-work"
+    return {
+        "path": str(path),
+        "status": status,
+        "records": len(data),
+        "uniqueUrls": len(urls),
+        "collectionMethods": dict(methods),
+        "issues": issues,
+    }
+
+
+def validate_plan(plan_path: Path, depth_dir: Path) -> dict[str, Any]:
+    plan = load_json(plan_path)
+    dimensions = plan.get("dimensions", [])
+    results = []
+    for dimension in dimensions:
+        if not isinstance(dimension, dict):
+            continue
+        depth_file = Path(str(dimension.get("depthFile", "")))
+        if not depth_file.is_absolute():
+            depth_file = depth_dir / depth_file.name
+        results.append(validate_depth_file(depth_file, dimension.get("minimumEvidence", {})))
+    summary = Counter(result["status"] for result in results)
+    return {
+        "plan": str(plan_path),
+        "depthDir": str(depth_dir),
+        "validatedAt": datetime.now(timezone.utc).isoformat(),
+        "summary": dict(summary),
+        "dimensions": results,
+        "overallStatus": "pass" if summary and set(summary) == {"pass"} else "needs-work",
+    }
+
+
+def write_json(data: dict[str, Any], output: Path | None) -> None:
+    text = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text, encoding="utf-8")
+    else:
+        print(text, end="")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Plan or validate renewable market search coverage.")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    plan_parser = subparsers.add_parser("plan", help="Generate a dimension-level search plan JSON.")
+    plan_parser.add_argument("--country", required=True)
+    plan_parser.add_argument("--technology", required=True)
+    plan_parser.add_argument("--audience", default="commercial-entry")
+    plan_parser.add_argument("--slug")
+    plan_parser.add_argument("--output", type=Path)
+
+    validate_parser = subparsers.add_parser("validate", help="Validate depth JSON coverage against a search plan.")
+    validate_parser.add_argument("--plan", required=True, type=Path)
+    validate_parser.add_argument("--depth-dir", default=Path("data/renewable-market/depth"), type=Path)
+    validate_parser.add_argument("--output", type=Path)
+
+    args = parser.parse_args()
+    if args.command == "plan":
+        data = build_plan(args.country, args.technology, args.audience, args.slug)
+        write_json(data, args.output)
+        return 0
+    if args.command == "validate":
+        data = validate_plan(args.plan, args.depth_dir)
+        write_json(data, args.output)
+        return 0 if data["overallStatus"] == "pass" else 1
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
