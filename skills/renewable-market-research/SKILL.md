@@ -22,6 +22,7 @@ Load only the reference needed for the current step:
 - `references/data-model.md`: directory layout, `index.json`, main JSON schema, depth JSON schema, and CSV columns.
 - `references/pdf-pipeline.md`: full/lite report structure, MD-to-PDF pipeline, Chinese font handling, and output risks.
 - `references/windows-native.md`: Windows native PowerShell/Python startup commands, CSV export wrapper, PDF caveats, and Chrome MCP browser rules.
+- `references/search-orchestration.md`: intent-aware query planning, search-lane coverage gates, validation script usage, and evidence-ranking guidance.
 
 ## Standard Workflow
 
@@ -29,6 +30,7 @@ Load only the reference needed for the current step:
    - Extract `country`, `technology`, language, report depth, and target audience.
    - Slugify to `{country_slug}-{technology_slug}` such as `uzbekistan-wind`.
    - Create `data/renewable-market/` and `data/renewable-market/depth/` if missing.
+   - For long-form research, generate a search plan with `scripts/search_orchestration.py plan` before assigning workers.
 
 2. **Resume or initialize harness state**
    - Read `data/renewable-market/index.json` if present.
@@ -59,6 +61,7 @@ Load only the reference needed for the current step:
    - When host policy and user request allow parallel agents, assign each dimension to a child agent that writes JSON under `depth/` and replies only `DONE`.
    - If parallel agents are unavailable, perform the same dimensions sequentially and still write per-dimension JSON files.
    - Never paste large raw search results into the main response.
+   - Workers should follow the generated search plan: use query variants, domain boosts, freshness hints, and minimum evidence gates per dimension.
 
 5. **Detect convergence**
    - Each dimension performs multiple rounds until 3 consecutive rounds add no meaningful new records, or the evidence target is met.
@@ -77,7 +80,7 @@ Load only the reference needed for the current step:
    - Full/lite reports must cite sources and include data-confidence notes.
 
 8. **Validate and hand off**
-   - Validate JSON syntax and CSV row count.
+   - Validate JSON syntax, CSV row count, and search coverage; use `scripts/search_orchestration.py validate` when a search plan exists.
    - Confirm both report files exist.
    - If PDFs were requested, confirm both PDFs exist or document why PDF rendering was skipped.
    - Summarize new files, coverage, gaps, and next update path.
@@ -226,6 +229,8 @@ Main agent should implement/maintain:
 - `dedupe_projects`
 - `project_timeline_records`
 - `validate_depth_files`
+- `build_search_plan`
+- `validate_search_coverage`
 
 ### Report Quality Gates
 
@@ -244,6 +249,7 @@ Use commands like:
 uv run python scripts/build_kazakhstan_wind_outputs.py
 uv run python -m json.tool data/renewable-market/index.json
 uv run python -m json.tool data/renewable-market/kazakhstan-wind.json
+uv run python skills/renewable-market-research/scripts/search_orchestration.py validate --plan data/renewable-market/kazakhstan-wind-search-plan.json --depth-dir data/renewable-market/depth --output data/renewable-market/kazakhstan-wind-search-coverage.json
 ```
 
 And verify:

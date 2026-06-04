@@ -175,6 +175,7 @@ py -3 -m json.tool feature_list.json > $env:TEMP\feature_list.validated.json
 - worker 禁止修改：主 JSON、Markdown/PDF、build scripts、harness 文件、其他 worker 的 depth 文件。
 - 关键事实字段：`statement`、`sources[]`（含 `url/title/publisher/accessedAt/sourceLanguage/collectionMethod`）、`confidence`、`uncertainty`。
 - 项目时间轴字段：`stage/auctionDate/ppaDate/fidDate/constructionStart/codOrTargetCod/timingConfidence/timingUncertainty`。
+- 搜索完整性：先用 `skills/renewable-market-research/scripts/search_orchestration.py plan` 生成维度搜索计划，再用 `search_orchestration.py validate` 校验 depth JSON 覆盖率。
 
 推荐验收产物（以哈萨克斯坦风电为例）：
 

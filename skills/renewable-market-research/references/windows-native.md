@@ -75,3 +75,23 @@ Rules:
 - Do not copy cookies, credentials, account identifiers, private profile data, or unrelated browsing history into files.
 - Do not stream screenshots or full page dumps into the main chat unless the user specifically asks; write distilled evidence to JSON.
 - Record Chrome MCP usage in the depth record `notes` or `collectionMethod` field.
+
+## Search Plan and Coverage Validation
+
+Use the Python search orchestration helper through PowerShell when you need a reproducible search plan and coverage report:
+
+```powershell
+.\skills\renewable-market-research\scripts\search_orchestration.ps1 plan `
+  --country Kazakhstan `
+  --technology wind `
+  --audience "Mingyang OEM commercial entry" `
+  --slug kazakhstan-wind `
+  --output data\renewable-market\kazakhstan-wind-search-plan.json
+
+.\skills\renewable-market-research\scripts\search_orchestration.ps1 validate `
+  --plan data\renewable-market\kazakhstan-wind-search-plan.json `
+  --depth-dir data\renewable-market\depth `
+  --output data\renewable-market\kazakhstan-wind-search-coverage.json
+```
+
+The helper is standard-library Python only. It does not call network APIs; it plans and validates worker search coverage so Exa, Chrome MCP, and other host tools can be used consistently.
