@@ -1,13 +1,13 @@
 ---
 name: renewable-market-research
-description: Comprehensive renewable-energy market intelligence workflow for any country plus technology, using effective-harnesses style state tracking, file-mode parallel research, Exa/web search, structured JSON/CSV data, convergence detection, and full/lite MD-to-PDF report outputs. Use when asked to research wind, solar, storage, hydrogen, grid, or other clean-energy markets and produce reusable data plus two report versions.
+description: Workflow skill for evidence-based renewable energy market judgment, project pipeline verification, product-fit analysis, sales-action generation, and executive briefing compression. Use for overseas wind, solar, storage, hydrogen, grid, or clean-energy market research where evidence quality, source traceability, uncertainty control, and decision usefulness matter more than long reports.
 ---
 
 # Renewable Market Research
 
 ## Goal
 
-Research **any country + any renewable/new-energy technology** and produce reusable market data plus two deliverables:
+Research **any country + any renewable/new-energy technology** as an evidence-driven market intelligence workflow for market judgment, project pipeline verification, product-fit analysis, sales-action generation, and executive reporting. Preserve reusable market data plus traditional report deliverables:
 
 1. **Full report**: deep internal report with project pipeline, policy, developers, financing, technology, environment, carbon/hydrogen, risks, and sources.
 2. **Lite report**: shorter delivery version with polished structure, project pipeline essentials, and reduced deep/proprietary analysis.
@@ -20,9 +20,22 @@ Load only the reference needed for the current step:
 
 - `references/file-mode-research.md`: parallel/file-mode collection workflow, tool priority, convergence rules, and child-agent prompt template.
 - `references/data-model.md`: directory layout, `index.json`, main JSON schema, depth JSON schema, and CSV columns.
-- `references/pdf-pipeline.md`: full/lite report structure, MD-to-PDF pipeline, Chinese font handling, and output risks.
+- `workflow.md`: Lite, Standard, and Deep workflow modes for decision-oriented market intelligence.
+- `agent_roles.md`: writer, reviewer, synthesis, and executive role separation.
+- `review_gates.md`: Evidence, Contradiction, Business, and Executive gates that final claims must pass.
+- `schema/*.schema.json`: machine-readable schemas for evidence, findings, projects, decisions, reviews, and reports.
+- `prompts/*.md`: role-specific prompts for orchestrator, policy, pipeline, owner, product-fit, grid, finance, competitor, skeptic, synthesis, and executive agents.
+- `references/pdf-pipeline.md`: full/lite report structure, Markdown/HTML/PDF pipeline, Chinese/English font handling, table alignment, and output risks.
 - `references/windows-native.md`: Windows native PowerShell/Python startup commands, CSV export wrapper, PDF caveats, and Chrome MCP browser rules.
 - `references/search-orchestration.md`: intent-aware query planning, search-lane coverage gates, validation script usage, and evidence-ranking guidance.
+
+## Workflow Modes
+
+Choose the mode in `workflow.md` before collecting data:
+
+- **Lite Workflow**: quick market checks using policy, pipeline, product-fit, skeptic, synthesis, and executive agents. Output a one-page market judgment, confirmed leads, risks, and next actions.
+- **Standard Workflow**: country-level reports using policy, pipeline, owner, grid, product-fit, finance, competitor, skeptic, synthesis, and executive agents. Output lite report, full report, project pipeline table, sales-action plan, and executive brief.
+- **Deep Workflow**: strategic questions requiring multiple review loops, scenario comparison, assumptions register, evidence archive, and human review gates.
 
 ## Standard Workflow
 
@@ -76,7 +89,9 @@ Load only the reference needed for the current step:
 7. **Generate reports**
    - Write `{slug}-report.md` for the full internal report.
    - Write `{slug}-lite.md` for the lite delivery report.
-   - Render PDFs when the environment has a working PDF stack; otherwise deliver MD and explain the limitation. On Windows native, prefer PowerShell/Python steps over Bash or `make.sh`.
+   - For controlled PDF layout, prefer Markdown as the authoring source, convert Markdown to HTML with a controlled template, then render HTML to PDF. Direct HTML authoring is acceptable only for highly designed final decks or when Markdown cannot represent required layout.
+   - Report CSS should use Microsoft YaHei (`微软雅黑`, `Microsoft YaHei`) for Chinese text and Times New Roman for English/Latin text; tables should use fixed widths, explicit column alignment, and print CSS to avoid broken pipeline tables.
+   - Render PDFs when the environment has a working HTML/PDF stack; otherwise deliver MD and HTML and explain the limitation. On Windows native, prefer PowerShell/Python steps over Bash or `make.sh`.
    - Full/lite reports must cite sources and include data-confidence notes.
 
 8. **Validate and hand off**
@@ -105,6 +120,15 @@ data/renewable-market/
 ├── uzbekistan-wind-report.pdf
 └── uzbekistan-wind-lite.pdf
 ```
+
+## Review Gates
+
+Before final writing, apply `review_gates.md`:
+
+1. **Evidence Gate**: unsupported claims and weak single-source claims cannot become high-confidence final claims.
+2. **Contradiction Gate**: reconcile installed/planned/pipeline capacity, status conflicts, COD conflicts, duplicates, translated names, phase confusion, and offshore/floating/onshore classification.
+3. **Business Gate**: convert important facts into implications for sales action, product fit, risk judgment, or executive decision-making.
+4. **Executive Gate**: compress final output into three evidence-backed core judgments and avoid vague potential claims unless quantified and qualified.
 
 ## Quality Gates
 
