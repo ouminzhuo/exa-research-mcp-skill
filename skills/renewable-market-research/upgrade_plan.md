@@ -93,3 +93,12 @@ Add `examples/kazakhstan_2026_2030/` with goal, scope, and expected outputs for 
 - Add optional helper scripts for Markdown-to-HTML conversion and HTML-to-PDF rendering if future users want an executable pipeline.
 - Add sample JSON outputs for a completed Kazakhstan run after real evidence collection is performed.
 - Add project-level validation scripts that check duplicate names, status conflicts, COD conflicts, and confirmed-pipeline eligibility.
+
+## Implementation Status
+
+- Phase 1 was performed as an audit before modifications: existing skill files, references, scripts, metadata, and output model were inspected and summarized above.
+- Existing skill capabilities were preserved: file-mode collection, depth JSON, master JSON, CSV export, full/lite Markdown reports, optional PDF outputs, search planning, coverage validation, and Windows-native operation remain part of the workflow.
+- New workflow files are additive and do not replace the legacy research-output contract.
+- Agent prompts now include explicit allowed and prohibited actions.
+- Final conclusions must pass the Evidence Gate and Contradiction Gate before synthesis or executive compression.
+- The Kazakhstan example is scoped to Kazakhstan 2026-2030; peer-country comparison is not part of the default scope.

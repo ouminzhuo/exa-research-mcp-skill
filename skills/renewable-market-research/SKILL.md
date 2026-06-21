@@ -64,7 +64,7 @@ Choose the mode in `workflow.md` before collecting data:
    - esg-land-community (ESIA, biodiversity, land/community, IFI social constraints)
    - carbon-greenpower-hydrogen (I-REC, CBAM, enterprise PPA, hydrogen/ammonia links)
    - china-finance-ecosystem (Chinese EPC/developers/financiers and policy-bank support)
-   - regional-benchmark (Kazakhstan vs peer markets)
+   - optional-single-country-benchmark (only if explicitly requested; keep default analysis on the target country, not another country comparison)
    - mingyang-entry-strategy (12/36/60 month actions across turbine, hybrid, EPC, O&M, local manufacturing)
 
 4. **Collect in file mode**
@@ -125,8 +125,8 @@ data/renewable-market/
 
 Before final writing, apply `review_gates.md`:
 
-1. **Evidence Gate**: unsupported claims and weak single-source claims cannot become high-confidence final claims.
-2. **Contradiction Gate**: reconcile installed/planned/pipeline capacity, status conflicts, COD conflicts, duplicates, translated names, phase confusion, and offshore/floating/onshore classification.
+1. **Evidence Gate**: unsupported claims and weak single-source claims cannot become high-confidence final claims; every final conclusion must pass this gate.
+2. **Contradiction Gate**: reconcile installed/planned/pipeline capacity, status conflicts, COD conflicts, duplicates, translated names, phase confusion, and offshore/floating/onshore classification; every final conclusion must pass this gate before synthesis.
 3. **Business Gate**: convert important facts into implications for sales action, product fit, risk judgment, or executive decision-making.
 4. **Executive Gate**: compress final output into three evidence-backed core judgments and avoid vague potential claims unless quantified and qualified.
 

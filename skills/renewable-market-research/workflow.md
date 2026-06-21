@@ -11,6 +11,8 @@
 5. Separate official plans, auction targets, installed capacity, confirmed project pipeline, and optimistic scenarios.
 6. Convert important facts into decision-useful implications.
 7. Mark assumptions explicitly and keep unsupported claims in `rejected_claims` or watchlists.
+8. Keep the default analysis focused on one target country; add peer-country comparisons only when the user explicitly requests a benchmark.
+9. Route all final conclusions through the Evidence Gate and Contradiction Gate before synthesis or executive compression.
 
 ## Lite Workflow
 
@@ -31,7 +33,7 @@ Outputs:
 - Confirmed leads and watchlist leads.
 - Top policy, grid, product-fit, and execution risks.
 - Immediate next sales actions.
-- Three executive judgments with evidence support.
+- Three executive judgments with evidence support after Evidence Gate and Contradiction Gate review.
 
 ## Standard Workflow
 
@@ -58,7 +60,7 @@ Outputs:
 - Owner/developer/EPC/competitor map.
 - Product-fit assessment for Mingyang/MySE solutions.
 - Sales-action plan.
-- Executive brief.
+- Executive brief based only on conclusions that passed the Evidence Gate and Contradiction Gate.
 - Evidence archive and rejected-claims register.
 
 ## Deep Workflow
@@ -76,7 +78,7 @@ Additional requirements:
 
 Deep Workflow outputs should include all Standard Workflow outputs plus:
 
-- Scenario matrix.
+- Scenario matrix focused on the target country unless an explicit benchmark scope is requested.
 - Assumptions register.
 - Decision tree.
 - Risk-trigger watchlist.
