@@ -45,6 +45,77 @@ Reduce or omit:
 
 If operational projects are excluded from the lite version, still summarize total operational capacity and state the filtering rule.
 
+## Report Format Requirements
+
+Default final package:
+
+1. Markdown (`.md`) remains the source-of-truth authoring format because it is easy to review, diff, cite, and reuse.
+2. HTML (`.html`) is the layout-control format for table alignment, typography, page breaks, and print styles.
+3. PDF (`.pdf`) should normally be rendered from the controlled HTML file, not directly from raw Markdown.
+
+Recommended fonts:
+
+- Chinese: `Microsoft YaHei`, `微软雅黑`, fallback `SimHei`, `SimSun`, sans-serif.
+- English/Latin: `Times New Roman`, Times, serif.
+- Tables may use the same family but must define explicit `font-family`, `font-size`, `line-height`, `border-collapse`, widths, and page-break behavior.
+
+## Markdown-to-HTML-to-PDF Decision
+
+Prefer option 2: **write Markdown first, convert to controlled HTML, then render PDF from HTML**.
+
+Why:
+
+- Markdown is easier for research agents to edit, review, cite, and compare in git.
+- HTML gives stronger control over table alignment, fonts, page breaks, headers, footers, captions, and print CSS.
+- The same Markdown can generate both internal reports and lighter delivery versions.
+- Review gates can be applied to Markdown before layout polishing.
+
+Use option 1, direct HTML authoring, only when:
+
+- the report is a highly designed executive deck,
+- complex layout cannot be represented cleanly in Markdown,
+- the HTML template is stable and the writer can preserve citations and evidence IDs, or
+- final visual fidelity is more important than text-review simplicity.
+
+Recommended pipeline:
+
+```text
+{slug}-report.md
+  -> markdown-to-html renderer with controlled template/CSS
+  -> {slug}-report.html
+  -> browser/Playwright/WeasyPrint/Pandoc HTML print
+  -> {slug}-report.pdf
+```
+
+CSS baseline:
+
+```css
+body {
+  font-family: "Times New Roman", "Microsoft YaHei", "微软雅黑", serif;
+}
+:lang(zh), .zh {
+  font-family: "Microsoft YaHei", "微软雅黑", "SimHei", sans-serif;
+}
+:lang(en), .en {
+  font-family: "Times New Roman", Times, serif;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  page-break-inside: auto;
+}
+th, td {
+  border: 1px solid #d0d7de;
+  padding: 6px 8px;
+  vertical-align: top;
+  word-break: break-word;
+}
+tr {
+  page-break-inside: avoid;
+}
+```
+
 ## MD-to-PDF Pipeline
 
 Use the local project pipeline if present. A proven pipeline can be:
@@ -59,18 +130,19 @@ source.md
   -> merge.py -> final.pdf
 ```
 
-If these scripts are absent, choose an available renderer such as Pandoc, Playwright HTML print, WeasyPrint, ReportLab, or a repository-native pipeline. On Windows native, run each step directly from PowerShell with `py -3 script.py` or `node script.js`; do not require `make.sh` or Bash.
+If these scripts are absent, choose an available renderer such as Pandoc, Playwright HTML print, WeasyPrint, ReportLab, or a repository-native pipeline. Prefer HTML-to-PDF rendering when table alignment and typography matter. On Windows native, run each step directly from PowerShell with `py -3 script.py` or `node script.js`; do not require `make.sh` or Bash.
 
-## Chinese Font Handling
+## Chinese and English Font Handling
 
-ReportLab/HTML renderers may fail with Chinese glyphs unless fonts are explicitly configured. On Windows, use fonts such as:
+ReportLab/HTML renderers may fail with Chinese glyphs unless fonts are explicitly configured. For final report output, prefer Microsoft YaHei for Chinese and Times New Roman for English/Latin text. On Windows, use fonts such as:
 
 ```json
 {
-  "font_display_rl": "SimHei",
-  "font_body_rl": "SimSun",
-  "font_body_b_rl": "SimHei",
+  "font_display_rl": "Microsoft YaHei",
+  "font_body_rl": "Microsoft YaHei",
+  "font_english_rl": "Times New Roman",
   "font_paths": {
+    "Microsoft YaHei": "C:/Windows/Fonts/msyh.ttc",
     "SimSun": "C:/Windows/Fonts/simsun.ttc",
     "SimHei": "C:/Windows/Fonts/simhei.ttf"
   }

@@ -1,7 +1,7 @@
 interface:
   display_name: "Renewable Market Research"
-  short_description: "File-mode renewable market intelligence reports"
-  default_prompt: "Use $renewable-market-research to research a country renewable technology market and produce full/lite reports."
+  short_description: "Evidence-driven renewable market workflow for pipeline verification, product fit, sales actions, and executive briefs"
+  default_prompt: "Use $renewable-market-research to run an evidence-driven renewable market workflow: verify pipeline, analyze policy and product fit, generate sales actions, and produce full/lite reports plus an executive brief."
 dependencies:
   tools:
     - type: "mcp"

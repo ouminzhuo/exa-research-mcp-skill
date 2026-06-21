@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Project",
+  "type": "object",
+  "required": [
+    "project_name",
+    "country",
+    "technology",
+    "pipeline_bucket",
+    "confirmed_pipeline_eligible",
+    "evidence",
+    "confidence",
+    "uncertainty"
+  ],
+  "properties": {
+    "project_name": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "technology": {
+      "type": "string"
+    },
+    "capacity_mw": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "owner_developer": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "location": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cod_or_target_cod": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pipeline_bucket": {
+      "enum": [
+        "operational",
+        "under_construction",
+        "awarded_or_ppa_signed",
+        "financing_closed",
+        "official_pipeline",
+        "auction_target",
+        "mou_or_framework",
+        "early_stage",
+        "watchlist_unverified",
+        "rejected_or_duplicate"
+      ]
+    },
+    "evidence_level": {
+      "enum": [
+        "official",
+        "owner_confirmed",
+        "mdb_confirmed",
+        "grid_confirmed",
+        "auction_confirmed",
+        "media_only",
+        "unverified",
+        "conflicting"
+      ]
+    },
+    "confirmed_pipeline_eligible": {
+      "type": "boolean"
+    },
+    "exclusion_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "duplicate_check_notes": {
+      "type": "string"
+    },
+    "status_confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "unknown"
+      ]
+    },
+    "capacity_confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "unknown"
+      ]
+    },
+    "cod_confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "unknown"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "evidence.schema.json"
+      }
+    },
+    "confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "unknown"
+      ]
+    },
+    "uncertainty": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
