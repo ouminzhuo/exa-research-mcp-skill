@@ -30,6 +30,8 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Trace targets, tariffs, auction volumes, local-content rules, and capacity goals back to original laws, decrees, orders, auction documents, regulator notices, or grid/operator documents where possible.
+- Search in English plus official/local language(s), and record `searchPass` or `searchPasses` such as `official-language` and `source-backtrace`.
 
 ## Allowed Actions
 
@@ -38,6 +40,7 @@ Return or write machine-readable JSON with this shape:
 - Record assumptions explicitly when evidence is incomplete.
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
+- Downgrade any target or tariff claim that cannot be traced to an original legal/regulatory source.
 
 ## Prohibited Actions
 
@@ -47,3 +50,4 @@ Return or write machine-readable JSON with this shape:
 - Do not use a single weak media source to support a high-confidence claim.
 - Do not introduce cross-country comparisons unless the user explicitly asks for a benchmark.
 - Do not overwrite other agents' files or expand beyond the assigned scope without recording the reason.
+- Do not cite a secondary report's policy target as high confidence unless the original law/decree/order/regulator source is found or the limitation is explicit.

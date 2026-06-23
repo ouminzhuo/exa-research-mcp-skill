@@ -2,23 +2,56 @@
 
 ## Full Report
 
-Default target: 10-12 pages or equivalent MD depth.
+Default target: 15 chapters or equivalent MD depth. Use the Lite Report for short delivery summaries; the Full Report should preserve the market, project, developer, equipment, logistics, policy, tariff, carbon, and conclusion depth needed for management review.
 
 Recommended sections:
 
-1. Executive summary
-2. Market size, project pipeline, and confirmed/all-phase capacity
-3. National plans, auctions, tariffs, and policy framework
-4. Project-by-project pipeline table
-5. Developer and sponsor landscape
-6. Financing structure by IFI/commercial/source
-7. Technology, OEM, EPC, grid, and storage analysis
-8. Environmental/social/ESIA and community issues
-9. Carbon markets, I-REC, CBAM, and green-hydrogen outlook
-10. Chinese company matrix and participation opportunities
-11. Regional benchmark comparison
-12. Risks, gaps, and update plan
-13. Source and confidence appendix
+1. Executive summary and weekly update timestamp
+2. Market key indicators and time-series dashboard
+3. Demand, power mix, market size, and confirmed/all-phase capacity
+4. Policy, legal framework, tariff reform, and target-change timeline
+5. Auction/PPA winning-tariff comparison
+6. Project pipeline cards
+7. Developer and sponsor landscape
+8. Anchor developer deep dives
+9. Chinese developers, entrants, and participation routes
+10. Equipment supplier and OEM panorama
+11. EPC and finance ecosystem
+12. Logistics, transport, and installation constraints
+13. Grid infrastructure, interconnection, storage, and curtailment
+14. Carbon markets, I-REC, CBAM, green hydrogen, and green power offtake
+15. Conclusions, risks, sales implications, update plan, and source/confidence appendix
+
+Do not include a default `Regional benchmark comparison` section. Add a regional or peer-country benchmark only when the user explicitly asks for it.
+
+## Executive Summary Timestamp
+
+The executive summary must include a clear time anchor:
+
+- report date;
+- data cutoff date;
+- `This-week / latest major updates` bullets when recent project, policy, tariff, grid, or developer facts changed;
+- whether the update changed market judgment, confirmed pipeline, watchlist, or sales priority.
+
+Do not freeze the executive summary before the final ledger, tariff comparison, policy backtrace, and developer deep dives are current.
+
+## Market Key Indicators
+
+Include a standalone key-indicator chapter in the full report. Aim for about 15-20 rows when evidence exists.
+
+Indicators should include, where available:
+
+- total generation and year-on-year change;
+- latest quarterly or monthly generation data such as Q1;
+- electricity demand, peak load, imports/exports, deficit or surplus;
+- wind generation, solar generation, and three-year trend;
+- installed wind/solar/renewable capacity;
+- confirmed project pipeline MW, all-phase pipeline MW, watchlist MW;
+- auction/PPA capacity and weighted/representative tariffs;
+- curtailment, grid expansion, storage, or reserve-margin indicators;
+- carbon, I-REC, green-hydrogen, CBAM, or corporate-PPA metrics when material.
+
+If a value is unavailable, write `not found` or `unavailable` and keep the source gap visible.
 
 ## Lite Report
 
@@ -30,7 +63,7 @@ Include:
 
 - Cover/title and short executive summary
 - Policy/planning snapshot
-- In-construction/signed/project pipeline essentials
+- In-construction/signed/project pipeline essentials as cards
 - Forecast and opportunity summary
 - Key risks and caveats
 
@@ -45,12 +78,61 @@ Reduce or omit:
 
 If operational projects are excluded from the lite version, still summarize total operational capacity and state the filtering rule.
 
+## Project Pipeline Cards
+
+In both full and lite reports, present the project pipeline as cards by default, not as a dense section table. Use the validated master JSON as the source for rich card fields, cross-read the matching depth records, and use the canonical project ledger only for identity, status grouping, dedupe, and watchlist/rejected decisions.
+
+Before writing cards, read the `sourceTrace` or `mergedFromDepthRecords` references for each project and compare the depth records against the master JSON. If depth contains annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, coordinates, logistics, community impact, biodiversity/bird protection, jobs/local employment, or personnel/developer data that is missing from the master JSON, update the master JSON and rerun integrity validation before report writing.
+
+Each project card should include:
+
+- project name plus local/translated alias when material;
+- status bucket and evidence stage;
+- capacity, coordinates, site area/land footprint, location, owner/developer/SPV;
+- COD or target COD, PPA/auction/financing/construction milestones when verified;
+- technology route, hub height, rotor/blade diameter, turbine model/count, storage/hybrid notes when material;
+- annual generation, annual emission reduction, jobs/local employment, and investment when verified;
+- bird/biodiversity protection, land/community impacts, ESIA constraints, and mitigation status when material;
+- Mingyang/MySE opportunity or sales implication;
+- confidence, uncertainty, and critical-field verification note;
+- source references or evidence IDs.
+
+Use compact grouping before cards:
+
+- `Confirmed / operational or COD`;
+- `Under construction / financing closed`;
+- `Awarded or PPA signed`;
+- `MOU / framework / watchlist`.
+
+Tables are allowed only as appendices, exports, or compact summary indexes. Do not replace project cards with a large project-by-project table in the report body.
+
+## Deep-Dive Chapter Requirements
+
+Use dedicated deep-dive chapters when an owner/developer, Chinese entrant, OEM, logistics route, or tariff issue materially affects market judgment or sales strategy.
+
+Anchor developer deep dives should include:
+
+- basic entity profile, ownership, financial metrics, listed ticker if applicable, revenue/profit/ROE/PE where public;
+- full local project portfolio, status, partners, financing, and ownership/SPV structure;
+- key people or management contacts when public and relevant;
+- China cooperation matrix and procurement/EPC/OEM ties;
+- project economics or IRR/return assumptions only when sourced or clearly marked as assumptions;
+- current operating status and recent updates.
+
+Chinese developer/entrant deep dives should include listed code, revenue/profit/margin when public, team/local presence, financing or Sinosure/policy-bank structures, and project-level role.
+
+Equipment supplier panorama should include as complete an OEM/supplier list as feasible for the market, not just a top-five table. Include turbine/platform specifications, hub height, rotor diameter, power class, climate/logistics suitability, product roadmap, relationship strength, and market-share trend from BNEF or other credible sources when available.
+
+Logistics and installation should include route length, transit time, ports/rail/road/border crossings, component dimensions/weights, heavy-lift and crane suppliers, seasonal/weather limits, abnormal-load permits, and installation risks.
+
+Auction/PPA tariff comparison should be a standalone chapter when auctions or PPAs are material. Compare project names, award dates, tariff currency and units, PPA tenor, sponsor, capacity, indexation/FX risk if known, and confidence/source notes.
+
 ## Report Format Requirements
 
 Default final package:
 
 1. Markdown (`.md`) remains the source-of-truth authoring format because it is easy to review, diff, cite, and reuse.
-2. HTML (`.html`) is the layout-control format for table alignment, typography, page breaks, and print styles.
+2. HTML (`.html`) is the layout-control format for card layout, table alignment, typography, page breaks, and print styles.
 3. PDF (`.pdf`) should normally be rendered from the controlled HTML file, not directly from raw Markdown.
 
 Recommended fonts:
@@ -66,7 +148,7 @@ Prefer option 2: **write Markdown first, convert to controlled HTML, then render
 Why:
 
 - Markdown is easier for research agents to edit, review, cite, and compare in git.
-- HTML gives stronger control over table alignment, fonts, page breaks, headers, footers, captions, and print CSS.
+- HTML gives stronger control over project-card layout, table alignment, fonts, page breaks, headers, footers, captions, and print CSS.
 - The same Markdown can generate both internal reports and lighter delivery versions.
 - Review gates can be applied to Markdown before layout polishing.
 
@@ -104,6 +186,21 @@ table {
   border-collapse: collapse;
   table-layout: fixed;
   page-break-inside: auto;
+}
+.project-card {
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  page-break-inside: avoid;
+}
+.project-card h3 {
+  margin: 0 0 6px;
+}
+.project-card .meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
 }
 th, td {
   border: 1px solid #d0d7de;

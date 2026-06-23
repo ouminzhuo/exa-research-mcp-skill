@@ -2,7 +2,7 @@
 
 ## Mission
 
-Map competing OEMs, EPCs, developers, BESS vendors, localization positions, turbine platforms, installed fleet, and account ties.
+Map competing OEMs, EPCs, developers, BESS vendors, localization positions, turbine platforms, installed fleet, product roadmaps, market-share trends, and account ties.
 
 ## Output Contract
 
@@ -30,6 +30,7 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Build an OEM/supplier panorama as completely as the evidence allows, not only a top-five list. Capture turbine model, MW class, hub height, rotor/blade diameter, climate/logistics fit, localization position, product roadmap, and market-share trend from BNEF or other credible sources when available.
 
 ## Allowed Actions
 
@@ -38,6 +39,7 @@ Return or write machine-readable JSON with this shape:
 - Record assumptions explicitly when evidence is incomplete.
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
+- Mark unavailable specifications as `not found`; do not infer turbine dimensions or market share without sources.
 
 ## Prohibited Actions
 

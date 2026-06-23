@@ -7,12 +7,15 @@
 1. Separate collection, review, synthesis, and executive compression.
 2. Keep writer agents and reviewer agents separate.
 3. Store evidence in files before writing conclusions.
-4. Never place unverified leads in the confirmed pipeline.
-5. Separate official plans, auction targets, installed capacity, confirmed project pipeline, and optimistic scenarios.
-6. Convert important facts into decision-useful implications.
-7. Mark assumptions explicitly and keep unsupported claims in `rejected_claims` or watchlists.
-8. Keep the default analysis focused on one target country; add peer-country comparisons only when the user explicitly requests a benchmark.
-9. Route all final conclusions through the Evidence Gate and Contradiction Gate before synthesis or executive compression.
+4. Keep a rich master JSON between depth files and reports, then derive a compact canonical project ledger for identity, dedupe, status buckets, and watchlist/rejected decisions. Chapters must read rich fields from the master JSON and use the ledger only as the project-control registry.
+5. Never place unverified leads in the confirmed pipeline.
+6. Separate official plans, auction targets, installed capacity, confirmed project pipeline, and optimistic scenarios.
+7. Search in English plus the country's official/local language(s); record the language coverage in the search plan or `index.json`.
+8. Convert important facts into decision-useful implications.
+9. Mark assumptions explicitly and keep unsupported claims in `rejected_claims` or watchlists.
+10. Keep the default analysis focused on one target country; add peer-country comparisons only when the user explicitly requests a benchmark.
+11. Route all final conclusions through the Continuity, Evidence, and Contradiction gates before synthesis or executive compression.
+12. After downstream chapters change, rerun a summary/conclusion backpropagation pass so the executive section reflects the latest master JSON, ledger, and synthesis.
 
 ## Lite Workflow
 
@@ -31,9 +34,10 @@ Outputs:
 
 - One-page market judgment.
 - Confirmed leads and watchlist leads.
+- Rich master JSON plus a canonical project ledger or compact project registry for any project claims.
 - Top policy, grid, product-fit, and execution risks.
 - Immediate next sales actions.
-- Three executive judgments with evidence support after Evidence Gate and Contradiction Gate review.
+- Three executive judgments with evidence support after Continuity, Evidence, and Contradiction Gate review.
 
 ## Standard Workflow
 
@@ -55,12 +59,16 @@ Agents:
 Outputs:
 
 - Lite report.
-- Full report.
-- Project pipeline table.
+- Full report using the 15-chapter deep structure in `references/pdf-pipeline.md`.
+- Standalone market key-indicator dashboard with time-series comparisons.
+- Rich master JSON and canonical project pipeline ledger.
+- Project pipeline cards in the report body, plus CSV/appendix tables when useful.
 - Owner/developer/EPC/competitor map.
+- Anchor developer deep dives when material to the market, such as ACWA, Masdar, state entities, or dominant IPPs.
+- OEM/equipment supplier panorama, logistics/installation analysis, and auction/PPA tariff comparison.
 - Product-fit assessment for Mingyang/MySE solutions.
 - Sales-action plan.
-- Executive brief based only on conclusions that passed the Evidence Gate and Contradiction Gate.
+- Executive brief based only on conclusions that passed the Continuity, Evidence, and Contradiction gates.
 - Evidence archive and rejected-claims register.
 
 ## Deep Workflow
@@ -73,6 +81,7 @@ Additional requirements:
 - Scenario comparison.
 - Assumptions register.
 - Evidence archive.
+- Omission audit covering local-language, Chinese-capital, new-entrant, legal-backtrace, and anomaly-hunter search passes.
 - Human review gates before final external delivery.
 - Sensitivity analysis for uncertain policy, grid, tariff, FX, localization, and demand assumptions.
 
@@ -93,3 +102,4 @@ Research collection can be broad. Final writing must be narrow:
 - Label assumptions.
 - Move interesting but non-decision-useful information to appendices.
 - Do not write claims that cannot pass the review gates.
+- Do not write or freeze executive summaries until the final master JSON, project ledger, policy backtrace, and synthesis are current.

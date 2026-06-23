@@ -21,6 +21,16 @@ What works well:
 - The project pipeline is already treated as structured data and can be exported to CSV.
 - Windows-native operation is explicitly supported.
 
+New usage feedback to address:
+
+- Project pipeline data can scatter across dimensions if no canonical ledger is enforced.
+- Executive summaries can become stale after downstream chapters update.
+- Search can miss projects when local-language, Chinese-capital, new-entrant, legal-backtrace, or anomaly-hunter passes are not mandatory.
+- Same-name/different-source records need executable dedupe review, not only cross-reference awareness.
+- Confirmed-pipeline critical fields must be verified by Chrome MCP or original-file fetch, not by Exa search snippets alone.
+- Full reports should preserve the 15-chapter benchmark-style depth instead of collapsing into a 6-section compressed report.
+- Project pipeline cards need richer card fields: coordinates, land footprint, turbine specs, generation, CO2 reduction, jobs, biodiversity, and community impacts when evidence exists.
+
 Gaps to close:
 
 - Add explicit workflow modes for lite, standard, and deep market intelligence.
@@ -92,7 +102,7 @@ Add `examples/kazakhstan_2026_2030/` with goal, scope, and expected outputs for 
 
 - Add optional helper scripts for Markdown-to-HTML conversion and HTML-to-PDF rendering if future users want an executable pipeline.
 - Add sample JSON outputs for a completed Kazakhstan run after real evidence collection is performed.
-- Add project-level validation scripts that check duplicate names, status conflicts, COD conflicts, and confirmed-pipeline eligibility.
+- Expand project-level validation beyond duplicate candidates to check status conflicts, COD conflicts, phase boundaries, and confirmed-pipeline eligibility.
 
 ## Implementation Status
 
@@ -102,3 +112,8 @@ Add `examples/kazakhstan_2026_2030/` with goal, scope, and expected outputs for 
 - Agent prompts now include explicit allowed and prohibited actions.
 - Final conclusions must pass the Evidence Gate and Contradiction Gate before synthesis or executive compression.
 - The Kazakhstan example is scoped to Kazakhstan 2026-2030; peer-country comparison is not part of the default scope.
+- Search orchestration now includes official-language, Chinese-capital/local-name, new-entrant, policy-law-backtrace, and anomaly-hunter passes.
+- Source-to-final continuity now requires a canonical project ledger, integrity validation, and final summary backpropagation.
+- Integrity validation now fails confirmed-pipeline records whose present critical fields lack `chrome-mcp`, `exa-fetch`, or `manual-file` verification.
+- Report guidance now requires a 15-chapter full report structure with weekly update timestamp, market key indicators, tariff comparison, project cards, anchor developer deep dives, OEM panorama, logistics/installation, grid, carbon/green hydrogen/CBAM, and conclusions.
+- Search orchestration now includes market key indicators/time series, auction tariff comparison, anchor developer deep dives, and Chinese developer deep dives as default non-benchmark dimensions.
