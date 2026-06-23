@@ -2,6 +2,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$MarketJson,
 
+    [string]$DepthDir,
+
     [string]$Output,
 
     [switch]$Strict
@@ -12,6 +14,9 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $pythonScript = Join-Path $scriptDir "validate_market_integrity.py"
 
 $argsForPython = @($MarketJson)
+if ($DepthDir) {
+    $argsForPython += @("--depth-dir", $DepthDir)
+}
 if ($Output) {
     $argsForPython += @("--output", $Output)
 }

@@ -55,10 +55,11 @@ After the master JSON and canonical ledger are built, run the source-to-final in
 ```powershell
 .\skills\renewable-market-research\scripts\validate_market_integrity.ps1 `
   -MarketJson .\data\renewable-market\uzbekistan-wind.json `
+  -DepthDir .\data\renewable-market\depth `
   -Output .\data\renewable-market\uzbekistan-wind-integrity.json
 ```
 
-Use `-Strict` only when warnings should fail the run. Duplicate candidates and critical-field verification gaps always require review because they can indicate unmerged records or confirmed-project fields that still lack Chrome MCP/original-file verification.
+Use `-Strict` only when warnings should fail the run. Duplicate candidates, critical-field verification gaps, report-card field gaps, and depth-to-master propagation gaps always require review because they can indicate unmerged records, confirmed-project fields that still lack Chrome MCP/original-file verification, or rich depth data that was lost before reporting.
 
 ## PDF Rendering on Windows
 

@@ -30,6 +30,8 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Capture project-level tariff/PPA evidence, PPA tenor, currency/indexation, award date, sponsor, project finance status, MDB/ECA/policy-bank role, and public sponsor financial metrics where available.
+- Estimate IRR or project economics only when assumptions are explicit and sourced; otherwise mark as assumption or `not found`.
 
 ## Allowed Actions
 
@@ -38,6 +40,7 @@ Return or write machine-readable JSON with this shape:
 - Record assumptions explicitly when evidence is incomplete.
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
+- Build a finance ecosystem table covering EPC financiers, Chinese banks, Sinosure/ECA, MDBs, and commercial lenders where evidence exists.
 
 ## Prohibited Actions
 

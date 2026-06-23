@@ -34,7 +34,7 @@ Load only the reference needed for the current step:
 Choose the mode in `workflow.md` before collecting data:
 
 - **Lite Workflow**: quick market checks using policy, pipeline, product-fit, skeptic, synthesis, and executive agents. Output a one-page market judgment, confirmed leads, risks, and next actions.
-- **Standard Workflow**: country-level reports using policy, pipeline, owner, grid, product-fit, finance, competitor, skeptic, synthesis, and executive agents. Output lite report, full report, project pipeline table, sales-action plan, and executive brief.
+- **Standard Workflow**: country-level reports using policy, pipeline, owner, grid, product-fit, finance, competitor, skeptic, synthesis, and executive agents. Output lite report, full report, project pipeline cards, sales-action plan, and executive brief.
 - **Deep Workflow**: strategic questions requiring multiple review loops, scenario comparison, assumptions register, evidence archive, and human review gates.
 
 ## Standard Workflow
@@ -55,17 +55,21 @@ Choose the mode in `workflow.md` before collecting data:
 3. **Split research dimensions**
    Use focused dimensions depending on scope. For OEM/commercial-entry asks (for example Mingyang), use **demand-first framing**: start from electricity demand gap and monetizable offtake, then validate resource/technology constraints.
    - demand-load-gap (generation, consumption, peak load, imports/exports, 5-10 year outlook)
+   - market-key-indicators-timeseries (generation YoY, latest Q/month data, wind/solar 3-year trend, installed capacity, imports/exports, pipeline MW)
    - power-mix-replacement (retirements, thermal constraints, hydro flexibility, wind/solar complementarity)
    - grid-storage-transmission (curtailment risk, substations/lines, storage requirement, cross-border corridors)
    - policy-ppa-economics (auction/FIT/PPA, tariff history, FX risk, localization, IRR/ROE if estimable)
+   - auction-tariff-comparison (project-level winning tariffs, PPA tenor, currency/indexation, sponsor, capacity, source confidence)
    - project-pipeline-layered (operational, under-construction, awarded/PPA, MOU, early stage)
    - owners-partners-routes (state entities, IPPs, EPC/developer networks, contact pathways)
-   - competitor-oem-landscape (OEM supply, turbine platforms, localization and tie strength)
-   - epc-om-logistics-lifting (transport routes, heavy-lift constraints, installation window risks)
+   - anchor-developer-deep-dives (material developers such as ACWA/Masdar/state entities: financials, full local portfolio, key people, partners, IRR assumptions when supportable)
+   - competitor-oem-landscape (full OEM/supplier panorama, turbine platforms/specs, product roadmap, BNEF or credible market-share trend when available, localization and tie strength)
+   - epc-om-logistics-lifting (route length/time, ports/rail/road/border crossings, component dimensions/weights, crane/heavy-lift firms, installation window risks)
    - localization-supply-chain (tower/blade/nacelle/BESS ecosystem and JV options)
    - esg-land-community (ESIA, biodiversity, land/community, IFI social constraints)
    - carbon-greenpower-hydrogen (I-REC, CBAM, enterprise PPA, hydrogen/ammonia links)
    - china-finance-ecosystem (Chinese EPC/developers/financiers and policy-bank support)
+   - chinese-developer-deep-dives (listed code, revenue/profit/margin, team/local presence, financing innovation, project roles)
    - local-language-china-capital-trace (Chinese capital + local-language project names + Chinese EPC/OEM/SPV traces)
    - new-entrant-hunter (new IPPs, new SPVs, first-time EPC/OEM entries, corporate offtakers)
    - policy-law-backtrace (reverse policy targets, auctions, tariffs, and capacity numbers to original laws, decrees, orders, and regulator documents)
@@ -91,8 +95,10 @@ Choose the mode in `workflow.md` before collecting data:
    - Record convergence and gaps in `index.json`.
 
 6. **Aggregate data**
-   - Merge depth files into `{slug}.json` using the schema in `references/data-model.md`.
-   - Build `{slug}-pipeline-ledger.json` as the canonical project registry before writing reports. This ledger owns canonical project IDs, local/English/Chinese aliases, dedupe keys, source traces, evidence layers, and merge/reject decisions.
+   - Split aggregation into two required passes. First, merge all depth files into the full `{slug}.json` using the rich schema in `references/data-model.md`; preserve project-card fields such as coordinates, site area, annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, logistics, community impact, and personnel/developer data when found.
+   - Validate the full `{slug}.json` before deriving downstream files. If a rich field exists in a depth file but is absent from the matching main JSON project, update the main JSON or mark the field explicitly as `not found`, `unavailable`, or `not applicable` with a gap note.
+   - Build `{slug}-pipeline-ledger.json` from the validated main JSON, not directly as a replacement for it. The ledger owns canonical project IDs, local/English/Chinese aliases, dedupe keys, source traces, evidence layers, confirmed/watchlist/rejected state, and merge/reject decisions.
+   - Treat `{slug}.json` as the rich report data source, `depth/*.json` as the required cross-read/fallback evidence layer, and `{slug}-pipeline-ledger.json` as the canonical dedupe/evidence registry. The ledger alone is not sufficient to write final project cards or deep-dive chapters.
    - Export project rows to `{slug}.csv`; use `scripts/export_projects_csv.py` when convenient.
    - Deduplicate by canonical name, local-language aliases, translated names, location, sponsor/SPV, capacity, coordinates if available, phase boundaries, and source URL. Same-name/different-source records must be merged or explicitly rejected/watchlisted.
    - For project pipeline, classify each project evidence layer as one of: `news-announcement`, `mou-framework`, `ppa-signed`, `financing-closed`, `construction-started`, `cod-operational`.
@@ -102,6 +108,11 @@ Choose the mode in `workflow.md` before collecting data:
 7. **Generate reports**
    - Write `{slug}-report.md` for the full internal report.
    - Write `{slug}-lite.md` for the lite delivery report.
+   - Full reports should follow the 15-chapter structure in `references/pdf-pipeline.md`, including weekly update timestamp, standalone market indicators, tariff comparison, developer deep dives, OEM panorama, logistics/installation, and conclusion/outlook.
+   - Present the project pipeline in the report body as project cards grouped by status/evidence stage. Use tables only for appendices, CSV exports, or compact summary indexes.
+   - Before writing each project card or project/developer chapter, cross-read the matching `depth/*.json` records named in `sourceTrace` or `mergedFromDepthRecords`. Check at minimum annualGenerationGWh, annualCO2ReductionTonnes, investmentUSD, turbineModel, turbineCount, storageMWh, coordinates, turbine specs, logistics route, community/land impact, biodiversity/bird protection, jobs/local employment, and personnel/developer data.
+   - If a depth file contains a richer field than `{slug}.json`, update `{slug}.json` and rerun integrity validation before writing the report. Do not silently downgrade to `{slug}-pipeline-ledger.json` when the main JSON is incomplete.
+   - Do not include a Regional Benchmark Comparison section unless the user explicitly requests a benchmark.
    - For controlled PDF layout, prefer Markdown as the authoring source, convert Markdown to HTML with a controlled template, then render HTML to PDF. Direct HTML authoring is acceptable only for highly designed final decks or when Markdown cannot represent required layout.
    - Report CSS should use Microsoft YaHei (`微软雅黑`, `Microsoft YaHei`) for Chinese text and Times New Roman for English/Latin text; tables should use fixed widths, explicit column alignment, and print CSS to avoid broken pipeline tables.
    - Render PDFs when the environment has a working HTML/PDF stack; otherwise deliver MD and HTML and explain the limitation. On Windows native, prefer PowerShell/Python steps over Bash or `make.sh`.
@@ -160,7 +171,7 @@ Run these checks when files are produced. Use the host's Python launcher (`pytho
 python -m json.tool data/renewable-market/index.json > <temp>/renewable-index.validated.json
 python -m json.tool data/renewable-market/{slug}.json > <temp>/renewable-main.validated.json
 python skills/renewable-market-research/scripts/export_projects_csv.py data/renewable-market/{slug}.json data/renewable-market/{slug}.csv
-python skills/renewable-market-research/scripts/validate_market_integrity.py data/renewable-market/{slug}.json --output data/renewable-market/{slug}-integrity.json
+python skills/renewable-market-research/scripts/validate_market_integrity.py data/renewable-market/{slug}.json --depth-dir data/renewable-market/depth --output data/renewable-market/{slug}-integrity.json
 ```
 
 On Windows native, use the PowerShell commands in `references/windows-native.md`. Mark unavailable checks as skipped only with an explicit environment reason.
@@ -173,7 +184,7 @@ When running on Windows native, read `references/windows-native.md` and use Powe
 New-Item -ItemType Directory -Force data/renewable-market/depth | Out-Null
 py -3 -m json.tool data/renewable-market/index.json > $env:TEMP\renewable-index.validated.json
 .\skills\renewable-market-research\scripts\export_projects_csv.ps1 -InputJson .\data\renewable-market\{slug}.json -OutputCsv .\data\renewable-market\{slug}.csv
-.\skills\renewable-market-research\scripts\validate_market_integrity.ps1 -MarketJson .\data\renewable-market\{slug}.json -Output .\data\renewable-market\{slug}-integrity.json
+.\skills\renewable-market-research\scripts\validate_market_integrity.ps1 -MarketJson .\data\renewable-market\{slug}.json -DepthDir .\data\renewable-market\depth -Output .\data\renewable-market\{slug}-integrity.json
 ```
 
 Do not require WSL, Git Bash, `make.sh`, or Bash-only syntax for the standard workflow.
@@ -292,6 +303,9 @@ Main agent should implement/maintain:
 ### Report Quality Gates
 
 - Markdown/CSV/PDF must be human-readable outputs, not raw JSON object dumps.
+- Standard and Deep full reports must follow the 15-chapter structure in `references/pdf-pipeline.md`; a 6-section compressed structure is acceptable only for Lite mode.
+- Report-body project pipeline must be rendered as project cards grouped by status/evidence stage, not as a large table.
+- Regional benchmark sections are omitted by default and included only when the user explicitly requests a benchmark.
 - Do not render raw structures such as `{\"claim\": ...}` or `{\"sources\": ...}` directly in reports.
 - Keep structured evidence in JSON/depth files only.
 - Missing values must be `unavailable` or `not found`.
@@ -307,12 +321,13 @@ uv run python scripts/build_kazakhstan_wind_outputs.py
 uv run python -m json.tool data/renewable-market/index.json
 uv run python -m json.tool data/renewable-market/kazakhstan-wind.json
 uv run python skills/renewable-market-research/scripts/search_orchestration.py validate --plan data/renewable-market/kazakhstan-wind-search-plan.json --depth-dir data/renewable-market/depth --output data/renewable-market/kazakhstan-wind-search-coverage.json
-uv run python skills/renewable-market-research/scripts/validate_market_integrity.py data/renewable-market/kazakhstan-wind.json --output data/renewable-market/kazakhstan-wind-integrity.json
+uv run python skills/renewable-market-research/scripts/validate_market_integrity.py data/renewable-market/kazakhstan-wind.json --depth-dir data/renewable-market/depth --output data/renewable-market/kazakhstan-wind-integrity.json
 ```
 
 And verify:
 - all depth JSON files parse
 - master JSON parses
+- rich project-card fields found in depth files are propagated into the master JSON or explicitly marked unavailable
 - CSV opens
 - canonical pipeline ledger exists and duplicate candidates are resolved or explicitly watchlisted/rejected
 - project timeline CSV exists

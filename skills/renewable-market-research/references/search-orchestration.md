@@ -37,6 +37,10 @@ For confirmed-pipeline critical fields, only `chrome-mcp`, `exa-fetch`, or `manu
 
 Use `scripts/search_orchestration.py` to generate a deterministic search plan. It does not call external APIs; it creates the dimensions, query variants, intended freshness, domain boosts, scoring weights, output files, and minimum evidence gates that workers must satisfy.
 
+Regional/peer-country benchmark is excluded by default. Add `--include-benchmark` only when the user explicitly asks for regional comparison.
+
+The standard plan includes depth lanes needed for the 15-chapter full report, including market key indicators/time series, auction/PPA tariff comparison, anchor developer deep dives, Chinese developer deep dives, OEM panorama, logistics/installation, grid, carbon/green hydrogen/CBAM, and source-to-final project pipeline evidence.
+
 Example:
 
 ```text
@@ -61,6 +65,16 @@ Windows PowerShell:
   --known-projects "Sho'rkul,Zhanatas,Arkalyk" `
   --slug kazakhstan-wind `
   --output data\renewable-market\kazakhstan-wind-search-plan.json
+```
+
+When explicitly requested:
+
+```text
+python skills/renewable-market-research/scripts/search_orchestration.py plan \
+  --country Kazakhstan \
+  --technology wind \
+  --include-benchmark \
+  --output data/renewable-market/kazakhstan-wind-search-plan.json
 ```
 
 ## Worker Execution Contract

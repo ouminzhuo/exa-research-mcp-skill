@@ -38,9 +38,10 @@ Return or write machine-readable JSON with this shape:
 - Include confidence, uncertainty, decision implication, recommended sales action, and what would change the judgment.
 - Avoid vague market-potential language unless quantified and qualified.
 - Include a two-minute spoken briefing version.
-- Use the latest synthesis and canonical project ledger only; refresh the executive summary after downstream project, policy, risk, or sales-action updates.
-- Include the ledger/synthesis timestamp or version used for the three judgments.
+- Use the latest synthesis, validated master JSON, and canonical project ledger only; refresh the executive summary after downstream project, policy, risk, or sales-action updates.
+- Include the master JSON, ledger, synthesis, and integrity-validation timestamp or version used for the three judgments.
 - Exclude or qualify any project-field claim that lacks `chrome-mcp`, `exa-fetch`, or `manual-file` verification.
+- Include report date, data cutoff, and latest major updates/time anchor before the three judgments.
 ## Allowed Actions
 
 - Collect and structure evidence within the assigned task scope.

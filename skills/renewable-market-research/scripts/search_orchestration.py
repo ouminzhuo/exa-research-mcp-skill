@@ -30,6 +30,18 @@ DIMENSIONS = [
         "domainBoost": ["iea.org", "enerdata.net", "worldbank.org", "stat.gov.kz", "kegoc.kz"],
     },
     {
+        "id": "market-key-indicators-timeseries",
+        "intent": "status",
+        "freshness": "pm",
+        "focus": "generation, YoY change, latest quarterly/monthly data, wind/solar three-year trends, installed capacity, imports/exports, and market dashboard indicators",
+        "patterns": [
+            "{country} electricity generation year on year Q1 wind solar generation statistics {year}",
+            "{country} renewable energy statistics wind solar generation 3 year trend installed capacity",
+            "{country} energy ministry statistics electricity generation imports exports peak load quarterly report",
+        ],
+        "domainBoost": ["energy.gov.kz", "stat.gov.kz", "iea.org", "ember-climate.org", "irena.org"],
+    },
+    {
         "id": "power-mix-replacement",
         "intent": "exploratory",
         "freshness": "py",
@@ -66,6 +78,18 @@ DIMENSIONS = [
         "domainBoost": ["rfc.kz", "korem.kz", "adilet.zan.kz", "ifc.org", "ebrd.com"],
     },
     {
+        "id": "auction-tariff-comparison",
+        "intent": "status",
+        "freshness": "py",
+        "focus": "project-level auction/PPA winning tariffs, award dates, PPA tenor, currency, indexation, capacity, sponsor, and comparable bid history",
+        "patterns": [
+            "{country} renewable auction results wind tariff cents kWh PPA project sponsor capacity",
+            "{country} {technology} winning tariff PPA price auction award date developer",
+            "{country} wind solar auction tariff comparison project PPA tenor currency indexation",
+        ],
+        "domainBoost": ["korem.kz", "rfc.kz", "energy.gov.kz", "masdar.ae", "acwapower.com"],
+    },
+    {
         "id": "project-pipeline-layered",
         "intent": "status",
         "freshness": "pm",
@@ -90,14 +114,27 @@ DIMENSIONS = [
         "domainBoost": ["samruk-energy.kz", "samruk-kazyna.kz", "kegoc.kz", "acwapower.com"],
     },
     {
+        "id": "anchor-developer-deep-dives",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "material owner/developer deep dives: ACWA, Masdar, TotalEnergies, state entities, portfolios, financials, people, partners, IRR assumptions, and China cooperation",
+        "patterns": [
+            "{country} ACWA Power Masdar wind solar portfolio financial results key people partnerships China EPC",
+            "{country} renewable developer project portfolio revenue profit ROE PE investor presentation",
+            "{country} Masdar TotalEnergies ACWA project SPV PPA financing EPC operation update",
+        ],
+        "domainBoost": ["acwapower.com", "masdar.ae", "totalenergies.com", "londonstockexchange.com", "argaam.com"],
+    },
+    {
         "id": "competitor-oem-landscape",
         "intent": "comparison",
         "freshness": "py",
-        "focus": "OEM supply, turbine platform, capacity, rotor, hub height, climate adaptation, localization, owner/EPC ties",
+        "focus": "full OEM/supplier panorama, turbine platform, capacity, rotor, hub height, product roadmap, market share trend, climate adaptation, localization, owner/EPC ties",
         "patterns": [
             "{country} wind turbine supplier Goldwind Envision SANY Mingyang Vestas GE Nordex project",
             "{country} wind farm turbine model rotor diameter hub height low temperature dust",
             "{country} wind OEM localization manufacturing tower blade nacelle",
+            "{country} wind turbine market share BNEF supplier ranking product roadmap",
         ],
         "domainBoost": ["goldwind.com", "envision-group.com", "myse.com.cn", "sanyglobal.com", "vestas.com"],
     },
@@ -105,11 +142,12 @@ DIMENSIONS = [
         "id": "epc-om-logistics-lifting",
         "intent": "exploratory",
         "freshness": "py",
-        "focus": "EPC, O&M, oversized logistics routes, border crossings, heavy lifting, cranes, installation windows",
+        "focus": "EPC, O&M, oversized logistics routes, ports, rail/road corridors, border crossings, component dimensions/weights, heavy lifting, cranes, installation windows",
         "patterns": [
             "{country} wind farm EPC O&M logistics heavy lift crane transport route China",
             "{country} oversized cargo wind turbine blade nacelle tower rail road border crossing",
             "{country} Mammoet Sarens wind turbine installation crane project",
+            "{country} wind turbine blade transport route port railway road heavy lift 4000 km 30 days",
         ],
         "domainBoost": ["mammoet.com", "sarens.com", "powerchina.cn", "ceec.net.cn"],
     },
@@ -160,6 +198,18 @@ DIMENSIONS = [
             "{country} China Kazakhstan industrial capacity cooperation renewable energy wind",
         ],
         "domainBoost": ["powerchina.cn", "ceec.net.cn", "sinosure.com.cn", "eximbank.gov.cn"],
+    },
+    {
+        "id": "chinese-developer-deep-dives",
+        "intent": "exploratory",
+        "freshness": "py",
+        "focus": "Chinese developers and entrants: listed code, revenue, profit, margin, team, Sinosure/policy-bank financing, local portfolio, EPC/OEM roles",
+        "patterns": [
+            "{country} SANY renewable wind project revenue profit gross margin listed code",
+            "{country} China renewable developer Sinosure financing team project portfolio EPC",
+            "{country} CEEC PowerChina SANY Universal Energy AMEA Voltalia wind solar project financing",
+        ],
+        "domainBoost": ["sanyglobal.com", "powerchina.cn", "ceec.net.cn", "sinosure.com.cn", "eximbank.gov.cn"],
     },
     {
         "id": "local-language-china-capital-trace",
@@ -311,8 +361,14 @@ def required_passes_for_dimension(dimension_id: str) -> list[str]:
     passes = ["english-broad", "official-language"]
     if "policy" in dimension_id:
         passes.append("source-backtrace")
+    if dimension_id in {"market-key-indicators-timeseries", "auction-tariff-comparison"}:
+        passes.extend(["source-backtrace", "chrome-verification"])
     if dimension_id in {"project-pipeline-layered", "owners-partners-routes", "china-finance-ecosystem"}:
         passes.append("china-capital-local-language")
+    if dimension_id in {"anchor-developer-deep-dives", "chinese-developer-deep-dives"}:
+        passes.extend(["official-language", "chrome-verification"])
+    if dimension_id in {"competitor-oem-landscape", "epc-om-logistics-lifting"}:
+        passes.append("chrome-verification")
     if dimension_id == "local-language-china-capital-trace":
         passes.extend(["china-capital-local-language", "chrome-verification"])
     if dimension_id == "new-entrant-hunter":
@@ -331,6 +387,7 @@ def build_plan(
     output_slug: str | None,
     official_languages: list[str] | None = None,
     known_projects: list[str] | None = None,
+    include_benchmark: bool = False,
 ) -> dict[str, Any]:
     year = datetime.now(timezone.utc).year
     slug = output_slug or f"{slugify(country)}-{slugify(technology)}"
@@ -338,6 +395,8 @@ def build_plan(
     known_projects = known_projects or []
     dimensions = []
     for dimension in DIMENSIONS:
+        if dimension["id"] == "regional-benchmark" and not include_benchmark:
+            continue
         intent = dimension["intent"]
         queries = [
             render_query_with_context(pattern, country, technology, year, audience, official_languages, known_projects)
@@ -371,6 +430,7 @@ def build_plan(
         "audience": audience,
         "officialLanguages": official_languages,
         "knownProjects": known_projects,
+        "includeBenchmark": include_benchmark,
         "slug": slug,
         "toolLanes": TOOL_LANES,
         "dimensions": dimensions,
@@ -615,6 +675,7 @@ def main() -> int:
     plan_parser.add_argument("--slug")
     plan_parser.add_argument("--official-languages", help="Comma-separated official/local languages to force into search passes.")
     plan_parser.add_argument("--known-projects", help="Comma-separated seed project names for alias and anomaly searches.")
+    plan_parser.add_argument("--include-benchmark", action="store_true", help="Include regional/peer-country benchmark dimension only when explicitly requested.")
     plan_parser.add_argument("--output", type=Path)
 
     validate_parser = subparsers.add_parser("validate", help="Validate depth JSON coverage against a search plan.")
@@ -631,6 +692,7 @@ def main() -> int:
             args.slug,
             split_csv_arg(args.official_languages),
             split_csv_arg(args.known_projects),
+            args.include_benchmark,
         )
         write_json(data, args.output)
         return 0

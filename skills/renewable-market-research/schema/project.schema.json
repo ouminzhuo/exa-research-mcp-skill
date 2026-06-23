@@ -70,7 +70,135 @@
         "null"
       ]
     },
+    "coordinates": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "siteAreaHa": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "site_area_ha": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
     "cod_or_target_cod": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "hubHeightM": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "hub_height_m": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "rotorDiameterM": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "rotor_diameter_m": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "bladeLengthM": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "blade_length_m": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "technologyRoute": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "technology_route": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "annualGenerationGWh": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "annual_generation_gwh": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "annualCO2ReductionTonnes": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "annual_co2_reduction_tonnes": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "jobsOrLocalEmployment": {
+      "type": [
+        "string",
+        "number",
+        "null"
+      ]
+    },
+    "jobs_or_local_employment": {
+      "type": [
+        "string",
+        "number",
+        "null"
+      ]
+    },
+    "biodiversityBirdProtection": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "biodiversity_bird_protection": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "communityLandImpact": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "community_land_impact": {
       "type": [
         "string",
         "null"

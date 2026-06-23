@@ -20,8 +20,34 @@ data/renewable-market/
 
 Also produce:
 
-- `{country}-{technology}-pipeline-ledger.json`: canonical project registry used by all report sections.
+- `{country}-{technology}-pipeline-ledger.json`: compact canonical project registry for identity, dedupe, evidence layers, and confirmed/watchlist/rejected state.
 - `{country}-{technology}-integrity.json`: output from `scripts/validate_market_integrity.py`.
+
+## File Roles and Source Priority
+
+| File | Role | Enough to write final reports? |
+|---|---|---|
+| `{slug}.json` | Rich master data source. It must preserve the full schema fields needed for project cards, market indicators, developer deep dives, OEM/specs, logistics, policy, tariff, carbon, and conclusions. | Yes. This is the primary report source after validation. |
+| `depth/*.json` | Detailed per-dimension evidence and raw structured findings. Use it to cross-read card/chapter details and backfill the master JSON. | Yes as fallback/evidence, but normalize into `{slug}.json` before final writing. |
+| `{slug}-pipeline-ledger.json` | Canonical project registry for dedupe, aliases, evidence layers, confirmed/watchlist/rejected decisions, and source-trace control. | No. It is intentionally compact and must not replace the rich master JSON for report cards. |
+
+Source priority for writing reports:
+
+1. Read `{slug}.json` for report-ready fields.
+2. Cross-read the matching `depth/*.json` records named in `sourceTrace` or `mergedFromDepthRecords`.
+3. Use `{slug}-pipeline-ledger.json` only for canonical project identity, status grouping, dedupe decisions, evidence layers, and watchlist/rejected state.
+
+## Rich Field Propagation Contract
+
+During aggregation, every rich project field found in depth records must be propagated into the matching project in `{slug}.json`, or explicitly marked as `not found`, `unavailable`, or `not applicable` with a gap note. This applies especially to:
+
+- `annualGenerationGWh`, `annualCO2ReductionTonnes`, `investmentUSD`;
+- `turbineModel`, `turbineCount`, `hubHeightM`, `rotorDiameterM`, `bladeLengthM`;
+- `storageMWh`, coordinates, site area, technology route;
+- logistics route, jobs/local employment, biodiversity/bird protection, community/land impact;
+- key people and developer/deep-dive fields when project-specific.
+
+Run `scripts/validate_market_integrity.py --depth-dir data/renewable-market/depth` before report writing. A `depthPropagationGaps` or `reportCardFieldGaps` result means the master JSON is not report-ready.
 
 ## `index.json`
 
@@ -96,15 +122,24 @@ Also produce:
       "developer": "Masdar",
       "developerCountry": "UAE",
       "location": "Navoi region, Tamdy district",
+      "coordinates": {"lat": null, "lon": null},
+      "siteAreaHa": null,
       "cod": "2024-12-14",
       "ppaType": "Government PPA",
       "ppaDuration": 25,
       "investmentUSD": 593400000,
       "turbineModel": "Goldwind GW155-4.5MW",
       "turbineCount": 111,
+      "hubHeightM": null,
+      "rotorDiameterM": null,
+      "bladeLengthM": null,
+      "technologyRoute": "onshore wind",
       "epc": "POWERCHINA/SEPCOIII",
       "annualGenerationGWh": 1100,
       "annualCO2ReductionTonnes": 1100000,
+      "jobsOrLocalEmployment": null,
+      "biodiversityBirdProtection": "unavailable",
+      "communityLandImpact": "unavailable",
       "storageMWh": null,
       "financing": "ADB $95M, EBRD $74M, IFC $42M...",
       "sources": [
@@ -169,7 +204,7 @@ Also produce:
 
 ## Canonical Project Ledger
 
-Use `{slug}-pipeline-ledger.json` as the source of truth for project pipeline records before any report writing.
+Use `{slug}-pipeline-ledger.json` as the canonical registry for project identity, deduplication, evidence layers, and confirmed/watchlist/rejected decisions. Do not use it as the only source for final project cards; final card fields must come from the validated `{slug}.json` and cross-checked `depth/*.json`.
 
 ```json
 {
@@ -191,6 +226,19 @@ Use `{slug}-pipeline-ledger.json` as the source of truth for project pipeline re
         {"language": "zh", "value": "Chinese translated/project name if found", "sourceUrl": "https://..."}
       ],
       "dedupeKey": "zarafshan|navoi-tamdy|522|masdar",
+      "cardFields": {
+        "coordinates": {"lat": null, "lon": null},
+        "siteAreaHa": null,
+        "hubHeightM": null,
+        "rotorDiameterM": null,
+        "bladeLengthM": null,
+        "technologyRoute": "onshore wind",
+        "annualGenerationGWh": null,
+        "annualCO2ReductionTonnes": null,
+        "jobsOrLocalEmployment": null,
+        "biodiversityBirdProtection": "unavailable",
+        "communityLandImpact": "unavailable"
+      },
       "mergedFromDepthRecords": [
         {"depthFile": "project-pipeline-layered.json", "recordIndex": 0},
         {"depthFile": "local-language-china-capital-trace.json", "recordIndex": 2}
@@ -216,7 +264,7 @@ Use `{slug}-pipeline-ledger.json` as the source of truth for project pipeline re
 }
 ```
 
-Reports, CSV exports, timelines, and executive summaries should read project records from this ledger or from a master JSON generated from this ledger. If a later chapter discovers a new project or alias, update the ledger first and then refresh synthesis and summary.
+Reports, CSV exports, timelines, and executive summaries should read rich project fields from the validated master JSON. Use the ledger to keep canonical IDs, status buckets, duplicate decisions, and watchlist/rejected records consistent. If a later chapter discovers a new project, alias, or richer project field, update the master JSON first, rebuild/refresh the ledger, then refresh synthesis and summary.
 
 ## Depth File Record Shape
 

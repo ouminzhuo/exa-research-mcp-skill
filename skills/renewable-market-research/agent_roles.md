@@ -6,8 +6,8 @@ The workflow separates writers, reviewers, synthesizers, and executive compressi
 
 - Writer agents collect and structure evidence for a specific domain.
 - Reviewer agents challenge evidence quality and contradictions.
-- The main/orchestrator agent owns the canonical project ledger and source-to-final continuity.
-- Synthesis agents combine only reviewed findings and the latest canonical ledger into decision-useful outputs.
+- The main/orchestrator agent owns rich master JSON aggregation, the canonical project ledger, and source-to-final continuity.
+- Synthesis agents combine only reviewed findings, the latest validated master JSON, and the canonical ledger into decision-useful outputs.
 - Executive agents compress reviewed conclusions into management-ready judgments only after the final backpropagation pass.
 
 ## Common Agent Output Contract
@@ -38,7 +38,7 @@ Collects policy targets, renewable laws, auction mechanisms, PPA structures, FIT
 
 Verifies wind, solar, storage, and hybrid project pipelines. It must separate installed capacity, official targets, auction capacity, confirmed projects, MOU-stage leads, and unverified watchlist leads.
 
-It must capture official/local-language names, Chinese translated names, SPV names, aliases, duplicate clues, source traces, and search passes so the main agent can merge records into the canonical pipeline ledger.
+It must capture official/local-language names, Chinese translated names, SPV names, aliases, duplicate clues, source traces, search passes, and rich project-card fields so the main agent can merge records into the master JSON and derive the canonical pipeline ledger.
 
 ### `owner_agent`
 
@@ -72,7 +72,7 @@ Challenges writer outputs. It checks source strength, contradictions, duplicate 
 
 Combines only reviewed findings into market judgment, confirmed pipeline, risk view, product-fit judgment, and sales-action plan. It must preserve evidence traceability and avoid unsupported narrative claims.
 
-It must read project claims from the latest canonical pipeline ledger or master JSON generated from that ledger.
+It must read rich project fields from the latest validated master JSON and use the canonical pipeline ledger for identity, dedupe, status buckets, and watchlist/rejected state.
 
 ## Executive Agent
 
@@ -80,4 +80,4 @@ It must read project claims from the latest canonical pipeline ledger or master 
 
 Compresses the reviewed synthesis into exactly three core judgments, each with evidence support, confidence, uncertainty, and a sales or resource-allocation implication.
 
-It must refresh the executive summary after downstream chapters, project ledger, policy backtrace, or synthesis changes.
+It must refresh the executive summary after downstream chapters, master JSON, project ledger, policy backtrace, or synthesis changes.

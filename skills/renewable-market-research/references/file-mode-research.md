@@ -7,12 +7,13 @@ User request
   -> main session decomposes dimensions and manages files
   -> child/sidecar researchers collect evidence per dimension
   -> each researcher writes JSON files, then replies DONE only
-  -> main session merges JSON into a canonical project ledger
-  -> main session updates synthesis from the ledger, then writes MD/PDF reports
+  -> main session merges JSON into a rich master JSON
+  -> main session derives the canonical project ledger from the validated master JSON
+  -> main session updates synthesis from the master JSON plus ledger, then writes MD/PDF reports
   -> main session reruns summary/conclusion backpropagation before release
 ```
 
-The main session owns orchestration, schema, deduplication, canonical project ledger, source-to-final continuity, report writing, and validation. Research workers own one narrow dimension and must not stream raw pages back into chat.
+The main session owns orchestration, schema, master JSON aggregation, deduplication, canonical project ledger, source-to-final continuity, report writing, and validation. Research workers own one narrow dimension and must not stream raw pages back into chat.
 
 ## Tool Priority
 
@@ -40,23 +41,28 @@ For a comprehensive country/technology task, use enough dimensions to cover stan
 | Dimension | Search target | Example |
 |---|---|---|
 | demand-load-gap | power demand growth, peak, imports/exports, deficit | `Kazakhstan electricity demand peak load import export trend` |
+| market-key-indicators-timeseries | generation YoY, Q1/monthly data, wind/solar three-year trends, installed capacity, imports/exports | `Kazakhstan wind solar generation Q1 YoY statistics` |
 | power-mix-replacement | current mix, retirements, thermal limits | `Kazakhstan coal retirement plan gas constraints power mix` |
 | grid-storage | storage, transmission, grid bottlenecks | `Kazakhstan wind grid curtailment storage transmission plan` |
 | policy-ppa-economics | auction/FIT/PPA/tariff/FX/IRR | `Kazakhstan renewable auction tariff PPA currency risk` |
+| auction-tariff-comparison | project-level winning tariffs, PPA tenor, currency/indexation, award dates | `Kazakhstan wind auction winning tariff PPA cents kWh` |
 | project-pipeline | all known projects and statuses | `Uzbekistan wind farm list capacity MW 2026` |
 | policy-plans | targets, laws, auctions, tariffs | `Uzbekistan renewable energy target 2030` |
 | developers | sponsor portfolio by company | `ACWA Power Uzbekistan portfolio wind` |
+| anchor-developer-deep-dives | material developer financials, portfolio, people, partners, China cooperation, IRR assumptions | `ACWA Power Uzbekistan portfolio financials key people China EPC` |
 | financing | IFI/commercial/project finance | `ADB EBRD AIIB Uzbekistan wind loan` |
-| technology-epc | turbines, modules, batteries, EPC | `Uzbekistan wind turbine Goldwind Envision` |
+| technology-epc | turbines, modules, batteries, EPC, full OEM panorama and product roadmap | `Uzbekistan wind turbine Goldwind Envision BNEF market share` |
 | grid-storage | storage, transmission, grid bottlenecks | `Uzbekistan renewable grid storage transmission` |
+| logistics-installation | route length/time, component dimensions/weights, crane/heavy-lift, ports/rail/road/borders | `Uzbekistan wind turbine blade transport route heavy lift crane` |
 | environment-social | ESIA, land, community, biodiversity | `Zarafshan wind farm environmental impact ESIA` |
 | carbon-hydrogen | I-REC, carbon, CBAM, green H2 | `Uzbekistan green hydrogen I-REC carbon CBAM` |
 | china-participation | Chinese OEM/EPC/developer role | `POWERCHINA Uzbekistan wind solar EPC Goldwind` |
+| chinese-developer-deep-dives | Chinese developer financials, listed code, team, Sinosure/policy-bank structures | `SANY Uzbekistan wind project revenue profit Sinosure` |
 | local-language-china-capital-trace | Chinese capital plus local-language project names, SPVs, EPC notices, aliases | `Kazakhstan wind PowerChina local project name Kazakh Russian` |
 | new-entrant-hunter | newly awarded developers, SPVs, first-time market actors, corporate offtakers | `Kazakhstan wind new entrant SPV PPA 2026` |
 | policy-law-backtrace | reverse targets, tariffs, auctions, and capacity numbers to original laws/decrees/orders | `Kazakhstan renewable target 2030 decree order number` |
 | anomaly-hunter | misspellings, transliterations, table/PDF/map-only mentions, renamed phases | `Kazakhstan wind local language misspelling PDF map` |
-| regional-benchmark | compare neighboring markets | `Uzbekistan Kazakhstan wind market comparison` |
+| regional-benchmark | optional only when the user explicitly asks to compare neighboring markets | `Uzbekistan Kazakhstan wind market comparison` |
 | entry-strategy | OEM/system/developer/EPC/O&M/localization pathways | `Kazakhstan wind OEM localization manufacturing opportunities` |
 
 ## Child Agent Prompt Template
@@ -102,9 +108,11 @@ Do not stop before rounds 1-4 for project pipeline work, and do not stop before 
 
 Record convergence in `index.json` with `rounds`, `newRecords`, `searchPasses`, `stoppedReason`, and `remainingGaps`.
 
-## Canonical Project Ledger
+## Master JSON and Canonical Project Ledger
 
-Before report writing, merge all project-like records into `{slug}-pipeline-ledger.json`.
+Before report writing, merge all project-like records into the rich `{slug}.json` first. This master JSON is the report-ready data source and must preserve rich card fields from depth records, including annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, coordinates, site area, logistics, jobs/community/ESG, and personnel/developer data when found.
+
+After the master JSON is complete, derive `{slug}-pipeline-ledger.json` from it.
 
 Each canonical project should include:
 
@@ -116,7 +124,7 @@ Each canonical project should include:
 - evidence layers such as `mou-framework`, `ppa-signed`, `financing-closed`, `construction-started`, or `cod-operational`;
 - confirmed-pipeline eligibility and exclusion reason when not eligible.
 
-No chapter may maintain an independent project list after the ledger exists. Chapters read from the ledger or master JSON; if a new chapter discovers a project candidate, it must update the ledger first, then refresh synthesis and summary.
+No chapter may maintain an independent project list after aggregation. Chapters read rich report fields from the master JSON and use the ledger for canonical IDs, status buckets, dedupe decisions, and watchlist/rejected state. If a new chapter discovers a project candidate, alias, or richer field, it must update the master JSON first, refresh the ledger, then refresh synthesis and summary.
 
 ## Critical Field Verification
 

@@ -10,16 +10,20 @@ Rules:
 - The executive summary must be written or refreshed after all downstream chapters and project ledger changes are complete.
 - No chapter may maintain a separate project pipeline table that diverges from `{slug}-pipeline-ledger.json` or the master JSON.
 - Every final project claim must include a source trace from depth record -> canonical ledger -> synthesis/report section.
+- The master JSON, not the compact ledger, is the rich report data source. Depth records must be cross-read before project cards and deep-dive chapters are finalized.
+- If a depth record contains a richer project-card field than the master JSON, update the master JSON first, then rebuild/refresh the ledger and synthesis.
 
 Pass criteria:
 
 - `metadata.sourceToFinal` records the pipeline ledger path, ledger update time, summary backpropagation time, and whether final claims were checked against the ledger.
-- The report's executive summary, project table, risk section, and sales-action section use the same project count, capacity totals, status buckets, and key caveats.
+- The report's executive summary, project cards or compact project index, risk section, and sales-action section use the same project count, capacity totals, status buckets, and key caveats.
 - Any changed downstream chapter has either updated the summary or recorded why the summary is unaffected.
+- `scripts/validate_market_integrity.py --depth-dir ...` returns no `depthPropagationGaps` or `reportCardFieldGaps`.
 
 Remediation:
 
 - Rebuild or refresh the canonical ledger.
+- Backfill missing rich project fields from `depth/*.json` into the master JSON, or mark them explicitly unavailable/not applicable with a gap note.
 - Rerun synthesis from the latest ledger.
 - Rewrite the executive summary and conclusion from the latest synthesis.
 - Move stale, divergent, or untraceable claims to watchlist, appendix, or `rejected_claims`.

@@ -4,7 +4,7 @@
 
 Combine only reviewed findings into market judgment, confirmed pipeline, product-fit view, key risks, sales-action plan, and report-ready conclusions.
 
-Read project pipeline records from the canonical project ledger or master JSON generated from that ledger. Do not synthesize directly from scattered depth records once the ledger exists.
+Read rich project fields from the validated master JSON and use the canonical project ledger for identity, status grouping, dedupe decisions, and watchlist/rejected state. Do not use the compact ledger as the only source for project cards or deep-dive conclusions.
 
 ## Output Contract
 
@@ -35,6 +35,8 @@ Return or write machine-readable JSON with this shape:
 - Check that project counts, capacity totals, and status buckets match the latest canonical ledger.
 - Downgrade or isolate any policy target that lacks original law/decree/order/regulator backtrace.
 - Downgrade or isolate any confirmed-pipeline critical field that lacks `chrome-mcp`, `exa-fetch`, or `manual-file` verification.
+- Before report-ready synthesis, confirm rich project-card fields from relevant depth records have been propagated into the master JSON or explicitly marked unavailable/not applicable. If a depth record has richer data than the master JSON, request a master JSON update before final synthesis.
+- For full reports, synthesize against the 15-chapter structure in `references/pdf-pipeline.md`; do not collapse market indicators, tariff comparison, OEM panorama, logistics, or developer deep dives into a short generic narrative.
 
 ## Allowed Actions
 
@@ -44,6 +46,8 @@ Return or write machine-readable JSON with this shape:
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
 - Record which ledger version or update timestamp the synthesis used.
+- Record which master JSON update timestamp and integrity validation result the synthesis used.
+- Produce generic conclusions plus Mingyang/MySE-specific strategy when both are needed; do not replace the conclusion/outlook chapter with only vendor-specific tactics.
 
 ## Prohibited Actions
 

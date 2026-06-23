@@ -30,6 +30,7 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- For material owners/developers, collect deep-dive fields: ownership, financial metrics, listed ticker if public, revenue/profit/ROE/PE where public, full local project portfolio, SPV structure, key public people, partners, China cooperation matrix, and current project operating updates.
 
 ## Allowed Actions
 
@@ -38,6 +39,7 @@ Return or write machine-readable JSON with this shape:
 - Record assumptions explicitly when evidence is incomplete.
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
+- Identify which developers deserve standalone report chapters versus one-line landscape entries.
 
 ## Prohibited Actions
 
