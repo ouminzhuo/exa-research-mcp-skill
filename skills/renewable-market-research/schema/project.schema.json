@@ -16,6 +16,36 @@
     "project_name": {
       "type": "string"
     },
+    "canonicalProjectId": {
+      "type": "string"
+    },
+    "canonical_project_id": {
+      "type": "string"
+    },
+    "canonicalName": {
+      "type": "string"
+    },
+    "canonical_name": {
+      "type": "string"
+    },
+    "nameVariants": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "name_variants": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "dedupeKey": {
+      "type": "string"
+    },
+    "dedupe_key": {
+      "type": "string"
+    },
     "country": {
       "type": "string"
     },
@@ -83,6 +113,50 @@
     },
     "duplicate_check_notes": {
       "type": "string"
+    },
+    "sourceTrace": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "source_trace": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "legalBasisRefs": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "legal_basis_refs": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "criticalFieldVerification": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "object",
+          "array",
+          "string"
+        ]
+      }
+    },
+    "critical_field_verification": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "object",
+          "array",
+          "string"
+        ]
+      }
     },
     "status_confidence": {
       "enum": [

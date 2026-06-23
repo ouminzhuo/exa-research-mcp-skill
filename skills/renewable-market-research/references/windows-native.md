@@ -48,6 +48,18 @@ Or the PowerShell wrapper:
   -OutputCsv .\data\renewable-market\uzbekistan-wind.csv
 ```
 
+## Integrity Validation
+
+After the master JSON and canonical ledger are built, run the source-to-final integrity validator:
+
+```powershell
+.\skills\renewable-market-research\scripts\validate_market_integrity.ps1 `
+  -MarketJson .\data\renewable-market\uzbekistan-wind.json `
+  -Output .\data\renewable-market\uzbekistan-wind-integrity.json
+```
+
+Use `-Strict` only when warnings should fail the run. Duplicate candidates and critical-field verification gaps always require review because they can indicate unmerged records or confirmed-project fields that still lack Chrome MCP/original-file verification.
+
 ## PDF Rendering on Windows
 
 - Prefer Python or Node commands that run directly in PowerShell.
@@ -85,6 +97,8 @@ Use the Python search orchestration helper through PowerShell when you need a re
   --country Kazakhstan `
   --technology wind `
   --audience "Mingyang OEM commercial entry" `
+  --official-languages "Kazakh,Russian" `
+  --known-projects "Sho'rkul,Zhanatas,Arkalyk" `
   --slug kazakhstan-wind `
   --output data\renewable-market\kazakhstan-wind-search-plan.json
 

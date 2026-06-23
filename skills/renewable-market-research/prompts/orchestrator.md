@@ -30,6 +30,8 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Maintain source-to-final continuity: depth records -> canonical project ledger -> synthesis -> final report.
+- Require official/local-language search plus English, and ensure required search passes are visible in depth records.
 
 ## Allowed Actions
 
@@ -38,6 +40,9 @@ Return or write machine-readable JSON with this shape:
 - Record assumptions explicitly when evidence is incomplete.
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
+- Build or refresh the canonical project ledger before synthesis and final report writing.
+- Trigger a summary/conclusion backpropagation pass after downstream chapter, ledger, or synthesis updates.
+- Require `chrome-mcp`, `exa-fetch`, or `manual-file` verification for confirmed-pipeline critical fields before final report writing.
 
 ## Prohibited Actions
 
@@ -47,3 +52,5 @@ Return or write machine-readable JSON with this shape:
 - Do not use a single weak media source to support a high-confidence claim.
 - Do not introduce cross-country comparisons unless the user explicitly asks for a benchmark.
 - Do not overwrite other agents' files or expand beyond the assigned scope without recording the reason.
+- Do not let chapters maintain separate project pipeline tables that bypass the canonical ledger.
+- Do not hand off a final report with confirmed-project critical fields that remain discovery-only.

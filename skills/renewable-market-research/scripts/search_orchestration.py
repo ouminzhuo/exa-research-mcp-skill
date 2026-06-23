@@ -162,6 +162,54 @@ DIMENSIONS = [
         "domainBoost": ["powerchina.cn", "ceec.net.cn", "sinosure.com.cn", "eximbank.gov.cn"],
     },
     {
+        "id": "local-language-china-capital-trace",
+        "intent": "exploratory",
+        "freshness": "pm",
+        "focus": "Chinese capital plus official-language project names, translated names, SPVs, EPC notices, and local aliases",
+        "patterns": [
+            "{country} {technology} China capital EPC local project name {official_languages}",
+            "{country} {technology} PowerChina CEEC Goldwind SANY Envision Chinese financing {official_languages}",
+            "{known_projects} {country} {technology} local language name Chinese EPC financing",
+        ],
+        "domainBoost": ["powerchina.cn", "ceec.net.cn", "goldwind.com", "sanyglobal.com", "invest.gov.kz"],
+    },
+    {
+        "id": "new-entrant-hunter",
+        "intent": "news",
+        "freshness": "pm",
+        "focus": "new entrants, newly awarded developers, recent SPVs, local partners, corporate offtakers, and first-time market actors",
+        "patterns": [
+            "{country} {technology} new entrant developer awarded project PPA {year}",
+            "{country} {technology} newly registered SPV renewable project local partner {official_languages}",
+            "{country} {technology} first project market entry IPP EPC OEM {year}",
+        ],
+        "domainBoost": ["invest.gov.kz", "korem.kz", "rfc.kz", "acwapower.com", "masdar.ae"],
+    },
+    {
+        "id": "policy-law-backtrace",
+        "intent": "resource",
+        "freshness": "py",
+        "focus": "trace policy targets, auction numbers, tariffs, and capacity goals back to original laws, decrees, orders, and regulator documents",
+        "patterns": [
+            "{country} renewable energy target decree law order number {year}",
+            "{country} {technology} auction tariff regulation decree original law {official_languages}",
+            "{country} renewable capacity target 2030 legal basis regulator decree PDF",
+        ],
+        "domainBoost": ["adilet.zan.kz", "korem.kz", "rfc.kz", "energy.gov.kz", "gov.kz"],
+    },
+    {
+        "id": "anomaly-hunter",
+        "intent": "exploratory",
+        "freshness": "pm",
+        "focus": "odd spellings, transliterations, map/table/PDF-only mentions, local-language names, and projects outside the known developer pattern",
+        "patterns": [
+            "{country} {technology} farm transliteration misspelling local language PDF map",
+            "{country} {technology} {official_languages} site:gov.kz filetype:pdf",
+            "{known_projects} alternative spelling renamed project phase {country} {technology}",
+        ],
+        "domainBoost": ["gov.kz", "adilet.zan.kz", "kegoc.kz", "wikimapia.org"],
+    },
+    {
         "id": "regional-benchmark",
         "intent": "comparison",
         "freshness": "py",
@@ -235,20 +283,66 @@ def slugify(value: str) -> str:
     return value.strip("-") or "market"
 
 
-def render_query(pattern: str, country: str, technology: str, year: int, audience: str) -> str:
-    query = pattern.format(country=country, technology=technology, year=year, audience=audience).strip()
+def render_query_with_context(
+    pattern: str,
+    country: str,
+    technology: str,
+    year: int,
+    audience: str,
+    official_languages: list[str],
+    known_projects: list[str],
+) -> str:
+    language_text = ", ".join(official_languages) if official_languages else "official language"
+    project_text = ", ".join(known_projects) if known_projects else "known project names"
+    query = pattern.format(
+        country=country,
+        technology=technology,
+        year=year,
+        audience=audience,
+        official_languages=language_text,
+        known_projects=project_text,
+    ).strip()
     if technology.lower() not in query.lower():
         query = f"{query} {technology}"
     return query
 
 
-def build_plan(country: str, technology: str, audience: str, output_slug: str | None) -> dict[str, Any]:
+def required_passes_for_dimension(dimension_id: str) -> list[str]:
+    passes = ["english-broad", "official-language"]
+    if "policy" in dimension_id:
+        passes.append("source-backtrace")
+    if dimension_id in {"project-pipeline-layered", "owners-partners-routes", "china-finance-ecosystem"}:
+        passes.append("china-capital-local-language")
+    if dimension_id == "local-language-china-capital-trace":
+        passes.extend(["china-capital-local-language", "chrome-verification"])
+    if dimension_id == "new-entrant-hunter":
+        passes.extend(["new-entrant", "official-language"])
+    if dimension_id == "policy-law-backtrace":
+        passes.extend(["source-backtrace", "chrome-verification"])
+    if dimension_id == "anomaly-hunter":
+        passes.extend(["anomaly-hunter", "official-language"])
+    return list(dict.fromkeys(passes))
+
+
+def build_plan(
+    country: str,
+    technology: str,
+    audience: str,
+    output_slug: str | None,
+    official_languages: list[str] | None = None,
+    known_projects: list[str] | None = None,
+) -> dict[str, Any]:
     year = datetime.now(timezone.utc).year
     slug = output_slug or f"{slugify(country)}-{slugify(technology)}"
+    official_languages = official_languages or []
+    known_projects = known_projects or []
     dimensions = []
     for dimension in DIMENSIONS:
         intent = dimension["intent"]
-        queries = [render_query(pattern, country, technology, year, audience) for pattern in dimension["patterns"]]
+        queries = [
+            render_query_with_context(pattern, country, technology, year, audience, official_languages, known_projects)
+            for pattern in dimension["patterns"]
+        ]
         dimensions.append(
             {
                 "id": dimension["id"],
@@ -262,7 +356,9 @@ def build_plan(country: str, technology: str, audience: str, output_slug: str | 
                 "minimumEvidence": {
                     "records": 3,
                     "uniqueUrls": 3,
-                    "collectionMethods": ["exa-search", "chrome-mcp"],
+                    "collectionMethods": ["exa-search"],
+                    "preferredVerificationMethods": ["chrome-mcp"],
+                    "requiredPasses": required_passes_for_dimension(dimension["id"]),
                     "requiredFields": ["topic", "facts", "sources", "confidence", "uncertainty"],
                 },
             }
@@ -273,6 +369,8 @@ def build_plan(country: str, technology: str, audience: str, output_slug: str | 
         "country": country,
         "technology": technology,
         "audience": audience,
+        "officialLanguages": official_languages,
+        "knownProjects": known_projects,
         "slug": slug,
         "toolLanes": TOOL_LANES,
         "dimensions": dimensions,
@@ -293,7 +391,22 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-SOURCE_REQUIRED_FIELDS = ["url", "title", "publisher", "accessedAt", "sourceLanguage"]
+SOURCE_REQUIRED_FIELD_ALIASES = [
+    ("url",),
+    ("title",),
+    ("publisher",),
+    ("accessedAt", "accessed_at"),
+    ("sourceLanguage", "source_language"),
+    ("collectionMethod", "collection_method"),
+]
+
+
+def get_any(mapping: dict[str, Any], aliases: tuple[str, ...]) -> Any:
+    for alias in aliases:
+        value = mapping.get(alias)
+        if value not in (None, "", []):
+            return value
+    return None
 
 
 def source_urls(record: dict[str, Any]) -> list[str]:
@@ -322,7 +435,10 @@ def source_missing_fields(record: dict[str, Any]) -> list[str]:
     if isinstance(sources, list):
         for source_index, source in enumerate(sources):
             if isinstance(source, dict):
-                missing = [field for field in SOURCE_REQUIRED_FIELDS if source.get(field) in (None, "", [])]
+                missing = []
+                for aliases in SOURCE_REQUIRED_FIELD_ALIASES:
+                    if get_any(source, aliases) is None and get_any(record, aliases) is None:
+                        missing.append("/".join(aliases))
                 if missing:
                     issues.append(f"source {source_index} missing fields: {', '.join(missing)}")
     facts = record.get("facts", [])
@@ -334,12 +450,59 @@ def source_missing_fields(record: dict[str, Any]) -> list[str]:
             if isinstance(fact_sources, list):
                 for source_index, source in enumerate(fact_sources):
                     if isinstance(source, dict):
-                        missing = [field for field in SOURCE_REQUIRED_FIELDS if source.get(field) in (None, "", [])]
+                        missing = []
+                        for aliases in SOURCE_REQUIRED_FIELD_ALIASES:
+                            if get_any(source, aliases) is None and get_any(fact, aliases) is None and get_any(record, aliases) is None:
+                                missing.append("/".join(aliases))
                         if missing:
                             issues.append(
                                 f"fact {fact_index} source {source_index} missing fields: {', '.join(missing)}"
                             )
     return issues
+
+
+def record_search_passes(record: dict[str, Any]) -> list[str]:
+    passes: list[str] = []
+    for key in ("searchPass", "search_pass"):
+        value = record.get(key)
+        if isinstance(value, str) and value:
+            passes.append(value)
+    for key in ("searchPasses", "search_passes", "coverageTags", "coverage_tags"):
+        value = record.get(key)
+        if isinstance(value, list):
+            passes.extend(str(item) for item in value if item)
+        elif isinstance(value, str) and value:
+            passes.append(value)
+    return passes
+
+
+def record_collection_methods(record: dict[str, Any]) -> list[str]:
+    methods: list[str] = []
+    method = get_any(record, ("collectionMethod", "collection_method"))
+    if isinstance(method, str) and method:
+        methods.append(method)
+    sources = record.get("sources", [])
+    if isinstance(sources, list):
+        for source in sources:
+            if isinstance(source, dict):
+                source_method = get_any(source, ("collectionMethod", "collection_method"))
+                if isinstance(source_method, str) and source_method:
+                    methods.append(source_method)
+    facts = record.get("facts", [])
+    if isinstance(facts, list):
+        for fact in facts:
+            if not isinstance(fact, dict):
+                continue
+            fact_sources = fact.get("sources", [])
+            if isinstance(fact_sources, list):
+                for source in fact_sources:
+                    if isinstance(source, dict):
+                        source_method = get_any(source, ("collectionMethod", "collection_method"))
+                        if isinstance(source_method, str) and source_method:
+                            methods.append(source_method)
+    if not methods and isinstance(record.get("notes"), str) and "chrome" in record["notes"].lower():
+        methods.append("chrome-mcp")
+    return methods
 
 def record_missing_fields(record: dict[str, Any], fields: list[str]) -> list[str]:
     missing = []
@@ -360,6 +523,7 @@ def validate_depth_file(path: Path, minimum: dict[str, Any]) -> dict[str, Any]:
     required_fields = minimum.get("requiredFields", [])
     urls: set[str] = set()
     methods: Counter[str] = Counter()
+    search_passes: Counter[str] = Counter()
     issues = []
     for index, record in enumerate(data):
         if not isinstance(record, dict):
@@ -371,18 +535,25 @@ def validate_depth_file(path: Path, minimum: dict[str, Any]) -> dict[str, Any]:
         for source_issue in source_missing_fields(record):
             issues.append(f"record {index} {source_issue}")
         urls.update(source_urls(record))
-        method = record.get("collectionMethod")
-        if not method and isinstance(record.get("notes"), str) and "chrome" in record["notes"].lower():
-            method = "chrome-mcp"
-        if method:
-            methods[str(method)] += 1
+        for method in record_collection_methods(record):
+            methods[method] += 1
+        for search_pass in record_search_passes(record):
+            search_passes[search_pass] += 1
 
     min_records = int(minimum.get("records", 0))
     min_urls = int(minimum.get("uniqueUrls", 0))
+    required_methods = minimum.get("collectionMethods", [])
+    required_passes = minimum.get("requiredPasses", [])
     if len(data) < min_records:
         issues.append(f"record count {len(data)} below minimum {min_records}")
     if len(urls) < min_urls:
         issues.append(f"unique URL count {len(urls)} below minimum {min_urls}")
+    missing_methods = [method for method in required_methods if methods.get(method, 0) == 0]
+    if missing_methods:
+        issues.append(f"missing required collection methods: {', '.join(missing_methods)}")
+    missing_passes = [search_pass for search_pass in required_passes if search_passes.get(search_pass, 0) == 0]
+    if missing_passes:
+        issues.append(f"missing required search passes: {', '.join(missing_passes)}")
 
     status = "pass" if not issues else "needs-work"
     return {
@@ -391,6 +562,7 @@ def validate_depth_file(path: Path, minimum: dict[str, Any]) -> dict[str, Any]:
         "records": len(data),
         "uniqueUrls": len(urls),
         "collectionMethods": dict(methods),
+        "searchPasses": dict(search_passes),
         "issues": issues,
     }
 
@@ -426,6 +598,12 @@ def write_json(data: dict[str, Any], output: Path | None) -> None:
         print(text, end="")
 
 
+def split_csv_arg(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Plan or validate renewable market search coverage.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -435,6 +613,8 @@ def main() -> int:
     plan_parser.add_argument("--technology", required=True)
     plan_parser.add_argument("--audience", default="commercial-entry")
     plan_parser.add_argument("--slug")
+    plan_parser.add_argument("--official-languages", help="Comma-separated official/local languages to force into search passes.")
+    plan_parser.add_argument("--known-projects", help="Comma-separated seed project names for alias and anomaly searches.")
     plan_parser.add_argument("--output", type=Path)
 
     validate_parser = subparsers.add_parser("validate", help="Validate depth JSON coverage against a search plan.")
@@ -444,7 +624,14 @@ def main() -> int:
 
     args = parser.parse_args()
     if args.command == "plan":
-        data = build_plan(args.country, args.technology, args.audience, args.slug)
+        data = build_plan(
+            args.country,
+            args.technology,
+            args.audience,
+            args.slug,
+            split_csv_arg(args.official_languages),
+            split_csv_arg(args.known_projects),
+        )
         write_json(data, args.output)
         return 0
     if args.command == "validate":
