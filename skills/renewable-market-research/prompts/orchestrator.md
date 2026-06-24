@@ -34,6 +34,9 @@ Return or write machine-readable JSON with this shape:
 - Maintain source-to-final continuity: depth records -> rich master JSON -> canonical project ledger -> synthesis -> final report.
 - Require official/local-language search plus English, and ensure required search passes are visible in depth records.
 - Preserve broad search coverage while forcing final project counts, MW totals, and opportunity claims through confirmed/watchlist/duplicate/rejected ledger buckets.
+- Select Heavy Workflow by default when the user asks for a benchmark-surpassing country report, full wind-market assessment, project pipeline accuracy, market participant depth, OEM competition, or sales-entry strategy.
+- Treat Standard and Lite as reductions of Heavy Workflow. If fewer real agents are available, run Heavy lanes sequentially but preserve the same artifacts, ownership rules, and review gates.
+- Trigger Reflection Gate review after search planning, evidence collection, ledger aggregation, and report drafting. Do not advance a stage based only on score improvement; require threshold pass and zero critical blockers.
 
 ## Allowed Actions
 
@@ -48,6 +51,9 @@ Return or write machine-readable JSON with this shape:
 - Keep storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial offtake subordinate to wind-market judgment; include them only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry.
 - Trigger a summary/conclusion backpropagation pass after downstream chapter, ledger, or synthesis updates.
 - Require `chrome-mcp`, `exa-fetch`, or `manual-file` verification for confirmed-pipeline critical fields before final report writing.
+- For Heavy Workflow, assign the 14 logical roles from `workflow.md` and `agent_roles.md`; record collapsed/sequential lanes when the host cannot spawn real child agents.
+- Require the verification agent to write source-audit artifacts before the reviewer scores evidence, ledger, or report stages.
+- Require the reviewer to write gap tasks with owner lane, missing artifact, required evidence method, and acceptance criterion whenever a stage fails.
 
 ## Prohibited Actions
 
@@ -62,3 +68,5 @@ Return or write machine-readable JSON with this shape:
 - Do not let chapters maintain separate project pipeline tables that bypass the canonical ledger.
 - Do not let final reports use `{slug}-pipeline-ledger.json` as a substitute for the rich master JSON.
 - Do not hand off a final report with confirmed-project critical fields that remain discovery-only.
+- Do not allow worker agents to edit the rich master JSON, canonical ledger, final reports, PDFs, harness state, scripts, or another worker's depth file.
+- Do not let the reviewer rewrite the report. The reviewer scores, blocks, and creates gap tasks; the main agent performs fixes.

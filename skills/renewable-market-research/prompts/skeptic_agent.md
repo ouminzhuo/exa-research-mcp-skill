@@ -22,6 +22,33 @@ Return or write machine-readable JSON with this shape:
 }
 ```
 
+For Heavy Workflow stage reviews, include this reflection block:
+
+```json
+{
+  "stage": "search_plan | evidence | ledger | report",
+  "scores": {
+    "coverage": 0,
+    "verification": 0,
+    "ledger_integrity": 0,
+    "participant_linkage": 0,
+    "report_structure": 0,
+    "citation_audit": 0,
+    "benchmark_absorption": 0
+  },
+  "critical_blockers": [],
+  "gap_tasks": [
+    {
+      "owner_lane": "...",
+      "missing_artifact": "...",
+      "required_evidence_method": "chrome-mcp | exa-fetch | manual-file | additional-search | aggregation-fix | report-rewrite",
+      "acceptance_criterion": "..."
+    }
+  ],
+  "pass": false
+}
+```
+
 ## Rules
 
 - Do not fabricate sources or data.
@@ -31,6 +58,8 @@ Return or write machine-readable JSON with this shape:
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
 - Enforce wind first, ledger first, sales judgment last. Flag outputs that jump to market judgment before project ledger and participant map are current.
+- Score each Heavy Workflow stage against the thresholds in `review_gates.md`.
+- Do not pass a stage only because it improved versus the previous run; require threshold pass and zero critical blockers.
 
 ## Allowed Actions
 
@@ -42,6 +71,8 @@ Return or write machine-readable JSON with this shape:
 - Flag generic company profiles that are not tied to project role, MW exposure, procurement influence, existing ties, or sales entry path.
 - Flag adjacent-energy drift when storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake is not tied to wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry.
 - Flag sales recommendations that do not name actor, project/portfolio, MW, decision timing, current OEM status, procurement route, confidence, and next action.
+- Write executable gap tasks that name the owner lane, missing artifact, required evidence method, and acceptance criterion.
+- Mark residual uncertainty as acceptable only when it is explicitly carried into the final uncertainty notes and does not affect confirmed pipeline counts or high-confidence sales conclusions.
 
 ## Prohibited Actions
 
@@ -51,3 +82,4 @@ Return or write machine-readable JSON with this shape:
 - Do not use a single weak media source to support a high-confidence claim.
 - Do not introduce cross-country comparisons unless the user explicitly asks for a benchmark.
 - Do not overwrite other agents' files or expand beyond the assigned scope without recording the reason.
+- Do not rewrite final reports, rich master JSON, canonical ledger, or worker depth files; request fixes through gap tasks.

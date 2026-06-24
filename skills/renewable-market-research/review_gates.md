@@ -121,7 +121,58 @@ Remediation:
 - Remove narrative filler.
 - Convert generic participant descriptions into project-linked role and procurement-influence records.
 
-## 5. Executive Gate
+## 5. Reflection Gate
+
+Rules:
+
+- The reflection/reviewer agent must review independently from the worker that produced the artifact.
+- Reflection applies after four stages in Heavy Workflow: search plan, evidence/depth collection, ledger aggregation, and report drafting.
+- Score improvement alone is not enough to advance. A stage must meet its threshold and have zero critical blockers.
+- Critical blockers include: missing mandatory search lane, confirmed critical fields supported only by discovery snippets, unreconciled duplicate projects, confirmed/watchlist leakage, missing source-to-final trace, stale executive summary, missing 15-chapter report structure, missing project-card fields without gap notes, generic participant profiles, or benchmark sections included without explicit request.
+- If a stage fails, the reviewer must write executable gap tasks with owner lane, missing artifact, required evidence method, and acceptance criterion.
+
+Default score thresholds:
+
+```json
+{
+  "search_plan": {
+    "coverage": 85,
+    "benchmark_absorption": 80
+  },
+  "evidence": {
+    "coverage": 85,
+    "verification": 90,
+    "citation_audit": 85
+  },
+  "ledger": {
+    "ledger_integrity": 95,
+    "verification": 90,
+    "participant_linkage": 85
+  },
+  "report": {
+    "report_structure": 90,
+    "citation_audit": 90,
+    "participant_linkage": 85,
+    "benchmark_absorption": 85
+  }
+}
+```
+
+Pass criteria:
+
+- `critical_blockers` is empty.
+- The current stage meets every applicable threshold above.
+- `gap_tasks` is empty or contains only explicitly accepted residual gaps that are carried into uncertainty notes.
+- The reviewer records which artifacts and timestamps were reviewed.
+
+Remediation:
+
+- Write or refresh `data/renewable-market/{slug}-gap-tasks.json`.
+- Rerun only the affected worker lanes or aggregation step.
+- Rerun verification if the fix changes critical fields.
+- Rerun the same Reflection Gate before advancing.
+
+## 6. Executive Gate
 
 Rules:
 

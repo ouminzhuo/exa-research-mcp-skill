@@ -32,7 +32,7 @@ Load only the reference needed for the current step:
 - `agent_roles.md`: writer, reviewer, synthesis, and executive role separation.
 - `review_gates.md`: Evidence, Contradiction, Business, and Executive gates that final claims must pass.
 - `schema/*.schema.json`: machine-readable schemas for evidence, findings, projects, decisions, reviews, and reports.
-- `prompts/*.md`: role-specific prompts for orchestrator, policy, pipeline, owner, product-fit, grid, finance, competitor, skeptic, synthesis, and executive agents.
+- `prompts/*.md`: role-specific prompts for orchestrator, policy, pipeline, owner, product-fit, grid, finance, competitor, verification, skeptic/reflection, synthesis, and executive agents.
 - `references/pdf-pipeline.md`: full/lite report structure, Markdown/HTML/PDF pipeline, Chinese/English font handling, table alignment, and output risks.
 - `references/windows-native.md`: Windows native PowerShell/Python startup commands, CSV export wrapper, PDF caveats, and Chrome MCP browser rules.
 - `references/search-orchestration.md`: intent-aware query planning, search-lane coverage gates, local-language/china-capital/anomaly passes, validation script usage, and evidence-ranking guidance.
@@ -43,6 +43,7 @@ Choose the mode in `workflow.md` before collecting data:
 
 - **Lite Workflow**: quick market checks using policy, pipeline, product-fit, skeptic, synthesis, and executive agents. Output a one-page market judgment, confirmed leads, risks, and next actions.
 - **Standard Workflow**: country-level reports using policy, pipeline, owner, grid, product-fit, finance, competitor, skeptic, synthesis, and executive agents. Output lite report, full report, project pipeline cards, sales-action plan, and executive brief.
+- **Heavy Workflow**: default for benchmark-surpassing country wind-market reports. Use one main/orchestrator agent, eleven focused research workers, one independent verification agent, and one independent reflection/reviewer agent. Output all Standard deliverables plus source-audit, reflection-review, and gap-task artifacts. If fewer real agents are available, collapse lanes sequentially but keep the same files, gates, and review loops.
 - **Deep Workflow**: strategic questions requiring multiple review loops, scenario comparison, assumptions register, evidence archive, and human review gates.
 
 ## Standard Workflow
@@ -90,6 +91,21 @@ Choose the mode in `workflow.md` before collecting data:
    - Prefer Exa semantic search/fetch/deep-search tools for broad discovery.
    - Use Chrome MCP as the first fallback/verification browser when Exa misses dynamic, PDF, table, map, ecommerce, or JavaScript-rendered evidence.
    - Fall back to general browser/search tools only after Exa and Chrome MCP are insufficient.
+   - For Heavy Workflow, use this 14-agent topology when the host supports parallel or delegated agents:
+     - Agent 0 `main_orchestrator_integrator`: owns run state, task split, depth merge, rich master JSON, canonical ledger, report writing, and final handoff.
+     - Agent 1 `market_indicators_worker`: demand/load gap, generation, installed capacity, imports/exports, latest monthly/quarterly data, and time-series indicators.
+     - Agent 2 `pipeline_worker`: project pipeline, auctions, PPA status, COD, project aliases, and confirmed/watchlist/duplicate/rejected candidates.
+     - Agent 3 `owner_developer_worker`: owners, developers, state entities, IPPs, SPVs, partner networks, key people, and procurement influence.
+     - Agent 4 `china_capital_new_entrant_worker`: Chinese capital traces, Chinese/local project names, new entrants, first-time SPVs, and local-language discovery.
+     - Agent 5 `oem_competitor_worker`: OEM awards, framework agreements, turbine models/specs, shortlist clues, absent/displaced competitors, and unallocated MW.
+     - Agent 6 `epc_logistics_localization_worker`: EPC, O&M, routes, port/rail/road constraints, heavy-lift/crane firms, localization, and component transport.
+     - Agent 7 `policy_law_tariff_worker`: policy targets, decrees, regulator orders, auction rules, PPA/FIT/tariff history, and legal/source backtrace.
+     - Agent 8 `finance_bankability_worker`: MDB/DFI finance, guarantees, PPA bankability, FX/indexation, project finance, and sponsor financials.
+     - Agent 9 `grid_storage_worker`: transmission, substations, grid-code, curtailment, balancing, storage, and interconnection constraints affecting wind.
+     - Agent 10 `adjacent_opportunity_worker`: solar, BESS, hydrogen, ammonia, methanol, green-power demand, I-REC, CBAM, and industrial offtake only where they affect wind opportunity.
+     - Agent 11 `product_fit_sales_worker`: Mingyang/MySE fit, entry windows, priority accounts, procurement routes, and sales-action hypotheses.
+     - Agent 12 `verification_agent`: independently verifies critical fields through Chrome MCP, Exa fetch, or original files and writes source-audit artifacts.
+     - Agent 13 `reflection_reviewer`: scores coverage, ledger integrity, participant linkage, report structure, citation audit, and benchmark absorption; writes gap tasks.
    - When host policy and user request allow parallel agents, assign each dimension to a child agent that writes JSON under `depth/` and replies only `DONE`.
    - If parallel agents are unavailable, perform the same dimensions sequentially and still write per-dimension JSON files.
    - Never paste large raw search results into the main response.
@@ -134,6 +150,7 @@ Choose the mode in `workflow.md` before collecting data:
 8. **Validate and hand off**
    - Validate JSON syntax, CSV row count, and search coverage; use `scripts/search_orchestration.py validate` when a search plan exists.
    - Run `scripts/validate_market_integrity.py` or its PowerShell wrapper to identify duplicate candidates, missing source fields, missing source-to-final metadata, and policy target records without legal backtrace.
+   - In Heavy Workflow, run reflection loops after search planning, evidence collection, ledger aggregation, and final report drafting. A stage may advance only when the reviewer reports no critical blockers and the stage meets the thresholds in `review_gates.md`; score improvement alone is not enough.
    - Confirm both report files exist.
    - If PDFs were requested, confirm both PDFs exist or document why PDF rendering was skipped.
    - Summarize new files, coverage, gaps, and next update path.
@@ -163,6 +180,9 @@ Also produce:
 
 - `data/renewable-market/{slug}-pipeline-ledger.json`
 - `data/renewable-market/{slug}-integrity.json`
+- `data/renewable-market/{slug}-source-audit.json` in Heavy Workflow
+- `data/renewable-market/{slug}-reflection-review.json` in Heavy Workflow
+- `data/renewable-market/{slug}-gap-tasks.json` in Heavy Workflow when gaps remain
 
 ## Review Gates
 
@@ -173,7 +193,8 @@ Before final writing, apply `review_gates.md`:
 3. **Critical Field Gate**: confirmed-pipeline critical fields must have `chrome-mcp`, `exa-fetch`, or `manual-file` verification. Otherwise downgrade the project/field to watchlist or uncertainty; do not leave it as a final confirmed fact.
 4. **Contradiction Gate**: reconcile installed/planned/pipeline capacity, status conflicts, COD conflicts, duplicates, translated names, local-language aliases, phase confusion, and offshore/floating/onshore classification; every final conclusion must pass this gate before synthesis.
 5. **Business Gate**: convert important facts into implications for sales action, product fit, risk judgment, or executive decision-making.
-6. **Executive Gate**: compress final output into three evidence-backed core judgments and avoid vague potential claims unless quantified and qualified.
+6. **Reflection Gate**: require the independent reviewer to score each stage, list critical blockers, and generate gap tasks. Do not advance a stage merely because its score improved; it must meet the stage threshold and have zero critical blockers.
+7. **Executive Gate**: compress final output into three evidence-backed core judgments and avoid vague potential claims unless quantified and qualified.
 
 ## Quality Gates
 
@@ -205,6 +226,8 @@ Do not require WSL, Git Bash, `make.sh`, or Bash-only syntax for the standard wo
 
 When running long-form market research, use a harness-based multi-agent file workflow.
 
+Default long-form profile is Heavy Workflow. Use Lite or Standard only when the user asks for speed or a smaller deliverable.
+
 ### Required Skills (when available)
 
 1. `effective-harnesses`
@@ -228,6 +251,8 @@ Main agent responsibilities:
 - produce master JSON, CSV, timeline CSV, markdown reports, and PDFs
 - rerun summary/conclusion backpropagation after downstream section updates
 - run validations and final business judgment
+
+Heavy Workflow uses 14 logical execution roles: one main/orchestrator integrator, eleven research workers, one verification agent, and one reflection/reviewer agent. Workers may be real child agents when the host supports that pattern, or sequential lanes when it does not. The final aggregation, canonical ledger, synthesis, executive summary, and report writing remain single-owner tasks under the main agent.
 
 Worker agent responsibilities:
 - only the assigned research module

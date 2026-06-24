@@ -19,6 +19,7 @@
 13. Treat storage, solar PV, grid, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial offtake as adjacent opportunity context only when they affect wind project value, PPA/tariff economics, interconnection, procurement, or sales entry.
 14. Route all final conclusions through the Continuity, Evidence, and Contradiction gates before synthesis or executive compression.
 15. After downstream chapters change, rerun a summary/conclusion backpropagation pass so the executive section reflects the latest master JSON, ledger, and synthesis.
+16. Use Heavy Workflow as the default for benchmark-surpassing country wind-market reports; Standard and Lite are reductions of the same file/gate architecture, not separate logic.
 
 ## Lite Workflow
 
@@ -75,12 +76,56 @@ Outputs:
 - Executive brief based only on conclusions that passed the Continuity, Evidence, and Contradiction gates.
 - Evidence archive and rejected-claims register.
 
+## Heavy Workflow
+
+Use for benchmark-surpassing country wind-market reports where pipeline accuracy, participant depth, OEM competition, citation auditability, and sales-action usefulness are more important than speed.
+
+Agent topology:
+
+1. `main_orchestrator_integrator`: owns run state, task split, aggregation, master JSON, canonical ledger, synthesis, reports, summary refresh, and final handoff.
+2. `market_indicators_worker`: demand/load gap, generation, installed capacity, imports/exports, latest monthly/quarterly data, and time-series market indicators.
+3. `pipeline_worker`: project pipeline, auctions, PPA/COD/status, aliases, phase boundaries, and confirmed/watchlist/duplicate/rejected classification.
+4. `owner_developer_worker`: owners, developers, state entities, IPPs, SPVs, partner networks, key people, procurement influence, and local presence.
+5. `china_capital_new_entrant_worker`: Chinese capital, Chinese/local project names, new entrants, first-time SPVs, local-language blind spots, and anomaly candidates.
+6. `oem_competitor_worker`: OEM awards, turbine models/specs, product roadmaps, framework agreements, shortlist clues, absent/displaced competitors, and unallocated MW.
+7. `epc_logistics_localization_worker`: EPC, O&M, port/rail/road route constraints, heavy-lift/crane firms, transport windows, localization, and supply-chain bottlenecks.
+8. `policy_law_tariff_worker`: policy targets, decrees, legal IDs, regulator orders, auction rules, PPA/FIT/tariff history, and source backtrace.
+9. `finance_bankability_worker`: MDB/DFI finance, project finance, guarantees, FX/indexation, sponsor financials, IRR/ROE where supportable, and bankability constraints.
+10. `grid_storage_worker`: transmission, substations, grid-code, curtailment, balancing, storage, hybrid constraints, and interconnection risk.
+11. `adjacent_opportunity_worker`: solar, BESS, hydrogen, ammonia, methanol, green-power demand, I-REC, CBAM, and industrial offtake only where they change wind opportunity.
+12. `product_fit_sales_worker`: Mingyang/MySE fit, priority accounts, procurement windows, current OEM status, route-to-entry, and sales-action hypotheses.
+13. `verification_agent`: verifies critical project/policy/tariff/participant fields through Chrome MCP, Exa fetch, or original files and writes source-audit artifacts.
+14. `reflection_reviewer`: independently scores each stage, lists critical blockers, and writes executable gap tasks.
+
+Heavy Workflow stage loop:
+
+1. Search plan reflection: reviewer checks local-language coverage, Chinese-capital search, new-entrant search, anomaly hunting, official-source backtrace, and mandatory evidence thresholds before workers start.
+2. Evidence reflection: reviewer checks depth files for coverage, source quality, search passes, critical-field verification, and unexplained blind spots.
+3. Ledger reflection: reviewer checks canonical IDs, alias merging, confirmed/watchlist/duplicate/rejected buckets, capacity totals, rich-field propagation, and source-to-final continuity.
+4. Report reflection: reviewer checks the 15-chapter structure, project cards, developer/OEM depth, logistics, tariff comparison, source appendix, summary freshness, and absence of benchmark sections unless requested.
+
+Stage advancement rules:
+
+- A stage may advance only when `critical_blockers == 0`.
+- Score improvement alone is insufficient; the current stage must also meet the threshold in `review_gates.md`.
+- If a stage fails, the reviewer must write `data/renewable-market/{slug}-gap-tasks.json` with owner lane, missing artifact, required evidence method, and acceptance criterion.
+- The main agent reruns only the affected lanes, then reruns verification/review for that stage.
+
+Heavy Workflow outputs include all Standard outputs plus:
+
+- `data/renewable-market/{slug}-search-coverage.json`
+- `data/renewable-market/{slug}-source-audit.json`
+- `data/renewable-market/{slug}-reflection-review.json`
+- `data/renewable-market/{slug}-gap-tasks.json` when gaps remain
+- Optional `data/renewable-market/{slug}-run-status.json` for a JS scheduler or resumable harness
+
 ## Deep Workflow
 
 Use for strategic questions such as NEOM energy configuration, Saudi localization factory strategy, floating offshore wind strategy, market-entry M&A, or integrated energy pricing logic.
 
 Additional requirements:
 
+- Start from the Heavy Workflow topology unless the user explicitly chooses a smaller profile.
 - Multiple evidence-review loops.
 - Scenario comparison.
 - Assumptions register.
