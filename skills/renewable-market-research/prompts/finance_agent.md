@@ -32,6 +32,8 @@ Return or write machine-readable JSON with this shape:
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
 - Capture project-level tariff/PPA evidence, PPA tenor, currency/indexation, award date, sponsor, project finance status, MDB/ECA/policy-bank role, and public sponsor financial metrics where available.
 - Estimate IRR or project economics only when assumptions are explicit and sourced; otherwise mark as assumption or `not found`.
+- Keep policy, tariff, speech targets, tender prices, and PPA prices in separate evidence buckets. Do not merge them into one market-price narrative.
+- Tie finance findings to wind project bankability, procurement constraints, OEM eligibility, and payment/offtaker risk.
 
 ## Allowed Actions
 
@@ -41,6 +43,7 @@ Return or write machine-readable JSON with this shape:
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
 - Build a finance ecosystem table covering EPC financiers, Chinese banks, Sinosure/ECA, MDBs, and commercial lenders where evidence exists.
+- For each material tariff/PPA record, identify the related project, MW, sponsor, tender or PPA route, price source, confidence, and sales implication.
 
 ## Prohibited Actions
 

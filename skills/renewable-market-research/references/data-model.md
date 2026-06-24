@@ -45,7 +45,8 @@ During aggregation, every rich project field found in depth records must be prop
 - `turbineModel`, `turbineCount`, `hubHeightM`, `rotorDiameterM`, `bladeLengthM`;
 - `storageMWh`, coordinates, site area, technology route;
 - logistics route, jobs/local employment, biodiversity/bird protection, community/land impact;
-- key people and developer/deep-dive fields when project-specific.
+- key people and developer/deep-dive fields when project-specific;
+- procurement and sales-opportunity fields such as currentOemStatus, oemShortlist, procurementWindow, decisionMaker, procurementInfluencers, likelyTenderRoute, bankabilityConstraint, salesEntryPoint, and adjacentOpportunityImpact.
 
 Run `scripts/validate_market_integrity.py --depth-dir data/renewable-market/depth` before report writing. A `depthPropagationGaps` or `reportCardFieldGaps` result means the master JSON is not report-ready.
 
@@ -141,6 +142,21 @@ Run `scripts/validate_market_integrity.py --depth-dir data/renewable-market/dept
       "biodiversityBirdProtection": "unavailable",
       "communityLandImpact": "unavailable",
       "storageMWh": null,
+      "currentOemStatus": "awarded to Goldwind",
+      "oemShortlist": ["Goldwind"],
+      "procurementWindow": "closed",
+      "decisionMaker": "developer/SPV procurement team",
+      "procurementInfluencers": ["EPC", "lenders", "offtaker"],
+      "likelyTenderRoute": "awarded package",
+      "bankabilityConstraint": "MDB/owner technical acceptance",
+      "salesEntryPoint": "closed project; use as reference case for future owner pipeline",
+      "adjacentOpportunityImpact": [
+        {
+          "topic": "storage / solar / green hydrogen / ammonia / methanol / industrial offtake if relevant",
+          "impactOnWindOpportunity": "explain only when it changes PPA value, interconnection, procurement scope, OEM opportunity, or sales entry",
+          "sourceUrl": "https://..."
+        }
+      ],
       "financing": "ADB $95M, EBRD $74M, IFC $42M...",
       "sources": [
         {
@@ -237,7 +253,10 @@ Use `{slug}-pipeline-ledger.json` as the canonical registry for project identity
         "annualCO2ReductionTonnes": null,
         "jobsOrLocalEmployment": null,
         "biodiversityBirdProtection": "unavailable",
-        "communityLandImpact": "unavailable"
+        "communityLandImpact": "unavailable",
+        "currentOemStatus": "awarded / undecided / framework / unknown",
+        "procurementWindow": "closed / 2026-2027 / not found",
+        "salesEntryPoint": "project-specific route if relevant"
       },
       "mergedFromDepthRecords": [
         {"depthFile": "project-pipeline-layered.json", "recordIndex": 0},

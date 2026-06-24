@@ -75,6 +75,15 @@ RICH_PROJECT_FIELDS = [
     ),
     ("logisticsRoute", ("logisticsRoute", "logistics_route", "transportRoute", "transport_route")),
     ("keyPeople", ("keyPeople", "key_people", "personnel", "management")),
+    ("currentOemStatus", ("currentOemStatus", "current_oem_status", "oemStatus", "oem_status")),
+    ("oemShortlist", ("oemShortlist", "oem_shortlist", "shortlistedOems", "shortlisted_oems")),
+    ("procurementWindow", ("procurementWindow", "procurement_window", "decisionWindow", "decision_window")),
+    ("decisionMaker", ("decisionMaker", "decision_maker", "procurementDecisionMaker", "procurement_decision_maker")),
+    ("procurementInfluencers", ("procurementInfluencers", "procurement_influencers", "influencers")),
+    ("likelyTenderRoute", ("likelyTenderRoute", "likely_tender_route", "tenderRoute", "tender_route")),
+    ("bankabilityConstraint", ("bankabilityConstraint", "bankability_constraint")),
+    ("salesEntryPoint", ("salesEntryPoint", "sales_entry_point", "entryPoint", "entry_point")),
+    ("adjacentOpportunityImpact", ("adjacentOpportunityImpact", "adjacent_opportunity_impact")),
 ]
 REPORT_READY_PROJECT_FIELDS = [
     ("annualGenerationGWh", ("annualGenerationGWh", "annual_generation_gwh", "annualGeneration", "annual_generation")),

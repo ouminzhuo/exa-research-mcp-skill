@@ -204,6 +204,132 @@
         "null"
       ]
     },
+    "currentOemStatus": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "current_oem_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "oemShortlist": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "oem_shortlist": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "procurementWindow": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "procurement_window": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decisionMaker": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decision_maker": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "procurementInfluencers": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "procurement_influencers": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "likelyTenderRoute": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "likely_tender_route": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bankabilityConstraint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bankability_constraint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "salesEntryPoint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sales_entry_point": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "adjacentOpportunityImpact": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "adjacent_opportunity_impact": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
     "pipeline_bucket": {
       "enum": [
         "operational",

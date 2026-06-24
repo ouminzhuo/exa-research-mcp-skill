@@ -4,6 +4,8 @@
 
 Default target: 15 chapters or equivalent MD depth. Use the Lite Report for short delivery summaries; the Full Report should preserve the market, project, developer, equipment, logistics, policy, tariff, carbon, and conclusion depth needed for management review.
 
+Quality target: retain benchmark-style breadth while using the verified ledger to prevent overcounting. A stronger new report is not the one with the most project names; it is the one that preserves discovered breadth, assigns every project candidate to confirmed/watchlist/duplicate/rejected, ties participants to project roles, and turns the remaining confirmed opportunities into sales actions.
+
 Recommended sections:
 
 1. Executive summary and weekly update timestamp
@@ -23,6 +25,8 @@ Recommended sections:
 15. Conclusions, risks, sales implications, update plan, and source/confidence appendix
 
 Do not include a default `Regional benchmark comparison` section. Add a regional or peer-country benchmark only when the user explicitly asks for it.
+
+Do not promote storage, solar PV, hydrogen, ammonia, methanol, or industrial green-power topics into independent main lines unless they affect wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry. When included, explicitly state the wind-market implication.
 
 ## Executive Summary Timestamp
 
@@ -96,6 +100,7 @@ Each project card should include:
 - Mingyang/MySE opportunity or sales implication;
 - confidence, uncertainty, and critical-field verification note;
 - source references or evidence IDs.
+- procurement window, likely decision maker, influencers, tender route, current OEM status, shortlist clues, bankability constraint, and sales entry point when evidence supports them.
 
 Use compact grouping before cards:
 
@@ -118,14 +123,17 @@ Anchor developer deep dives should include:
 - China cooperation matrix and procurement/EPC/OEM ties;
 - project economics or IRR/return assumptions only when sourced or clearly marked as assumptions;
 - current operating status and recent updates.
+- project-linked procurement influence: which MW the developer controls, current OEM ties, EPC/finance constraints, likely tender timing, and the practical route to influence decisions.
 
 Chinese developer/entrant deep dives should include listed code, revenue/profit/margin when public, team/local presence, financing or Sinosure/policy-bank structures, and project-level role.
 
-Equipment supplier panorama should include as complete an OEM/supplier list as feasible for the market, not just a top-five table. Include turbine/platform specifications, hub height, rotor diameter, power class, climate/logistics suitability, product roadmap, relationship strength, and market-share trend from BNEF or other credible sources when available.
+Equipment supplier panorama should include as complete an OEM/supplier list as feasible for the market, not just a top-five table. Segment OEMs into awarded/supplied, framework-agreement, shortlisted or likely entrant, absent/displaced, and unknown. Include tied project MW, turbine/platform specifications, hub height, rotor diameter, power class, climate/logistics suitability, product roadmap, relationship strength, and market-share trend from BNEF or other credible sources when available.
 
 Logistics and installation should include route length, transit time, ports/rail/road/border crossings, component dimensions/weights, heavy-lift and crane suppliers, seasonal/weather limits, abnormal-load permits, and installation risks.
 
 Auction/PPA tariff comparison should be a standalone chapter when auctions or PPAs are material. Compare project names, award dates, tariff currency and units, PPA tenor, sponsor, capacity, indexation/FX risk if known, and confidence/source notes.
+
+The conclusion chapter must include a sales-action matrix with: target actor, project/portfolio, MW scale, decision timing, current OEM status, procurement route, relationship path, evidence confidence, and recommended next action. Avoid generic market-potential summaries.
 
 ## Report Format Requirements
 

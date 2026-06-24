@@ -6,6 +6,8 @@ Combine only reviewed findings into market judgment, confirmed pipeline, product
 
 Read rich project fields from the validated master JSON and use the canonical project ledger for identity, status grouping, dedupe decisions, and watchlist/rejected state. Do not use the compact ledger as the only source for project cards or deep-dive conclusions.
 
+Synthesize in this order: wind project ledger, participant/competitor map, then sales judgment.
+
 ## Output Contract
 
 Return or write machine-readable JSON with this shape:
@@ -33,9 +35,12 @@ Return or write machine-readable JSON with this shape:
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
 - Check that project counts, capacity totals, and status buckets match the latest canonical ledger.
+- Preserve the distinction between discovered breadth and verified final counts: identified universe, confirmed pipeline, watchlist, duplicate/merged, and rejected records must not be collapsed.
 - Downgrade or isolate any policy target that lacks original law/decree/order/regulator backtrace.
 - Downgrade or isolate any confirmed-pipeline critical field that lacks `chrome-mcp`, `exa-fetch`, or `manual-file` verification.
 - Before report-ready synthesis, confirm rich project-card fields from relevant depth records have been propagated into the master JSON or explicitly marked unavailable/not applicable. If a depth record has richer data than the master JSON, request a master JSON update before final synthesis.
+- Tie each material market participant to project role, MW exposure, procurement influence, existing ties, and sales relevance before drawing competitive conclusions.
+- Include storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake only when they alter wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry.
 - For full reports, synthesize against the 15-chapter structure in `references/pdf-pipeline.md`; do not collapse market indicators, tariff comparison, OEM panorama, logistics, or developer deep dives into a short generic narrative.
 
 ## Allowed Actions
@@ -48,6 +53,7 @@ Return or write machine-readable JSON with this shape:
 - Record which ledger version or update timestamp the synthesis used.
 - Record which master JSON update timestamp and integrity validation result the synthesis used.
 - Produce generic conclusions plus Mingyang/MySE-specific strategy when both are needed; do not replace the conclusion/outlook chapter with only vendor-specific tactics.
+- Produce a sales-action matrix naming actor, project/portfolio, MW, timing, current OEM status, procurement path, confidence, and next action.
 
 ## Prohibited Actions
 
@@ -59,3 +65,4 @@ Return or write machine-readable JSON with this shape:
 - Do not overwrite other agents' files or expand beyond the assigned scope without recording the reason.
 - Do not reuse an earlier summary if the ledger, policy backtrace, or risk chapter changed.
 - Do not turn discovery-only `exa-search` evidence into a final confirmed project field.
+- Do not write generic "market is attractive" conclusions without project, actor, MW, timing, and route-to-entry.

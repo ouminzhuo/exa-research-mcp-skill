@@ -15,6 +15,8 @@ User request
 
 The main session owns orchestration, schema, master JSON aggregation, deduplication, canonical project ledger, source-to-final continuity, report writing, and validation. Research workers own one narrow dimension and must not stream raw pages back into chat.
 
+For wind-market work, file mode should maximize search breadth while keeping final judgment narrow. Workers may discover many project-like records and adjacent opportunity facts, but the main session must classify them through the master JSON and ledger before any final count, MW total, participant ranking, or sales action is written.
+
 ## Tool Priority
 
 1. **Exa semantic search/fetch/deep search** when available.
@@ -77,6 +79,7 @@ Output file: data/renewable-market/depth/[dimension].json
 Write an array of records. Each record must include:
 - topic/project/company
 - key facts with numbers and dates when available
+- project or participant linkage when relevant: project name, MW, actor role, procurement influence, OEM/EPC/finance tie, and sales relevance
 - source title, url, publisher, accessedAt
 - sourceLanguage and collectionMethod
 - searchPass or searchPasses
@@ -85,6 +88,8 @@ Write an array of records. Each record must include:
 - confidence: high/medium/low
 - uncertainty: what is estimated or unavailable
 - notes/gaps
+
+If the assigned dimension finds storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake facts, record how the fact changes a wind project, portfolio, PPA/tariff, interconnection, procurement route, OEM opportunity, or sales entry. If there is no wind-market implication, mark it as adjacent context.
 
 Do not return raw search results in chat. After writing and validating JSON, reply only: DONE.
 Do not stop until mandatory search passes for the dimension are complete. Record remaining gaps instead of silently stopping.

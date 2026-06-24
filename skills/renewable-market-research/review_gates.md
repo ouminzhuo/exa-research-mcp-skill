@@ -104,17 +104,22 @@ Rules:
 - Business implications must support sales action, product-fit judgment, risk judgment, or executive decision-making.
 - Non-decision-useful information should move to appendix.
 - A fact is not important merely because it is interesting; it must affect market judgment, pipeline conversion, product fit, risk, timing, or account strategy.
+- Market participants must be tied to projects, MW exposure, role, procurement influence, relationship strength, or sales entry route. Generic company profiles do not pass.
+- Adjacent opportunities such as storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake pass only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry.
+- Sales recommendations must name actor, project or portfolio, MW scale, decision timing, current OEM status, procurement route, confidence, and next action.
 
 Pass criteria:
 
 - Each key finding has at least one implication category: `sales_action`, `product_fit`, `risk_judgment`, `executive_decision`, or `appendix_only`.
 - The final report contains a concrete next-action list.
+- The final report includes a participant-role matrix or equivalent structured section for owners/developers, OEMs, EPC/finance actors, and priority sales targets.
 
 Remediation:
 
 - Add implication text.
 - Move low-value information to appendix.
 - Remove narrative filler.
+- Convert generic participant descriptions into project-linked role and procurement-influence records.
 
 ## 5. Executive Gate
 

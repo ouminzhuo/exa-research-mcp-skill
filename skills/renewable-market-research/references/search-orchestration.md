@@ -41,6 +41,10 @@ Regional/peer-country benchmark is excluded by default. Add `--include-benchmark
 
 The standard plan includes depth lanes needed for the 15-chapter full report, including market key indicators/time series, auction/PPA tariff comparison, anchor developer deep dives, Chinese developer deep dives, OEM panorama, logistics/installation, grid, carbon/green hydrogen/CBAM, and source-to-final project pipeline evidence.
 
+For wind-market tasks, the search plan must preserve benchmark-style breadth while final reporting remains ledger-constrained. Broad discovery should surface the full project universe, market participants, OEM/EPC/finance actors, and adjacent opportunity signals. The final report should then separate confirmed pipeline, watchlist, duplicate/merged, rejected, official targets, and optimistic scenarios instead of treating all discovered records as confirmed capacity.
+
+Adjacent lanes for storage, solar PV, green hydrogen, ammonia, methanol, I-REC, CBAM, or industrial green-power demand should collect only the facts that affect wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry.
+
 Example:
 
 ```text

@@ -4,18 +4,21 @@
 
 ## Core Workflow Principles
 
-1. Separate collection, review, synthesis, and executive compression.
-2. Keep writer agents and reviewer agents separate.
-3. Store evidence in files before writing conclusions.
-4. Keep a rich master JSON between depth files and reports, then derive a compact canonical project ledger for identity, dedupe, status buckets, and watchlist/rejected decisions. Chapters must read rich fields from the master JSON and use the ledger only as the project-control registry.
-5. Never place unverified leads in the confirmed pipeline.
-6. Separate official plans, auction targets, installed capacity, confirmed project pipeline, and optimistic scenarios.
-7. Search in English plus the country's official/local language(s); record the language coverage in the search plan or `index.json`.
-8. Convert important facts into decision-useful implications.
-9. Mark assumptions explicitly and keep unsupported claims in `rejected_claims` or watchlists.
-10. Keep the default analysis focused on one target country; add peer-country comparisons only when the user explicitly requests a benchmark.
-11. Route all final conclusions through the Continuity, Evidence, and Contradiction gates before synthesis or executive compression.
-12. After downstream chapters change, rerun a summary/conclusion backpropagation pass so the executive section reflects the latest master JSON, ledger, and synthesis.
+1. Follow the hard order: wind first, ledger first, sales judgment last.
+2. Separate collection, review, synthesis, and executive compression.
+3. Keep writer agents and reviewer agents separate.
+4. Store evidence in files before writing conclusions.
+5. Keep a rich master JSON between depth files and reports, then derive a compact canonical project ledger for identity, dedupe, status buckets, and watchlist/rejected decisions. Chapters must read rich fields from the master JSON and use the ledger only as the project-control registry.
+6. Never place unverified leads in the confirmed pipeline.
+7. Separate official plans, auction targets, installed capacity, confirmed project pipeline, all-phase pipeline, watchlist, duplicate, and rejected records.
+8. Preserve broad discovery coverage, but make final capacity/project counts narrower through verified ledger buckets.
+9. Search in English plus the country's official/local language(s); record the language coverage in the search plan or `index.json`.
+10. Convert important facts into decision-useful implications.
+11. Mark assumptions explicitly and keep unsupported claims in `rejected_claims` or watchlists.
+12. Keep the default analysis focused on one target country; add peer-country comparisons only when the user explicitly requests a benchmark.
+13. Treat storage, solar PV, grid, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial offtake as adjacent opportunity context only when they affect wind project value, PPA/tariff economics, interconnection, procurement, or sales entry.
+14. Route all final conclusions through the Continuity, Evidence, and Contradiction gates before synthesis or executive compression.
+15. After downstream chapters change, rerun a summary/conclusion backpropagation pass so the executive section reflects the latest master JSON, ledger, and synthesis.
 
 ## Lite Workflow
 
@@ -66,6 +69,7 @@ Outputs:
 - Owner/developer/EPC/competitor map.
 - Anchor developer deep dives when material to the market, such as ACWA, Masdar, state entities, or dominant IPPs.
 - OEM/equipment supplier panorama, logistics/installation analysis, and auction/PPA tariff comparison.
+- Participant-role matrix tying every material owner, OEM, EPC, financier, and channel actor to project roles, MW exposure, procurement influence, relationship strength, and sales entry point.
 - Product-fit assessment for Mingyang/MySE solutions.
 - Sales-action plan.
 - Executive brief based only on conclusions that passed the Continuity, Evidence, and Contradiction gates.
@@ -101,5 +105,8 @@ Research collection can be broad. Final writing must be narrow:
 - Qualify uncertain facts.
 - Label assumptions.
 - Move interesting but non-decision-useful information to appendices.
+- Do not let adjacent-energy topics displace wind project pipeline, market participants, OEM competition, or procurement-window analysis.
+- Do not list participants as generic company profiles; tie each material company to projects, role, MW exposure, procurement influence, and sales relevance.
+- Sales conclusions must name the target actor, project or portfolio, MW scale, timing, procurement route, and recommended entry action.
 - Do not write claims that cannot pass the review gates.
 - Do not write or freeze executive summaries until the final master JSON, project ledger, policy backtrace, and synthesis are current.

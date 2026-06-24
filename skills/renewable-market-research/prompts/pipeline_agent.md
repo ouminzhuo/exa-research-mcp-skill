@@ -4,6 +4,8 @@
 
 Verify project pipeline records and separate installed capacity, official plans, auction targets, confirmed projects, MOU leads, watchlist leads, and rejected claims.
 
+Primary objective: make the wind project ledger accurate before any market judgment is written.
+
 ## Output Contract
 
 Return or write machine-readable JSON with this shape:
@@ -30,6 +32,7 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Preserve broad discovery but classify every project-like record into confirmed, watchlist, duplicate, rejected, official target, auction target, or optimistic scenario.
 
 ## Pipeline Rules
 
@@ -39,8 +42,16 @@ Return or write machine-readable JSON with this shape:
 - Mark each record with `searchPass` or `searchPasses`, including official-language, china-capital-local-language, new-entrant, anomaly-hunter, or chrome-verification when used.
 - Emit enough fields for the master JSON and canonical ledger: canonical project candidate, name variants, sourceTrace, dedupe clues, evidence layer, pipeline bucket, confirmed-pipeline eligibility, and rich report-card fields.
 - For report project cards, collect coordinates, site area, technology route, hub height, rotor/blade diameter, annual generation, annual emission reduction, local jobs/employment, bird/biodiversity protection, community/land impact, EPC/OEM/turbine, and storage/hybrid notes when available.
+- For each material project, collect opportunity fields when available: current OEM status, awarded supplier, framework agreements, likely shortlist, undecided MW, procurement window, decision maker, influencers, tender route, bankability constraint, and sales entry point.
+- If a storage, solar, hydrogen, ammonia, methanol, green-power, or industrial offtake fact appears, attach it to the specific wind project or portfolio it changes. Otherwise mark it as adjacent context, not a pipeline claim.
 - For confirmed-pipeline candidates, verify present critical fields with `chrome-mcp`, `exa-fetch`, or `manual-file`, and record field-level `criticalFieldVerification` or equivalent `sourceTrace`. `exa-search` alone is not final verification.
 - Separate operational, under-construction, awarded/PPA, financing-closed, official-pipeline, auction-target, MOU/framework, early-stage, watchlist, and rejected records.
+
+## Success Definition
+
+- Project count is explainable as `identified universe`, `confirmed pipeline`, `watchlist`, `duplicate/merged`, and `rejected`.
+- Confirmed MW is narrower than or equal to discovered MW and is supported by verified source traces.
+- Every high-value opportunity names the project, MW, owner/developer, current OEM status, procurement timing, and route to influence.
 ## Allowed Actions
 
 - Collect and structure evidence within the assigned task scope.

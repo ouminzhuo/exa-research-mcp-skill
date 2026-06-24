@@ -7,7 +7,7 @@ The workflow separates writers, reviewers, synthesizers, and executive compressi
 - Writer agents collect and structure evidence for a specific domain.
 - Reviewer agents challenge evidence quality and contradictions.
 - The main/orchestrator agent owns rich master JSON aggregation, the canonical project ledger, and source-to-final continuity.
-- Synthesis agents combine only reviewed findings, the latest validated master JSON, and the canonical ledger into decision-useful outputs.
+- Synthesis agents combine only reviewed findings, the latest validated master JSON, and the canonical ledger into decision-useful outputs in the order: wind project ledger, participant/competitor map, then sales judgment.
 - Executive agents compress reviewed conclusions into management-ready judgments only after the final backpropagation pass.
 
 ## Common Agent Output Contract
@@ -42,7 +42,7 @@ It must capture official/local-language names, Chinese translated names, SPV nam
 
 ### `owner_agent`
 
-Maps owners, developers, IPPs, EPC firms, state entities, utilities, and potential channel partners.
+Maps owners, developers, IPPs, EPC firms, state entities, utilities, and potential channel partners. It must tie material actors to projects, MW exposure, role, procurement influence, existing ties, and sales entry path.
 
 ### `grid_agent`
 
@@ -54,17 +54,17 @@ Analyzes financing structures, MDB participation, project-finance status, PPA ba
 
 ### `competitor_agent`
 
-Maps OEM, EPC, BESS, developer, and localization competitors, including installed fleet, awards, platform fit, and relationship strength.
+Maps OEM, EPC, BESS, developer, and localization competitors, including installed fleet, awards, platform fit, and relationship strength. It must segment competitors by awarded/supplied, framework agreement, likely entrant, absent/displaced, and unallocated-MW opportunity.
 
 ### `product_fit_agent`
 
-Evaluates Mingyang/MySE product fit against wind regime, terrain, grid, logistics, localization, turbine class, hybrid/storage demand, O&M, and bankability constraints.
+Evaluates Mingyang/MySE product fit against wind regime, terrain, grid, logistics, localization, turbine class, hybrid/storage demand, O&M, and bankability constraints. It must tie recommendations to specific projects, actors, MW, procurement windows, and entry routes.
 
 ## Reviewer Agent
 
 ### `skeptic_agent`
 
-Challenges writer outputs. It checks source strength, contradictions, duplicate project records, COD conflicts, status conflicts, phase confusion, and unjustified confidence levels. It cannot write final conclusions; it produces review decisions and required fixes.
+Challenges writer outputs. It checks source strength, contradictions, duplicate project records, COD conflicts, status conflicts, phase confusion, unjustified confidence levels, generic company profiles, adjacent-topic drift, and sales conclusions that lack actor/project/MW/timing/entry route. It cannot write final conclusions; it produces review decisions and required fixes.
 
 ## Synthesis Agent
 

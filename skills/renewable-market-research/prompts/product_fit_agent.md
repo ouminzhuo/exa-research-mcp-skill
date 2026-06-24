@@ -30,6 +30,7 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Evaluate product fit only after the project ledger and participant map are current. Tie every recommendation to a project, owner, OEM status, procurement window, grid/logistics constraint, or bankability requirement.
 
 ## Allowed Actions
 
@@ -38,6 +39,7 @@ Return or write machine-readable JSON with this shape:
 - Record assumptions explicitly when evidence is incomplete.
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
+- Build a target-action table with project/portfolio, MW, current OEM status, product-fit rationale, constraint, decision timing, relationship route, and recommended sales action.
 
 ## Prohibited Actions
 
@@ -46,4 +48,5 @@ Return or write machine-readable JSON with this shape:
 - Do not make final conclusions before the Evidence Gate and Contradiction Gate have been applied.
 - Do not use a single weak media source to support a high-confidence claim.
 - Do not introduce cross-country comparisons unless the user explicitly asks for a benchmark.
+- Do not turn the report into a generic storage, solar, or hydrogen opportunity scan; adjacent opportunities must support wind product fit or sales entry.
 - Do not overwrite other agents' files or expand beyond the assigned scope without recording the reason.

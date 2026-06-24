@@ -30,8 +30,10 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Enforce the operating order: wind first, ledger first, sales judgment last.
 - Maintain source-to-final continuity: depth records -> rich master JSON -> canonical project ledger -> synthesis -> final report.
 - Require official/local-language search plus English, and ensure required search passes are visible in depth records.
+- Preserve broad search coverage while forcing final project counts, MW totals, and opportunity claims through confirmed/watchlist/duplicate/rejected ledger buckets.
 
 ## Allowed Actions
 
@@ -41,7 +43,9 @@ Return or write machine-readable JSON with this shape:
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
 - Build or refresh the rich master JSON first, then derive or refresh the canonical project ledger before synthesis and final report writing.
+- Require a participant-role matrix before final writing: each material owner, developer, OEM, EPC, financier, and channel actor must be tied to project role, MW exposure, procurement influence, relationship strength, and sales relevance.
 - Require report writers to cross-read project depth records before writing cards or deep-dive chapters. If depth contains richer project-card fields than the master JSON, update the master JSON and rerun integrity validation first.
+- Keep storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial offtake subordinate to wind-market judgment; include them only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry.
 - Trigger a summary/conclusion backpropagation pass after downstream chapter, ledger, or synthesis updates.
 - Require `chrome-mcp`, `exa-fetch`, or `manual-file` verification for confirmed-pipeline critical fields before final report writing.
 
@@ -52,6 +56,8 @@ Return or write machine-readable JSON with this shape:
 - Do not make final conclusions before the Evidence Gate and Contradiction Gate have been applied.
 - Do not use a single weak media source to support a high-confidence claim.
 - Do not introduce cross-country comparisons unless the user explicitly asks for a benchmark.
+- Do not let adjacent-energy material displace wind project pipeline, market participants, OEM competition, or procurement-window analysis.
+- Do not accept generic company profiles in final deliverables unless the company is tied to specific projects, roles, MW exposure, procurement influence, or sales actions.
 - Do not overwrite other agents' files or expand beyond the assigned scope without recording the reason.
 - Do not let chapters maintain separate project pipeline tables that bypass the canonical ledger.
 - Do not let final reports use `{slug}-pipeline-ledger.json` as a substitute for the rich master JSON.

@@ -31,6 +31,7 @@ Return or write machine-readable JSON with this shape:
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
 - Build an OEM/supplier panorama as completely as the evidence allows, not only a top-five list. Capture turbine model, MW class, hub height, rotor/blade diameter, climate/logistics fit, localization position, product roadmap, and market-share trend from BNEF or other credible sources when available.
+- Segment competitors by market position: awarded/supplied, framework agreement, shortlisted or likely entrant, potential new entrant, absent/displaced, and unknown. Tie each OEM to project MW, owner/EPC relationship, procurement influence, and remaining unallocated MW.
 
 ## Allowed Actions
 
@@ -40,6 +41,7 @@ Return or write machine-readable JSON with this shape:
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
 - Mark unavailable specifications as `not found`; do not infer turbine dimensions or market share without sources.
+- Identify competitive white space: projects or portfolios with no confirmed OEM, weak incumbent ties, bankability constraints that favor/penalize Chinese OEMs, and windows where Mingyang/MySE could enter.
 
 ## Prohibited Actions
 

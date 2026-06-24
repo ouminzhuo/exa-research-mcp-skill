@@ -14,6 +14,14 @@ Research **any country + any renewable/new-energy technology** as an evidence-dr
 
 Use an effective-harnesses mindset: persist state to files, make progress resumable, validate outputs, and avoid returning large raw search payloads through chat.
 
+## Operating Principle
+
+**Wind first, ledger first, sales judgment last.**
+
+For wind-market tasks, first make the wind project ledger accurate, then map market participants around each project, and only then write market and sales judgments. Preserve broad discovery coverage from benchmark-style reports, but constrain final output with verified ledger status, deduplication, source traceability, and clear evidence buckets.
+
+Adjacent topics such as storage, solar PV, grid, green hydrogen, ammonia, methanol, I-REC, CBAM, and industrial green-power demand may enter the main report only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry point. Otherwise keep them as appendix/gap notes.
+
 ## Required Reading
 
 Load only the reference needed for the current step:
@@ -76,6 +84,7 @@ Choose the mode in `workflow.md` before collecting data:
    - anomaly-hunter (misspellings, transliterations, PDF/table/map-only mentions, renamed phases, and projects outside known patterns)
    - optional-single-country-benchmark (only if explicitly requested; keep default analysis on the target country, not another country comparison)
    - mingyang-entry-strategy (12/36/60 month actions across turbine, hybrid, EPC, O&M, local manufacturing)
+   - Keep wind as the primary object: storage, solar, hydrogen, ammonia, methanol, and industrial offtake dimensions should explain how they affect wind projects, not become standalone market reports.
 
 4. **Collect in file mode**
    - Prefer Exa semantic search/fetch/deep-search tools for broad discovery.
@@ -104,6 +113,7 @@ Choose the mode in `workflow.md` before collecting data:
    - For project pipeline, classify each project evidence layer as one of: `news-announcement`, `mou-framework`, `ppa-signed`, `financing-closed`, `construction-started`, `cod-operational`.
    - Policy targets, auction targets, tariff numbers, and capacity goals must include an original legal/regulator/auction backtrace or be downgraded with an uncertainty note.
    - For confirmed projects, verify these critical fields with `chrome-mcp`, `exa-fetch`, or `manual-file` before final writing when the field is present: project name/alias, capacity, status/evidence stage, owner/developer/SPV, location, COD/target COD, PPA, financing/investment, EPC/OEM/turbine, and construction start.
+   - Preserve both breadth and convergence: keep all discovered project candidates in confirmed/watchlist/duplicate/rejected buckets, but report confirmed capacity only from verified, deduplicated ledger records.
 
 7. **Generate reports**
    - Write `{slug}-report.md` for the full internal report.
@@ -117,6 +127,8 @@ Choose the mode in `workflow.md` before collecting data:
    - Report CSS should use Microsoft YaHei (`微软雅黑`, `Microsoft YaHei`) for Chinese text and Times New Roman for English/Latin text; tables should use fixed widths, explicit column alignment, and print CSS to avoid broken pipeline tables.
    - Render PDFs when the environment has a working HTML/PDF stack; otherwise deliver MD and HTML and explain the limitation. On Windows native, prefer PowerShell/Python steps over Bash or `make.sh`.
    - Full/lite reports must cite sources and include data-confidence notes.
+   - Market participants must be tied to projects and procurement influence. Do not list owners, OEMs, EPCs, financiers, or adjacent-energy actors unless their role, project link, competitive position, or sales relevance is stated.
+   - Sales judgment must answer who, which project, how many MW, decision timing, procurement route, current OEM status, and feasible entry point. Avoid generic "market is attractive" conclusions.
    - Write the executive summary and conclusion after all chapters, then run a backpropagation pass: compare every summary number, project count, risk, and recommendation against the latest canonical ledger and synthesis. If any downstream chapter changed, update the summary before release.
 
 8. **Validate and hand off**

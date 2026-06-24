@@ -30,6 +30,7 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Keep wind project delivery as the primary lens. Analyze storage, solar PV, grid reinforcement, SCADA/EMS, curtailment, and balancing only as they affect wind project interconnection, dispatch, PPA value, procurement scope, or sales entry.
 
 ## Allowed Actions
 
@@ -38,6 +39,7 @@ Return or write machine-readable JSON with this shape:
 - Record assumptions explicitly when evidence is incomplete.
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
+- Tie each grid/storage constraint to affected wind projects, substations/lines if known, MW at risk, mitigation route, and implication for OEM/EPC/BESS packaging.
 
 ## Prohibited Actions
 
