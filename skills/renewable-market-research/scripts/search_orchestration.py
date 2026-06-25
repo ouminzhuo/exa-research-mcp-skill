@@ -318,6 +318,527 @@ TOOL_LANES = [
     },
 ]
 
+MINIMUM_RECALL_ROUNDS = 5
+FRONTIER_STALL_ROUNDS = 2
+
+FRONTIER_ENTITY_TYPES = [
+    "project",
+    "developer",
+    "spv",
+    "oem",
+    "epc",
+    "finance",
+    "law_decree",
+    "offtaker",
+    "grid_entity",
+    "region",
+    "authority_source",
+    "adjacent_opportunity",
+    "supply_chain",
+    "logistics",
+    "local_manufacturing",
+    "macro_energy",
+]
+
+FRONTIER_SEARCH_STATUSES = [
+    "pending",
+    "searched",
+    "expanded",
+    "deferred",
+    "classified",
+]
+
+FRONTIER_CLASSIFICATIONS = [
+    "candidate",
+    "confirmed",
+    "watchlist",
+    "duplicate",
+    "rejected",
+    "unresolved",
+    "deferred",
+]
+
+HIGH_PRIORITY_FRONTIER_LEVELS = ["P0", "P1"]
+
+FRONTIER_PRIORITY_LEVELS = [
+    {
+        "id": "P0",
+        "label": "wind-project-commercial-core",
+        "includes": "Wind projects, developers, SPVs, capacity, status, OEM, EPC, PPA, and project finance.",
+        "expansionPolicy": "Auto-expand until searched, classified, or explicitly deferred with reason.",
+        "blocksVerificationMode": True,
+        "maxExpansionDepth": 99,
+    },
+    {
+        "id": "P1",
+        "label": "wind-policy-grid-revenue-context",
+        "includes": "Policy, tariff, grid, offtaker, decree, auction, and PPA context tied to wind.",
+        "expansionPolicy": "Auto-expand while linked to wind project value, bankability, grid access, or revenue.",
+        "blocksVerificationMode": True,
+        "maxExpansionDepth": 3,
+    },
+    {
+        "id": "P2",
+        "label": "wind-market-enablers",
+        "includes": "Supply chain, local manufacturing, logistics, and financial-institution background.",
+        "expansionPolicy": "One-hop expansion only unless promoted to P0/P1 by direct wind linkage.",
+        "blocksVerificationMode": False,
+        "maxExpansionDepth": 1,
+    },
+    {
+        "id": "P3",
+        "label": "adjacent-opportunity-conditional",
+        "includes": "BESS, solar hybrid, hydrogen, ammonia, methanol, carbon certificates, I-REC, CBAM, and industrial green-power demand.",
+        "expansionPolicy": "Expand only when the entry changes wind configuration, interconnection, PPA/tariff, offtake, procurement, or OEM opportunity.",
+        "blocksVerificationMode": False,
+        "maxExpansionDepth": 1,
+    },
+    {
+        "id": "P4",
+        "label": "macro-background-deferred",
+        "includes": "Broad power-sector, gas, coal, hydro, desalination, and macro-energy context without a wind opportunity link.",
+        "expansionPolicy": "Record as deferred background; do not expand and do not place in the report body by default.",
+        "blocksVerificationMode": False,
+        "maxExpansionDepth": 0,
+    },
+]
+
+FRONTIER_BOUNDARY_POLICY = {
+    "principle": "High recall is bounded high recall: discover broadly, but only wind-relevant frontier entries keep expanding.",
+    "highPriorityLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
+    "automaticExpansion": ["P0", "P1"],
+    "boundedExpansion": {"P2": "one-hop only", "P3": "one-hop only after explicit wind linkage"},
+    "defaultDeferred": ["P4"],
+    "promotionRule": "Promote P2/P3 entries to P0/P1 only when a source links them to wind project capacity/status, PPA/tariff, grid, offtake, procurement, OEM/EPC, or project finance.",
+    "reportRule": "P4 background and unlinked P3 adjacent topics stay out of the report body unless synthesis proves direct wind relevance.",
+}
+
+PRIORITY_MAX_EXPANSION_DEPTH = {
+    "P0": 99,
+    "P1": 3,
+    "P2": 1,
+    "P3": 1,
+    "P4": 0,
+}
+
+P0_ENTITY_TYPES = {"project", "developer", "spv", "oem", "epc"}
+P1_ENTITY_TYPES = {"law_decree", "offtaker", "grid_entity", "region", "authority_source"}
+P2_ENTITY_TYPES = {"finance", "supply_chain", "logistics", "local_manufacturing"}
+P3_ENTITY_TYPES = {"adjacent_opportunity"}
+P4_ENTITY_TYPES = {"macro_energy"}
+
+WIND_LINKAGE_TERMS = {
+    "wind",
+    "wind farm",
+    "wind power",
+    "wind project",
+    "wind turbine",
+    "turbine",
+    "ppa",
+    "epc",
+    "oem",
+    "cod",
+    "mw",
+    "gw",
+    "grid connection",
+    "interconnection",
+    "project finance",
+    "financial close",
+    "offtake",
+}
+
+ADJACENT_TERMS = {
+    "bess",
+    "battery",
+    "storage",
+    "solar",
+    "pv",
+    "hybrid",
+    "hydrogen",
+    "ammonia",
+    "methanol",
+    "i-rec",
+    "irec",
+    "cbam",
+    "carbon certificate",
+    "green power",
+}
+
+P2_TERMS = {
+    "supply chain",
+    "manufacturing",
+    "localization",
+    "localisation",
+    "factory",
+    "blade",
+    "tower",
+    "nacelle",
+    "logistics",
+    "transport",
+    "port",
+    "rail",
+    "crane",
+    "heavy lift",
+}
+
+P4_TERMS = {
+    "gas",
+    "coal",
+    "oil",
+    "thermal",
+    "hydro",
+    "desalination",
+    "water",
+    "macro",
+    "power sector",
+    "energy sector",
+}
+
+FRONTIER_ENTITY_CONTRACT = {
+    "requiredFields": [
+        "entity_id",
+        "name",
+        "aliases",
+        "entity_type",
+        "language",
+        "source_found",
+        "origin",
+        "country",
+        "search_priority",
+        "priority_level",
+        "wind_linkage",
+        "expansion_allowed",
+        "expansion_depth",
+        "max_expansion_depth",
+        "defer_reason",
+        "promote_reason",
+        "search_round",
+        "queries_generated",
+        "search_status",
+        "classification",
+        "parent_entity_ids",
+    ],
+    "entityTypes": FRONTIER_ENTITY_TYPES,
+    "searchStatuses": FRONTIER_SEARCH_STATUSES,
+    "classifications": FRONTIER_CLASSIFICATIONS,
+    "priorityLevels": FRONTIER_PRIORITY_LEVELS,
+    "highPriorityLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
+    "boundaryPolicy": FRONTIER_BOUNDARY_POLICY,
+    "notes": [
+        "Search entry names are not assumed complete at initialization.",
+        "Every discovered project, developer, SPV, OEM, EPC, lender, law/decree, offtaker, grid entity, region, authority source, and adjacent-opportunity signal is recorded unless it is a normalized duplicate.",
+        "P0/P1 entries expand automatically and block Verification Mode while pending; P2 is one-hop; P3 requires explicit wind linkage; P4 is deferred background by default.",
+    ],
+}
+
+FIXED_SEED_TEMPLATES = [
+    {
+        "id": "country-wind-project",
+        "entryType": "project",
+        "patterns": [
+            "{country} wind project",
+            "{country} wind farm",
+            "{country} wind power project",
+        ],
+    },
+    {
+        "id": "policy-commercial",
+        "entryType": "law_decree",
+        "patterns": [
+            "{country} renewable auction wind",
+            "{country} PPA wind",
+            "{country} wind energy investment agreement",
+            "{country} wind decree law order",
+        ],
+    },
+    {
+        "id": "market-actors",
+        "entryType": "developer",
+        "patterns": [
+            "{country} wind developer",
+            "{country} wind turbine supplier",
+            "{country} EPC wind",
+            "{country} IFI wind",
+        ],
+    },
+    {
+        "id": "grid-adjacent",
+        "entryType": "grid_entity",
+        "patterns": [
+            "{country} transmission wind",
+            "{country} grid connection wind",
+            "{country} wind BESS",
+        ],
+    },
+    {
+        "id": "chinese-language-generic",
+        "entryType": "authority_source",
+        "patterns": [
+            "{country_zh} wind project",
+            "{country_zh} wind PPA",
+            "{country_zh} wind presidential decree",
+            "{country_zh} wind Chinese EPC",
+            "{country_zh} wind Chinese OEM",
+        ],
+    },
+    {
+        "id": "local-language-generic",
+        "entryType": "authority_source",
+        "patterns": [
+            "{country} wind official language project",
+            "{country} wind local ministry",
+            "{country} wind local legal database",
+        ],
+    },
+]
+
+RECALL_ENTRY_CATEGORIES = [
+    {
+        "id": "project",
+        "purpose": "Start from generic country/technology project templates and expand with discovered project names.",
+        "minimumOutput": "candidate records or explicit no-find/gap note",
+    },
+    {
+        "id": "developer",
+        "purpose": "Expand developers discovered from project, authority-source, and portfolio results.",
+        "minimumOutput": "developer-project leads or explicit no-find/gap note",
+    },
+    {
+        "id": "oem",
+        "purpose": "Find turbine awards, shortlists, framework deals, and unallocated MW from discovered OEM names.",
+        "minimumOutput": "OEM/project or OEM-opportunity leads or explicit no-find/gap note",
+    },
+    {
+        "id": "epc",
+        "purpose": "Find EPC awards, construction roles, grid works, and logistics traces from discovered EPC names.",
+        "minimumOutput": "EPC/project leads or explicit no-find/gap note",
+    },
+    {
+        "id": "finance",
+        "purpose": "Find bankability, financial close, guarantees, and lender project lists from discovered finance entities.",
+        "minimumOutput": "finance/project leads or explicit no-find/gap note",
+    },
+    {
+        "id": "policy",
+        "purpose": "Find legal basis, auctions, PPAs, grid rules, and tariff authority from generic templates and discovered decree IDs.",
+        "minimumOutput": "policy/project or policy-target leads or explicit no-find/gap note",
+    },
+    {
+        "id": "local-language",
+        "purpose": "Catch ministry, regulator, legal, grid, and media records missed in English using local-language aliases.",
+        "minimumOutput": "local-language leads or explicit no-find/gap note",
+    },
+    {
+        "id": "chinese-language",
+        "purpose": "Catch Chinese EPC/OEM/developer/finance records and Chinese project aliases.",
+        "minimumOutput": "Chinese-language leads or explicit no-find/gap note",
+    },
+    {
+        "id": "adjacent-opportunity",
+        "purpose": "Capture adjacent facts only when they change wind value, grid/PPA, procurement, or OEM opportunity.",
+        "minimumOutput": "wind-relevant adjacent-opportunity leads or explicit no-find/gap note",
+    },
+]
+
+AUTHORITY_SOURCE_CATEGORIES = [
+    {
+        "id": "government-legal",
+        "examples": ["legal database", "energy ministry", "president office", "investment ministry", "PPP project database", "auction notice"],
+        "requiredTreatment": "attempt source enumeration and record no-find/gap if unavailable",
+    },
+    {
+        "id": "ifi-dfi",
+        "examples": ["ADB country project list", "AIIB project list", "EBRD project summary", "IFC disclosure", "MIGA guarantees", "World Bank project portal"],
+        "requiredTreatment": "attempt source enumeration and record no-find/gap if unavailable",
+    },
+    {
+        "id": "developer-portfolio",
+        "examples": ["developer portfolio pages", "project pages", "investor presentations"],
+        "requiredTreatment": "attempt source enumeration and record no-find/gap if unavailable",
+    },
+    {
+        "id": "oem-epc",
+        "examples": ["OEM project references", "EPC press releases", "construction award pages"],
+        "requiredTreatment": "attempt source enumeration and record no-find/gap if unavailable",
+    },
+    {
+        "id": "chinese-source",
+        "examples": ["Chinese EPC pages", "Chinese OEM pages", "Chinese finance and insurer notices"],
+        "requiredTreatment": "attempt source enumeration and record no-find/gap if unavailable",
+    },
+    {
+        "id": "local-language-source",
+        "examples": ["local ministry pages", "local media", "local regulator, grid, and legal pages"],
+        "requiredTreatment": "attempt source enumeration and record no-find/gap if unavailable",
+    },
+]
+
+RECALL_ROUNDS = [
+    {
+        "round": 1,
+        "name": "fixed-seed-template-search",
+        "goal": "Search generic country plus wind/project/PPA/auction/developer/OEM/EPC/IFI/grid/BESS templates.",
+        "outputs": ["seed_entities", "candidate_project_pool", "discovered_entries"],
+    },
+    {
+        "round": 2,
+        "name": "baseline-and-authority-enumeration",
+        "goal": "Search historical baseline entries and authority source categories.",
+        "outputs": ["search_frontier", "authority_sources", "discovered_entries"],
+    },
+    {
+        "round": 3,
+        "name": "entity-expansion-search",
+        "goal": "Search newly extracted projects, companies, SPVs, decree IDs, regions, and institutions from rounds 1-2.",
+        "outputs": ["search_frontier", "candidate_project_pool", "discovered_entries"],
+    },
+    {
+        "round": 4,
+        "name": "reverse-source-search",
+        "goal": "Reverse-search from OEM, EPC, IFI, Chinese-language, and local-language sources to find hidden projects.",
+        "outputs": ["source_trace", "authority_sources", "discovered_entries"],
+    },
+    {
+        "round": 5,
+        "name": "alias-anomaly-backtrace-search",
+        "goal": "Search aliases, anomalies, source backtraces, and remaining P0/P1 high-priority frontier entries.",
+        "outputs": ["search_frontier", "frontier_convergence", "contradiction_queue"],
+    },
+]
+
+FRONTIER_CONVERGENCE_POLICY = {
+    "minimumRecallRounds": MINIMUM_RECALL_ROUNDS,
+    "stallRoundsAfterMinimum": FRONTIER_STALL_ROUNDS,
+    "requiredBeforeVerification": [
+        "completedRecallRounds >= 5",
+        "all P0/P1 high-priority frontier entries are searched, classified, or explicitly deferred with reason",
+        "all baseline seed entities are classified",
+        "all authority source categories are attempted",
+        "two consecutive post-minimum expansion rounds produce zero new high-priority entries",
+    ],
+    "highPriorityLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
+    "boundedPriorityTreatment": {
+        "P2": "may remain deferred after one-hop treatment and does not block verification unless promoted",
+        "P3": "must show wind linkage before expansion and does not block verification unless promoted",
+        "P4": "deferred background; does not block verification or report generation",
+    },
+    "notAStopCondition": "The model feeling that enough sources were searched.",
+}
+
+LEDGER_STATUSES = [
+    "operational",
+    "financing_closed",
+    "under_construction",
+    "ppa_signed",
+    "decree_backed",
+    "mou_or_early_stage",
+    "watchlist",
+    "duplicate",
+    "rejected",
+    "unresolved",
+]
+
+WORKFLOW_PHASES = [
+    {
+        "id": "phase-0-initialize",
+        "name": "Initialize",
+        "output": "normalized scope, country, time window, target company, report mode",
+    },
+    {
+        "id": "phase-1-broad-recall",
+        "name": "Broad Recall",
+        "output": "candidate_project_pool.json",
+    },
+    {
+        "id": "phase-2-anchor-expansion",
+        "name": "Anchor Expansion",
+        "output": "developer_project_map.json",
+    },
+    {
+        "id": "phase-3-source-specific-verification",
+        "name": "Source-Specific Verification",
+        "output": "source_trace.json",
+    },
+    {
+        "id": "phase-4-ledger-build",
+        "name": "Ledger Build",
+        "output": "project_ledger JSON/CSV",
+    },
+    {
+        "id": "phase-5-reconciliation",
+        "name": "Reconciliation",
+        "output": "capacity_reconciliation.md and contradiction_queue.json",
+    },
+    {
+        "id": "phase-6-commercial-synthesis",
+        "name": "Commercial Synthesis",
+        "output": "participant map, OEM/EPC competition, finance/risk view, sales paths",
+    },
+    {
+        "id": "phase-7-report-generation",
+        "name": "Report Generation",
+        "output": "full report, executive brief, PDF when available",
+    },
+]
+
+SCHEDULER_GATES = {
+    "entity_extraction_gate": {
+        "rule": "Every search result must be scanned for project, developer, SPV, OEM, EPC, finance, law/decree, offtaker, grid, region, authority-source, supply-chain/logistics/local-manufacturing, adjacent-opportunity, and macro-energy entities.",
+        "writes": "discovered_entries.json",
+    },
+    "alias_expansion_gate": {
+        "rule": "Each material entity should receive English, local-language, Russian when relevant, Chinese, transliteration, SPV, and decree/order variants where discoverable.",
+        "writes": "search_frontier.json aliases",
+    },
+    "frontier_priority_gate": {
+        "rule": "Each frontier entry must be assigned P0/P1/P2/P3/P4 plus wind_linkage, expansion_allowed, expansion_depth, defer_reason, and promote_reason before scheduling another search.",
+        "priorityLevels": FRONTIER_PRIORITY_LEVELS,
+        "highPriorityLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
+    },
+    "wind_relevance_gate": {
+        "rule": "P3 adjacent entries expand only when they affect wind configuration, interconnection, PPA/tariff, offtake, procurement, OEM/EPC opportunity, or project finance; P4 macro background is deferred by default.",
+        "writes": "search_frontier.json defer_reason/promote_reason",
+    },
+    "expansion_depth_gate": {
+        "rule": "P0/P1 entries may continue until convergence; P2 and linked P3 entries are one-hop unless promoted; P4 entries do not expand.",
+        "maxExpansionDepth": PRIORITY_MAX_EXPANSION_DEPTH,
+    },
+    "frontier_expansion_gate": {
+        "rule": "Every new non-duplicate entity is recorded, but only entries allowed by frontier_priority_gate, wind_relevance_gate, and expansion_depth_gate are enqueued for a later search round.",
+        "writes": "search_frontier.json",
+    },
+    "historical_entry_retention_gate": {
+        "rule": "Baseline seed entities from prior reports must be searched or explicitly classified; they must not silently disappear.",
+        "allowedClassifications": ["confirmed", "watchlist", "duplicate", "rejected", "unresolved", "deferred"],
+    },
+    "authority_source_gate": {
+        "rule": "Government/legal, IFI/DFI, developer, OEM/EPC, Chinese, and local-language authority source categories must each be attempted or documented as unavailable.",
+        "requiredAuthorityCategories": [category["id"] for category in AUTHORITY_SOURCE_CATEGORIES],
+    },
+    "minimum_recall_round_gate": {
+        "rule": "Verification Mode cannot begin before at least five Recall Mode rounds are complete.",
+        "minimumRecallRounds": MINIMUM_RECALL_ROUNDS,
+    },
+    "frontier_exhaustion_gate": {
+        "rule": "After round five, continue recall until all P0/P1 frontier entries are searched/classified/deferred, all baseline seeds are classified, all authority categories are attempted, and two consecutive rounds produce zero new P0/P1 entries.",
+        "stallRoundsAfterMinimum": FRONTIER_STALL_ROUNDS,
+        "highPriorityLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
+    },
+    "verification_gate": {
+        "rule": "Ledger-admitted projects require sourceTrace, evidenceGrade, and field-level verification for present critical fields.",
+        "verifiedMethods": ["chrome-mcp", "exa-fetch", "manual-file"],
+    },
+    "capacity_sum_gate": {
+        "rule": "Capacity totals must be computed from project_ledger, not manually copied into report prose.",
+    },
+    "duplicate_gate": {
+        "rule": "Aliases and renamed phases must be merged or given explicit duplicate/rejected decisions.",
+    },
+    "opportunity_gate": {
+        "rule": "OEM opportunity tables may include only projects where OEM is TBD, unconfirmed, undisclosed, or non-final framework.",
+    },
+}
+
 INTENT_WEIGHTS = {
     "status": {"freshness": 0.45, "authority": 0.35, "keyword": 0.20},
     "news": {"freshness": 0.60, "authority": 0.25, "keyword": 0.15},
@@ -380,6 +901,332 @@ def required_passes_for_dimension(dimension_id: str) -> list[str]:
     return list(dict.fromkeys(passes))
 
 
+def render_seed_templates(
+    country: str,
+    technology: str,
+    official_languages: list[str],
+) -> list[dict[str, Any]]:
+    country_zh_placeholder = f"{country} Chinese-language"
+    context = {
+        "country": country,
+        "country_zh": country_zh_placeholder,
+        "technology": technology,
+        "official_languages": ", ".join(official_languages) if official_languages else "official language",
+    }
+    rendered = []
+    for template in FIXED_SEED_TEMPLATES:
+        item = dict(template)
+        item["queries"] = [pattern.format(**context) for pattern in template["patterns"]]
+        rendered.append(item)
+    return rendered
+
+
+def normalize_entity_key(value: str, entity_type: str) -> str:
+    text = value.lower().replace("’", "'").replace("`", "'").replace("ʻ", "'").replace("ʼ", "'")
+    text = re.sub(r"[^a-z0-9]+", "", text)
+    return f"{entity_type}:{text}"
+
+
+def expand_aliases(name: str) -> list[str]:
+    aliases = {name.strip()}
+    normalized_apostrophe = name.replace("’", "'").replace("`", "'").replace("ʻ", "'").replace("ʼ", "'")
+    aliases.add(normalized_apostrophe)
+    aliases.add(normalized_apostrophe.replace("'", ""))
+    aliases.add(normalized_apostrophe.replace("'", "’"))
+    return sorted(alias for alias in aliases if alias)
+
+
+def generate_entity_queries(name: str, entity_type: str, country: str, technology: str) -> list[str]:
+    if entity_type == "law_decree":
+        return [
+            f"{name} {country} {technology} decree",
+            f"{name} {country} renewable energy law",
+            f"site:lex.uz {name} {technology}",
+        ]
+    if entity_type == "finance":
+        return [
+            f"{name} {country} {technology} project finance",
+            f"{name} {country} wind project",
+            f"{name} {country} renewable energy investment",
+        ]
+    if entity_type in {"developer", "oem", "epc"}:
+        return [
+            f"{name} {country} {technology} project",
+            f"{name} {country} wind portfolio",
+            f"{name} {country} wind PPA EPC OEM",
+        ]
+    if entity_type in {"offtaker", "grid_entity"}:
+        return [
+            f"{name} {country} {technology} PPA grid connection",
+            f"{name} {country} wind offtake transmission interconnection",
+            f"{name} {country} renewable energy grid",
+        ]
+    if entity_type in {"supply_chain", "logistics", "local_manufacturing"}:
+        return [
+            f"{name} {country} {technology} supply chain logistics",
+            f"{name} {country} wind turbine local manufacturing",
+            f"{name} {country} wind EPC transport route",
+        ]
+    if entity_type == "adjacent_opportunity":
+        return [
+            f"{name} {country} wind hybrid PPA grid",
+            f"{name} {country} wind BESS offtake procurement",
+            f"{name} {country} renewable energy wind opportunity",
+        ]
+    if entity_type == "macro_energy":
+        return [
+            f"{name} {country} wind market impact",
+            f"{name} {country} renewable energy wind relevance",
+        ]
+    return [
+        f"{name} {country} {technology} project",
+        f"{name} wind project PPA {country}",
+        f"{name} {country} MW {technology}",
+    ]
+
+
+def has_any_term(text: str, terms: set[str]) -> bool:
+    lowered = text.lower()
+    return any(term in lowered for term in terms)
+
+
+def detect_wind_linkage(name: str, entity_type: str, context_text: str) -> str:
+    context = f"{name} {context_text}".lower()
+    negative_wind_linkage = bool(
+        re.search(r"\b(?:without|no|not|unrelated to)\b.{0,60}\bwind\b", context)
+    )
+    has_wind_term = has_any_term(context, WIND_LINKAGE_TERMS)
+    has_capacity_signal = bool(re.search(r"\b\d+(?:\.\d+)?\s*(?:mw|gw)\b", context))
+    has_commercial_signal = any(term in context for term in ["ppa", "tariff", "auction", "offtake", "financial close"])
+    if entity_type in P3_ENTITY_TYPES and negative_wind_linkage:
+        return "none"
+    if entity_type in P0_ENTITY_TYPES and (has_wind_term or has_capacity_signal or has_commercial_signal):
+        return "direct"
+    if entity_type in P1_ENTITY_TYPES and (has_wind_term or has_commercial_signal):
+        return "contextual"
+    if entity_type in P2_ENTITY_TYPES and (has_wind_term or has_capacity_signal):
+        return "enabling"
+    if entity_type in P3_ENTITY_TYPES and (
+        has_wind_term
+        or any(term in context for term in ["hybrid", "grid", "ppa", "offtake", "curtailment", "procurement"])
+    ):
+        return "conditional"
+    return "none"
+
+
+def local_context_for_entity(text: str, name: str, window: int = 160) -> str:
+    lowered_text = text.lower()
+    lowered_name = name.lower()
+    index = lowered_text.find(lowered_name)
+    if index < 0:
+        index = lowered_text.find(lowered_name.replace("-", " "))
+    if index < 0:
+        return text[: window * 2]
+    start = max(0, index - window)
+    end = min(len(text), index + len(name) + window)
+    return text[start:end]
+
+
+def build_frontier_priority_fields(
+    name: str,
+    entity_type: str,
+    context_text: str,
+    search_round: int,
+    expansion_depth: int | None = None,
+) -> dict[str, Any]:
+    wind_linkage = detect_wind_linkage(name, entity_type, context_text)
+    if entity_type in P4_ENTITY_TYPES:
+        priority_level = "P4"
+    elif entity_type in P3_ENTITY_TYPES:
+        priority_level = "P3"
+    elif entity_type == "finance":
+        priority_level = "P0" if wind_linkage in {"direct", "contextual", "enabling"} else "P2"
+    elif entity_type in P0_ENTITY_TYPES:
+        priority_level = "P0" if wind_linkage in {"direct", "contextual", "enabling"} else "P2"
+    elif entity_type in P1_ENTITY_TYPES:
+        priority_level = "P1" if wind_linkage != "none" or entity_type in {"law_decree", "authority_source"} else "P2"
+    elif entity_type in P2_ENTITY_TYPES:
+        priority_level = "P2"
+    else:
+        priority_level = "P2"
+
+    depth = expansion_depth if expansion_depth is not None else max(search_round - 1, 0)
+    max_depth = PRIORITY_MAX_EXPANSION_DEPTH[priority_level]
+    expansion_allowed = priority_level in {"P0", "P1"} or (
+        priority_level == "P2" and depth < max_depth
+    ) or (
+        priority_level == "P3" and wind_linkage != "none" and depth < max_depth
+    )
+    search_priority = "high" if priority_level in HIGH_PRIORITY_FRONTIER_LEVELS else "medium"
+    if priority_level == "P3":
+        search_priority = "low" if expansion_allowed else "deferred"
+    if priority_level == "P4":
+        search_priority = "deferred"
+
+    defer_reason = ""
+    if not expansion_allowed:
+        if priority_level == "P3":
+            defer_reason = "Adjacent topic lacks an explicit wind-opportunity linkage."
+        elif priority_level == "P4":
+            defer_reason = "Macro-energy background is outside the wind-market report body by default."
+        elif depth >= max_depth:
+            defer_reason = f"{priority_level} expansion depth limit reached."
+
+    promote_reason = ""
+    if priority_level in {"P0", "P1"} and wind_linkage != "none":
+        promote_reason = f"{wind_linkage} wind linkage found in source context."
+    elif priority_level == "P3" and expansion_allowed:
+        promote_reason = "Adjacent topic is linked to wind configuration, grid, PPA, offtake, procurement, or OEM opportunity."
+
+    return {
+        "search_priority": search_priority,
+        "priority_level": priority_level,
+        "wind_linkage": wind_linkage,
+        "expansion_allowed": expansion_allowed,
+        "expansion_depth": depth,
+        "max_expansion_depth": max_depth,
+        "defer_reason": defer_reason,
+        "promote_reason": promote_reason,
+    }
+
+
+def build_runtime_seed_entities(
+    country: str,
+    technology: str,
+    known_projects: list[str],
+) -> list[dict[str, Any]]:
+    entities = []
+    for index, name in enumerate(known_projects, start=1):
+        priority_fields = build_frontier_priority_fields(
+            name,
+            "project",
+            f"{country} {technology} runtime known project seed",
+            search_round=1,
+            expansion_depth=0,
+        )
+        entities.append(
+            {
+                "entity_id": f"SEED-{index:04d}",
+                "name": name,
+                "aliases": expand_aliases(name),
+                "entity_type": "project",
+                "language": "unknown",
+                "source_found": ["--known-projects"],
+                "origin": "runtime-seed",
+                "country": country,
+                **priority_fields,
+                "search_round": 1,
+                "queries_generated": generate_entity_queries(name, "project", country, technology),
+                "search_status": "pending",
+                "classification": "candidate",
+                "parent_entity_ids": [],
+            }
+        )
+    return entities
+
+
+def classify_entity_name(name: str) -> str:
+    upper_name = name.upper()
+    lowered_name = name.lower()
+    finance_terms = {"ADB", "AIIB", "EBRD", "IFC", "MIGA", "JICA", "FMO", "DEG", "SCB", "SMBC", "SINOSURE"}
+    if re.fullmatch(r"(?:PP|PQ|UP)[-\s]?\d+", upper_name):
+        return "law_decree"
+    if upper_name in finance_terms:
+        return "finance"
+    if any(term in lowered_name for term in ADJACENT_TERMS):
+        return "adjacent_opportunity"
+    if any(term in lowered_name for term in ["grid", "transmission", "interconnection", "substation"]):
+        return "grid_entity"
+    if any(term in lowered_name for term in ["offtaker", "offtake", "buyer", "uzenergosotish"]):
+        return "offtaker"
+    if any(term in lowered_name for term in ["logistics", "transport", "port", "rail", "crane", "heavy lift"]):
+        return "logistics"
+    if any(term in lowered_name for term in ["manufacturing", "factory", "localization", "localisation"]):
+        return "local_manufacturing"
+    if any(term in lowered_name for term in P2_TERMS):
+        return "supply_chain"
+    if any(term in lowered_name for term in P4_TERMS):
+        return "macro_energy"
+    return "project"
+
+
+def extract_frontier_entities_from_text(
+    text: str,
+    country: str,
+    technology: str,
+    search_round: int,
+    source_found: str,
+) -> list[dict[str, Any]]:
+    stopwords = {
+        "Wind",
+        "Project",
+        "Power",
+        "Farm",
+        "PPA",
+        "EPC",
+        "COD",
+        "MW",
+        "GW",
+        "PP",
+        "PQ",
+        "UP",
+        "Uzbekistan",
+        "Green",
+    }
+    candidates: list[str] = []
+    candidates.extend(re.findall(r"\b(?:PP|PQ|UP)[-\s]?\d+\b", text))
+    phrase_candidates = re.findall(
+        r"\b[A-Z][A-Za-z0-9'’`ʻʼ-]{2,}(?:\s+[A-Z][A-Za-z0-9'’`ʻʼ-]{2,}){0,2}\b",
+        text,
+    )
+    candidates.extend(phrase_candidates)
+    for phrase in phrase_candidates:
+        for part in phrase.split():
+            if part not in stopwords and len(part) > 2:
+                candidates.append(part)
+    candidates.extend(re.findall(r"\b[A-Z]{2,10}\b", text))
+
+    seen: set[str] = set()
+    entities = []
+    for raw_name in candidates:
+        name = raw_name.strip()
+        if not name or name in stopwords:
+            continue
+        entity_type = classify_entity_name(name)
+        key = normalize_entity_key(name, entity_type)
+        if key in seen:
+            continue
+        seen.add(key)
+        entity_id = f"ENT-{len(entities) + 1:04d}"
+        display_name = name.replace(" ", "-") if entity_type == "law_decree" else name
+        local_context = local_context_for_entity(text, name)
+        priority_fields = build_frontier_priority_fields(
+            display_name,
+            entity_type,
+            local_context,
+            search_round=search_round,
+        )
+        entities.append(
+            {
+                "entity_id": entity_id,
+                "name": display_name,
+                "aliases": expand_aliases(name),
+                "entity_type": entity_type,
+                "language": "unknown",
+                "source_found": [source_found],
+                "origin": "extracted",
+                "country": country,
+                **priority_fields,
+                "search_round": search_round,
+                "queries_generated": generate_entity_queries(name, entity_type, country, technology),
+                "search_status": "pending",
+                "classification": "candidate",
+                "parent_entity_ids": [],
+            }
+        )
+    return entities
+
+
 def build_plan(
     country: str,
     technology: str,
@@ -393,6 +1240,7 @@ def build_plan(
     slug = output_slug or f"{slugify(country)}-{slugify(technology)}"
     official_languages = official_languages or []
     known_projects = known_projects or []
+    runtime_seed_entities = build_runtime_seed_entities(country, technology, known_projects)
     dimensions = []
     for dimension in DIMENSIONS:
         if dimension["id"] == "regional-benchmark" and not include_benchmark:
@@ -433,12 +1281,69 @@ def build_plan(
         "includeBenchmark": include_benchmark,
         "slug": slug,
         "toolLanes": TOOL_LANES,
+        "workflowPhases": WORKFLOW_PHASES,
+        "seedEntitiesPath": f"data/renewable-market/{slug}-seed_entities.json",
+        "searchFrontierPath": f"data/renewable-market/{slug}-search_frontier.json",
+        "discoveredEntriesPath": f"data/renewable-market/{slug}-discovered_entries.json",
+        "authoritySourceRegistryPath": f"data/renewable-market/{slug}-authority_sources.json",
+        "searchCoverageMatrixPath": f"data/renewable-market/{slug}-search_coverage_matrix.md",
+        "frontierConvergenceReportPath": f"data/renewable-market/{slug}-frontier_convergence.json",
+        "recallMode": {
+            "minimumRecallRounds": MINIMUM_RECALL_ROUNDS,
+            "frontierStallRoundsAfterMinimum": FRONTIER_STALL_ROUNDS,
+            "candidatePool": f"data/renewable-market/{slug}-candidate_project_pool.json",
+            "entryCategories": RECALL_ENTRY_CATEGORIES,
+            "fixedSeedTemplates": render_seed_templates(country, technology, official_languages),
+            "runtimeSeedEntities": runtime_seed_entities,
+            "recallRounds": RECALL_ROUNDS,
+            "frontierEntityContract": FRONTIER_ENTITY_CONTRACT,
+            "frontierPriorityLevels": FRONTIER_PRIORITY_LEVELS,
+            "frontierBoundaryPolicy": FRONTIER_BOUNDARY_POLICY,
+            "highPriorityFrontierLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
+            "authoritySourceCategories": AUTHORITY_SOURCE_CATEGORIES,
+            "frontierConvergencePolicy": FRONTIER_CONVERGENCE_POLICY,
+            "admissionRule": (
+                "Record any lead with a project name plus at least one capacity, actor, location, "
+                "agreement, decree, news, financing, PPA/grid, OEM/EPC, or adjacent-opportunity clue."
+            ),
+            "doNotRejectDuringRecall": True,
+            "initialRunState": {
+                "completedRecallRounds": 0,
+                "canEnterVerificationMode": False,
+                "blockedBy": ["minimum_recall_round_gate"],
+                "blockingFrontierPriorityLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
+                "blockingFrontierStatuses": ["pending"],
+            },
+        },
+        "verificationMode": {
+            "sourceTrace": f"data/renewable-market/{slug}-source_trace.json",
+            "ledgerStatuses": LEDGER_STATUSES,
+            "verifiedMethods": ["chrome-mcp", "exa-fetch", "manual-file"],
+            "canEnterVerificationMode": {
+                "requires": FRONTIER_CONVERGENCE_POLICY["requiredBeforeVerification"],
+                "minimumRecallRounds": MINIMUM_RECALL_ROUNDS,
+            },
+            "rule": "Final reports are generated from the reconciled ledger and rich master JSON, not raw recall notes.",
+        },
+        "schedulerGates": SCHEDULER_GATES,
         "dimensions": dimensions,
         "outputs": {
             "index": "data/renewable-market/index.json",
+            "seedEntities": f"data/renewable-market/{slug}-seed_entities.json",
+            "searchFrontier": f"data/renewable-market/{slug}-search_frontier.json",
+            "discoveredEntries": f"data/renewable-market/{slug}-discovered_entries.json",
+            "authoritySourceRegistry": f"data/renewable-market/{slug}-authority_sources.json",
+            "candidateProjectPool": f"data/renewable-market/{slug}-candidate_project_pool.json",
+            "developerProjectMap": f"data/renewable-market/{slug}-developer_project_map.json",
+            "sourceTrace": f"data/renewable-market/{slug}-source_trace.json",
             "mainJson": f"data/renewable-market/{slug}.json",
+            "pipelineLedger": f"data/renewable-market/{slug}-pipeline-ledger.json",
             "projectsCsv": f"data/renewable-market/{slug}.csv",
             "timelineCsv": f"data/renewable-market/{slug}-project-timeline.csv",
+            "capacityReconciliationMd": f"data/renewable-market/{slug}-capacity_reconciliation.md",
+            "contradictionQueue": f"data/renewable-market/{slug}-contradiction_queue.json",
+            "searchCoverageMatrix": f"data/renewable-market/{slug}-search_coverage_matrix.md",
+            "frontierConvergenceReport": f"data/renewable-market/{slug}-frontier_convergence.json",
             "fullReportMd": f"data/renewable-market/{slug}-report.md",
             "liteReportMd": f"data/renewable-market/{slug}-lite.md",
             "fullReportPdf": f"data/renewable-market/{slug}-report.pdf",
@@ -683,6 +1588,19 @@ def main() -> int:
     validate_parser.add_argument("--depth-dir", default=Path("data/renewable-market/depth"), type=Path)
     validate_parser.add_argument("--output", type=Path)
 
+    extract_parser = subparsers.add_parser(
+        "extract-frontier",
+        help="Extract candidate frontier entities from a text fixture or extracted source text.",
+    )
+    extract_parser.add_argument("--country", required=True)
+    extract_parser.add_argument("--technology", required=True)
+    extract_parser.add_argument("--round", default=1, type=int)
+    extract_parser.add_argument("--source", default="manual-fixture")
+    extract_input = extract_parser.add_mutually_exclusive_group(required=True)
+    extract_input.add_argument("--text")
+    extract_input.add_argument("--input", type=Path)
+    extract_parser.add_argument("--output", type=Path)
+
     args = parser.parse_args()
     if args.command == "plan":
         data = build_plan(
@@ -700,6 +1618,23 @@ def main() -> int:
         data = validate_plan(args.plan, args.depth_dir)
         write_json(data, args.output)
         return 0 if data["overallStatus"] == "pass" else 1
+    if args.command == "extract-frontier":
+        text = args.text if args.text is not None else args.input.read_text(encoding="utf-8-sig")
+        data = {
+            "country": args.country,
+            "technology": args.technology,
+            "searchRound": args.round,
+            "sourceFound": args.source,
+            "entities": extract_frontier_entities_from_text(
+                text,
+                args.country,
+                args.technology,
+                args.round,
+                args.source,
+            ),
+        }
+        write_json(data, args.output)
+        return 0
     return 2
 
 

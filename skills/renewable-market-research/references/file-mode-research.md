@@ -5,7 +5,12 @@
 ```text
 User request
   -> main session decomposes dimensions and manages files
-  -> child/sidecar researchers collect evidence per dimension
+  -> seed_entities.json initializes fixed, baseline, and authority-source entries
+  -> search_frontier.json tracks pending, searched, expanded, deferred, and classified entries
+  -> child/sidecar researchers run high-recall frontier searches for at least five rounds
+  -> each search result is mined into discovered_entries.json
+  -> all project-like leads enter candidate_project_pool.json
+  -> source-specific workers verify and grade candidate fields
   -> each researcher writes JSON files, then replies DONE only
   -> main session merges JSON into a rich master JSON
   -> main session derives the canonical project ledger from the validated master JSON
@@ -15,7 +20,16 @@ User request
 
 The main session owns orchestration, schema, master JSON aggregation, deduplication, canonical project ledger, source-to-final continuity, report writing, and validation. Research workers own one narrow dimension and must not stream raw pages back into chat.
 
-For wind-market work, file mode should maximize search breadth while keeping final judgment narrow. Workers may discover many project-like records and adjacent opportunity facts, but the main session must classify them through the master JSON and ledger before any final count, MW total, participant ranking, or sales action is written.
+For wind-market work, file mode should maximize search breadth while keeping final judgment narrow. Workers may discover many project-like records and adjacent opportunity facts, but the main session must first preserve them in `candidate_project_pool.json`, then classify them through the master JSON and ledger before any final count, MW total, participant ranking, or sales action is written.
+
+## Two-Stage Search Discipline
+
+Use two modes instead of mixing discovery and verification:
+
+1. **Recall Mode**: search broadly by fixed templates, historical baseline entries, authority-source entries, and dynamically discovered project, developer, SPV, OEM, EPC, finance, policy/legal, region, local-language, Chinese-language, and adjacent-opportunity entries. Do not reject or delete early-stage, weak, duplicate, or contradictory leads during recall.
+2. **Verification Mode**: use source-specific workers to verify government/legal, IFI/finance, developer, OEM/EPC, local-language, and Chinese-language evidence. Merge aliases and classify every candidate into the ledger.
+
+Recall is allowed to be messy, but its frontier must be bounded. P0 wind project/commercial-core and P1 policy/grid/revenue entries expand automatically; P2 enablers get one-hop expansion; P3 adjacent topics expand only with explicit wind impact; P4 macro background is deferred. Ledger admission is not loose. Final reports may cite watchlist and unresolved candidates only as clearly labeled uncertainty or appendix material.
 
 ## Tool Priority
 
@@ -67,12 +81,36 @@ For a comprehensive country/technology task, use enough dimensions to cover stan
 | regional-benchmark | optional only when the user explicitly asks to compare neighboring markets | `Uzbekistan Kazakhstan wind market comparison` |
 | entry-strategy | OEM/system/developer/EPC/O&M/localization pathways | `Kazakhstan wind OEM localization manufacturing opportunities` |
 
+## Dynamic Frontier Split
+
+For a national wind-market run, assign workers or sequential lanes from `search_frontier.json`. Initial entries come from fixed seed templates, historical baseline seeds, and authority-source categories; later entries are extracted from search results.
+
+| Frontier source | Required output |
+|---|---|
+| fixed seed templates | generic country + wind/project/PPA/auction/developer/OEM/EPC/IFI/grid/BESS search results |
+| baseline seeds | every historical project, developer, SPV, OEM, EPC, finance, law/decree, region, grid/offtaker entry classified or deferred |
+| authority sources | government/legal, IFI/DFI, developer, OEM/EPC, Chinese, and local-language source pools attempted |
+| discovered entries | new project, company, SPV, law/decree, region, institution, supply-chain/logistics/local-manufacturing, macro-energy, and authority-source names recorded with P0-P4 priority |
+| adjacent opportunity | BESS, solar hybrid, hydrogen, I-REC, CBAM, and industrial offtake only when they change wind value, grid/PPA, procurement, or OEM opportunity |
+
+Each frontier source must output candidate/frontier records or an explicit no-find/gap note. All project-like records flow into `data/renewable-market/{slug}-candidate_project_pool.json`.
+
+Use this priority boundary before scheduling follow-up searches:
+
+| Priority | Meaning | Worker treatment |
+|---|---|---|
+| P0 | Wind project, developer, SPV, capacity, status, OEM, EPC, PPA, project finance | Search and expand until processed |
+| P1 | Policy, tariff, grid, offtaker, decree, auction, PPA context | Search and expand while linked to wind economics or delivery |
+| P2 | Supply chain, local manufacturing, logistics, finance background | One-hop only unless promoted by direct wind evidence |
+| P3 | Storage, solar, hydrogen, ammonia, methanol, carbon/I-REC/CBAM, industrial offtake | Expand only if the source states a wind opportunity impact |
+| P4 | Broad energy macro without wind linkage | Record as deferred background; do not expand |
+
 ## Child Agent Prompt Template
 
 Use only when the host allows child agents and the user has requested/authorized parallel research.
 
 ```text
-Task: Research [dimension] for [country] [technology].
+Task: Research [dimension or recall entry category] for [country] [technology].
 Tools: Prefer Exa semantic search/fetch/deep-search if available; fall back to browser/search.
 Output file: data/renewable-market/depth/[dimension].json
 
@@ -82,6 +120,9 @@ Write an array of records. Each record must include:
 - project or participant linkage when relevant: project name, MW, actor role, procurement influence, OEM/EPC/finance tie, and sales relevance
 - source title, url, publisher, accessedAt
 - sourceLanguage and collectionMethod
+- recallEntryCategory when the record came from a Recall Mode entry point
+- frontierEntityId when the record came from `search_frontier.json`
+- priority_level, wind_linkage, expansion_allowed, defer_reason, and promote_reason when the record creates or updates a frontier entry
 - searchPass or searchPasses
 - sourceTrace note explaining how this record should map into the canonical ledger or policy/legal backtrace
 - criticalFieldVerification for confirmed-pipeline fields verified by Chrome MCP or original-file fetch
@@ -90,6 +131,10 @@ Write an array of records. Each record must include:
 - notes/gaps
 
 If the assigned dimension finds storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake facts, record how the fact changes a wind project, portfolio, PPA/tariff, interconnection, procurement route, OEM opportunity, or sales entry. If there is no wind-market implication, mark it as adjacent context.
+
+During Recall Mode, do not discard weak, early-stage, duplicate, contradictory, or unverified project-like leads. If the record has a project name plus at least one capacity, actor, location, agreement, decree, news, financing, PPA/grid, OEM/EPC, or adjacent-opportunity clue, preserve it for the candidate pool.
+
+Every search result must also be scanned for new frontier entries: project names, developers, SPVs, OEMs, EPCs, lenders, law/decree IDs, offtakers, grid entities, regions, authority-source pages, supply-chain/logistics/local-manufacturing signals, adjacent-opportunity signals, and macro-energy background. Write those to `discovered_entries.json` so the scheduler can dedupe, prioritize, and enqueue only entries allowed by the frontier boundary.
 
 Do not return raw search results in chat. After writing and validating JSON, reply only: DONE.
 Do not stop until mandatory search passes for the dimension are complete. Record remaining gaps instead of silently stopping.
@@ -100,22 +145,20 @@ Do not stop until mandatory search passes for the dimension are complete. Record
 Per dimension:
 
 ```text
-Round 1: English broad discovery with Exa semantic search.
-Round 2: source-specific search against official/regulator/owner/MDB/grid domains.
-Round 3: official/local-language search using the country's official languages and local scripts.
-Round 4: Chinese-capital + local-language project-name search using Chinese EPC/OEM/developer/financier terms.
-Round 5: new-entrant search for new SPVs, first-time developers, corporate offtakers, and recent awards.
-Round 6: anomaly-hunter search for transliterations, misspellings, renamed phases, PDF/table/map-only mentions.
-Round 7: source-backtrace search for any policy target, auction number, tariff, or capacity goal that lacks original law/decree/order/regulator evidence.
+Round 1: Fixed seed template search for country + wind/project/PPA/auction/developer/OEM/EPC/IFI/grid/BESS.
+Round 2: Historical baseline and authority-source enumeration.
+Round 3: Entity expansion search for newly extracted projects, companies, SPVs, decree IDs, regions, and institutions.
+Round 4: Reverse-source search from OEM, EPC, IFI, Chinese-language, and local-language sources.
+Round 5: Alias, anomaly, source-backtrace, and remaining P0/P1 high-priority frontier search.
 ```
 
-Do not stop before rounds 1-4 for project pipeline work, and do not stop before round 7 for policy target claims. After mandatory rounds, stop only when two additional gap-search rounds add neither new canonical project candidates nor evidence upgrades, or when the remaining gap is explicitly recorded and downgraded.
+Do not stop before five Recall Mode rounds are complete. After round five, continue until all P0/P1 frontier entries are searched, classified, or explicitly deferred; all baseline seed entities are classified; all authority source categories are attempted; and two consecutive expansion rounds add zero P0/P1 entries. P2/P3/P4 entries do not block convergence unless promoted by evidence that they affect wind capacity, project status, PPA/tariff, grid, offtake, procurement, OEM/EPC, or project finance.
 
-Record convergence in `index.json` with `rounds`, `newRecords`, `searchPasses`, `stoppedReason`, and `remainingGaps`.
+Record convergence in `index.json` and `{slug}-frontier_convergence.json` with `rounds`, `newRecords`, `newHighPriorityEntries`, `stalledRounds`, `searchPasses`, `stoppedReason`, and `remainingGaps`.
 
 ## Master JSON and Canonical Project Ledger
 
-Before report writing, merge all project-like records into the rich `{slug}.json` first. This master JSON is the report-ready data source and must preserve rich card fields from depth records, including annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, coordinates, site area, logistics, jobs/community/ESG, and personnel/developer data when found.
+Before report writing, merge all project-like records into `candidate_project_pool.json`, then into the rich `{slug}.json`. This master JSON is the report-ready data source and must preserve rich card fields from depth records, including annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, coordinates, site area, logistics, jobs/community/ESG, and personnel/developer data when found.
 
 After the master JSON is complete, derive `{slug}-pipeline-ledger.json` from it.
 
@@ -127,9 +170,11 @@ Each canonical project should include:
 - merged depth records and sourceTrace entries;
 - criticalFieldVerification for present key fields, using `chrome-mcp`, `exa-fetch`, or `manual-file`;
 - evidence layers such as `mou-framework`, `ppa-signed`, `financing-closed`, `construction-started`, or `cod-operational`;
+- ledger status as `operational`, `financing_closed`, `under_construction`, `ppa_signed`, `decree_backed`, `mou_or_early_stage`, `watchlist`, `duplicate`, `rejected`, or `unresolved`;
+- evidence grade;
 - confirmed-pipeline eligibility and exclusion reason when not eligible.
 
-No chapter may maintain an independent project list after aggregation. Chapters read rich report fields from the master JSON and use the ledger for canonical IDs, status buckets, dedupe decisions, and watchlist/rejected state. If a new chapter discovers a project candidate, alias, or richer field, it must update the master JSON first, refresh the ledger, then refresh synthesis and summary.
+No chapter may maintain an independent project list after aggregation. Chapters read rich report fields from the master JSON and use the ledger for canonical IDs, status buckets, dedupe decisions, and watchlist/rejected/unresolved state. If a new chapter discovers a project candidate, alias, or richer field, it must update the candidate pool and master JSON first, refresh the ledger, then refresh synthesis and summary.
 
 ## Critical Field Verification
 

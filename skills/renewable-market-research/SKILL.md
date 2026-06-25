@@ -16,9 +16,15 @@ Use an effective-harnesses mindset: persist state to files, make progress resuma
 
 ## Operating Principle
 
-**Wind first, ledger first, sales judgment last.**
+**Wind first, recall first, ledger strict, sales judgment last.**
 
-For wind-market tasks, first make the wind project ledger accurate, then map market participants around each project, and only then write market and sales judgments. Preserve broad discovery coverage from benchmark-style reports, but constrain final output with verified ledger status, deduplication, source traceability, and clear evidence buckets.
+For wind-market tasks, treat the report as a national wind market study, not a broad energy overview. The core line is project pipeline, market participants, OEM/EPC competition, policy/PPA/tariff context, and sales opportunity.
+
+Run research in two modes. First, run high-recall discovery with dynamic frontier expansion: search entry names must not be assumed complete at initialization. Start from fixed seed templates, historical baseline entries, and authority-source categories; then extract every discovered project, developer, SPV, OEM, EPC, lender, law/decree, offtaker, grid entity, region, authority source, and adjacent-opportunity signal into `search_frontier.json`. Search the newly discovered entries in later rounds. Do not reject early-stage items during recall. Any candidate with a project name plus at least one signal such as capacity, actor, location, agreement, decree, news, financing, OEM/EPC link, or grid/PPA clue must enter `candidate_project_pool.json`.
+
+Bound high recall with frontier priority, not with early deletion. Treat P0 as wind project/commercial core, P1 as wind policy/grid/revenue context, P2 as one-hop market enablers, P3 as adjacent topics that expand only with explicit wind impact, and P4 as deferred macro background. P0/P1 entries drive convergence; P2/P3/P4 entries are preserved but must not create infinite search drift unless promoted by wind-linked evidence.
+
+Second, run verification and reconciliation: merge duplicates, classify every candidate as `operational`, `financing_closed`, `under_construction`, `ppa_signed`, `decree_backed`, `mou_or_early_stage`, `watchlist`, `duplicate`, `rejected`, or `unresolved`, backtrace policies and tariffs, verify source traces, and calculate all capacity totals from `{slug}-pipeline-ledger.json`. Search should be broad; ledger admission should be strict. Final reports must be generated from the reconciled ledger and rich master JSON, not from raw notes.
 
 Adjacent topics such as storage, solar PV, grid, green hydrogen, ammonia, methanol, I-REC, CBAM, and industrial green-power demand may enter the main report only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry point. Otherwise keep them as appendix/gap notes.
 
@@ -87,7 +93,7 @@ Choose the mode in `workflow.md` before collecting data:
    - mingyang-entry-strategy (12/36/60 month actions across turbine, hybrid, EPC, O&M, local manufacturing)
    - Keep wind as the primary object: storage, solar, hydrogen, ammonia, methanol, and industrial offtake dimensions should explain how they affect wind projects, not become standalone market reports.
 
-4. **Collect in file mode**
+4. **Recall in file mode**
    - Prefer Exa semantic search/fetch/deep-search tools for broad discovery.
    - Use Chrome MCP as the first fallback/verification browser when Exa misses dynamic, PDF, table, map, ecommerce, or JavaScript-rendered evidence.
    - Fall back to general browser/search tools only after Exa and Chrome MCP are insufficient.
@@ -110,26 +116,35 @@ Choose the mode in `workflow.md` before collecting data:
    - If parallel agents are unavailable, perform the same dimensions sequentially and still write per-dimension JSON files.
    - Never paste large raw search results into the main response.
    - Workers should follow the generated search plan: use query variants, domain boosts, freshness hints, and minimum evidence gates per dimension.
+   - During Recall Mode, workers must not silently discard project-like leads. Write all candidate leads to `data/renewable-market/{slug}-candidate_project_pool.json` or to depth files that the main agent merges into that pool.
+   - Search entry coverage must include fixed seed templates, historical baseline entries, authority-source enumeration, and dynamically discovered project, developer, SPV, OEM, EPC, finance, policy/legal, region, local-language, Chinese-language, and adjacent-opportunity entries. Each lane must either produce candidate/frontier records or record a clear no-find/gap note.
+   - Apply frontier priority before scheduling follow-up searches: P0 wind project/commercial-core and P1 policy/grid/revenue entries expand automatically; P2 supply-chain/logistics/local-manufacturing/finance background is one-hop; P3 storage, solar, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial green-power traces expand only when they affect wind opportunities; P4 generic energy macro is deferred background.
+   - Recall Mode must run at least five rounds: fixed seed templates, baseline/authority enumeration, entity expansion, reverse-source search, then alias/anomaly/source-backtrace search. After round five, continue until the P0/P1 high-priority frontier is exhausted.
    - Every depth record should include `searchPass` or `searchPasses` such as `english-broad`, `official-language`, `china-capital-local-language`, `new-entrant`, `source-backtrace`, `anomaly-hunter`, or `chrome-verification`.
    - Treat Chrome MCP as an integrated verification lane, not only a debug check: when Exa finds a candidate official PDF/table/map/dynamic page, verify it in Chrome MCP when available and record the verification method.
-   - Key confirmed-pipeline fields must be verified by `chrome-mcp`, `exa-fetch`, or `manual-file`; `exa-search` discovery alone is not enough for final use.
+   - Key confirmed-pipeline fields must be verified later by `chrome-mcp`, `exa-fetch`, or `manual-file`; `exa-search` discovery alone is not enough for final ledger admission.
 
-5. **Detect convergence**
-   - Do not stop because of 3 quiet rounds until mandatory search passes are complete: English broad search, official/local-language search, source-specific search, Chinese-capital/local-name search, new-entrant search, anomaly hunt, and legal/source backtrace where relevant.
-   - After mandatory passes, stop only when additional rounds add neither new canonical project candidates nor evidence upgrades to existing projects, or when remaining gaps are explicitly recorded.
-   - Record convergence and gaps in `index.json`.
+5. **Detect frontier convergence**
+   - Do not stop before at least five Recall Mode rounds are complete.
+   - Do not stop because the model feels the search is sufficient. Stop only when all P0/P1 high-priority frontier entries are searched, classified, or explicitly deferred; all baseline seed entities are classified; all authority source categories are attempted; and two consecutive post-minimum rounds produce zero new P0/P1 entries.
+   - P2/P3/P4 entries do not block convergence unless promoted to P0/P1 by evidence that they affect wind capacity, project status, PPA/tariff, grid, offtake, procurement, OEM/EPC, or project finance.
+   - Record convergence, searched rounds, new entries, stalled rounds, deferred entries, and remaining gaps in `index.json` and `{slug}-frontier_convergence.json`.
 
-6. **Aggregate data**
-   - Split aggregation into two required passes. First, merge all depth files into the full `{slug}.json` using the rich schema in `references/data-model.md`; preserve project-card fields such as coordinates, site area, annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, logistics, community impact, and personnel/developer data when found.
+6. **Verify, reconcile, and aggregate data**
+   - Treat `candidate_project_pool.json` as the required recall artifact. Every candidate must be carried forward into a ledger treatment such as confirmed, watchlist, duplicate, rejected, or unresolved; never make old leads disappear without a classification.
+   - Build source-specific verification artifacts such as `{slug}-source_trace.json`.
+   - Split aggregation into two required passes. First, merge all depth files and candidate records into the full `{slug}.json` using the rich schema in `references/data-model.md`; preserve project-card fields such as coordinates, site area, annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, logistics, community impact, and personnel/developer data when found.
    - Validate the full `{slug}.json` before deriving downstream files. If a rich field exists in a depth file but is absent from the matching main JSON project, update the main JSON or mark the field explicitly as `not found`, `unavailable`, or `not applicable` with a gap note.
    - Build `{slug}-pipeline-ledger.json` from the validated main JSON, not directly as a replacement for it. The ledger owns canonical project IDs, local/English/Chinese aliases, dedupe keys, source traces, evidence layers, confirmed/watchlist/rejected state, and merge/reject decisions.
    - Treat `{slug}.json` as the rich report data source, `depth/*.json` as the required cross-read/fallback evidence layer, and `{slug}-pipeline-ledger.json` as the canonical dedupe/evidence registry. The ledger alone is not sufficient to write final project cards or deep-dive chapters.
    - Export project rows to `{slug}.csv`; use `scripts/export_projects_csv.py` when convenient.
    - Deduplicate by canonical name, local-language aliases, translated names, location, sponsor/SPV, capacity, coordinates if available, phase boundaries, and source URL. Same-name/different-source records must be merged or explicitly rejected/watchlisted.
    - For project pipeline, classify each project evidence layer as one of: `news-announcement`, `mou-framework`, `ppa-signed`, `financing-closed`, `construction-started`, `cod-operational`.
+   - For ledger status, classify every candidate as exactly one of: `operational`, `financing_closed`, `under_construction`, `ppa_signed`, `decree_backed`, `mou_or_early_stage`, `watchlist`, `duplicate`, `rejected`, or `unresolved`.
    - Policy targets, auction targets, tariff numbers, and capacity goals must include an original legal/regulator/auction backtrace or be downgraded with an uncertainty note.
    - For confirmed projects, verify these critical fields with `chrome-mcp`, `exa-fetch`, or `manual-file` before final writing when the field is present: project name/alias, capacity, status/evidence stage, owner/developer/SPV, location, COD/target COD, PPA, financing/investment, EPC/OEM/turbine, and construction start.
-   - Preserve both breadth and convergence: keep all discovered project candidates in confirmed/watchlist/duplicate/rejected buckets, but report confirmed capacity only from verified, deduplicated ledger records.
+   - Preserve both breadth and convergence: keep all discovered project candidates in confirmed/watchlist/duplicate/rejected/unresolved buckets, but report confirmed capacity only from verified, deduplicated ledger records.
+   - Calculate capacity totals, status totals, undecided OEM opportunity MW, and sales opportunity tables from the ledger, not from narrative notes.
 
 7. **Generate reports**
    - Write `{slug}-report.md` for the full internal report.
@@ -179,6 +194,17 @@ data/renewable-market/
 Also produce:
 
 - `data/renewable-market/{slug}-pipeline-ledger.json`
+- `data/renewable-market/{slug}-seed_entities.json`
+- `data/renewable-market/{slug}-search_frontier.json`
+- `data/renewable-market/{slug}-discovered_entries.json`
+- `data/renewable-market/{slug}-authority_sources.json`
+- `data/renewable-market/{slug}-candidate_project_pool.json`
+- `data/renewable-market/{slug}-developer_project_map.json`
+- `data/renewable-market/{slug}-source_trace.json`
+- `data/renewable-market/{slug}-search_coverage_matrix.md`
+- `data/renewable-market/{slug}-frontier_convergence.json`
+- `data/renewable-market/{slug}-capacity_reconciliation.md`
+- `data/renewable-market/{slug}-contradiction_queue.json`
 - `data/renewable-market/{slug}-integrity.json`
 - `data/renewable-market/{slug}-source-audit.json` in Heavy Workflow
 - `data/renewable-market/{slug}-reflection-review.json` in Heavy Workflow

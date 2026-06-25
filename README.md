@@ -77,6 +77,48 @@
 - “调研沙特储能项目管道、融资和中国企业机会”
 - “更新越南光伏市场数据，基于已有 JSON 做增量采集”
 
+#### 推荐使用方式：bounded dynamic frontier
+
+在 Codex/OpenClaw 中直接点名或触发 `$renewable-market-research`，并给出国家、技术、目标企业/读者、时间窗口和交付物。例如：
+
+```text
+使用 $renewable-market-research 调研乌兹别克斯坦风电市场，目标读者是明阳海外销售团队。
+采用文件模式，先生成 search plan，再做高召回动态 frontier，最后输出 project ledger、full report、lite report 和销售机会表。
+```
+
+当前版本的风电市场研究默认使用两段式：
+
+1. **Recall Mode**：先高召回，不假设项目名、开发商、SPV、OEM、EPC、融资方、法令和地区入口已经完整。搜索过程按 `seed -> search -> extract entities -> enqueue -> search again` 扩展 `search_frontier.json`，至少运行 5 轮。
+2. **Bounded Frontier**：高召回不是无限扩展。P0/P1 自动追踪并阻止过早进入 Verification；P2 只做 one-hop；P3 只有影响风电机会才展开；P4 泛能源宏观信息默认 deferred，不进正文。
+3. **Verification Mode**：只从 `candidate_project_pool.json` 和去重后的 `{slug}-pipeline-ledger.json` 入账，分类为 operational / financing_closed / under_construction / ppa_signed / decree_backed / mou_or_early_stage / watchlist / duplicate / rejected / unresolved。
+
+如果只想先生成调度契约，可以运行：
+
+```powershell
+python .\skills\renewable-market-research\scripts\search_orchestration.py plan `
+  --country Uzbekistan `
+  --technology wind `
+  --audience "Mingyang OEM commercial entry" `
+  --official-languages "Uzbek,Russian" `
+  --known-projects "Zarafshan,Bash,Dzhankeldy,Nukus,Karatau,Sho'rkul,Nurota" `
+  --slug uzbekistan-wind `
+  --output .\data\renewable-market\uzbekistan-wind-search-plan.json
+```
+
+重点检查这些输出：
+
+- `data/renewable-market/{slug}-seed_entities.json`
+- `data/renewable-market/{slug}-search_frontier.json`
+- `data/renewable-market/{slug}-discovered_entries.json`
+- `data/renewable-market/{slug}-candidate_project_pool.json`
+- `data/renewable-market/{slug}-pipeline-ledger.json`
+- `data/renewable-market/{slug}-search_coverage_matrix.md`
+- `data/renewable-market/{slug}-frontier_convergence.json`
+- `data/renewable-market/{slug}-report.md`
+- `data/renewable-market/{slug}-lite.md`
+
+进入正式报告前，必须确认：Recall 已完成至少 5 轮；所有 P0/P1 frontier 已搜索、分类或明确 deferred；历史 baseline seed 没有静默消失；政府/法令、IFI、开发商、OEM/EPC、中文、本地语言权威来源都已尝试；连续两轮没有新增 P0/P1 高价值入口；容量汇总来自 ledger，而不是叙述笔记。
+
 ### `effective-harnesses`
 
 用于长时间运行的开发或研究任务管理。
