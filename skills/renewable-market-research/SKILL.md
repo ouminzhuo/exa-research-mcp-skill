@@ -53,7 +53,7 @@ Choose the mode in `workflow.md` before collecting data:
 
 - **Lite Workflow**: quick market checks using policy, pipeline, product-fit, skeptic, synthesis, and executive agents. Output a one-page market judgment, confirmed leads, risks, and next actions.
 - **Standard Workflow**: country-level reports using policy, pipeline, owner, grid, product-fit, finance, competitor, skeptic, synthesis, and executive agents. Output lite report, V4 full report, project ledger/cards, procurement-window and decision-chain tables, and an executive brief or action memo only when requested.
-- **Heavy Workflow**: default for benchmark-surpassing country wind-market reports. Use one main/orchestrator agent, eleven focused research workers, one independent verification agent, and one independent reflection/reviewer agent. Output all Standard deliverables plus source-audit, reflection-review, and gap-task artifacts. If fewer real agents are available, collapse lanes sequentially but keep the same files, gates, and review loops.
+- **Heavy Workflow**: default for V4 full country wind-market reports. Use the `v4-heavy-chapter-agent` profile: at least 15 logical agents and a target topology of 20 roles covering chapter workers, one independent verification agent, and one independent reflection/reviewer. Output all Standard deliverables plus source-audit, chapter-verification, reflection-review, and gap-task artifacts. If fewer real agents are available, collapse lanes sequentially but keep the same roles, files, gates, and review loops.
 - **Deep Workflow**: strategic questions requiring multiple review loops, scenario comparison, assumptions register, evidence archive, and human review gates.
 
 ## Standard Workflow
@@ -101,23 +101,10 @@ Choose the mode in `workflow.md` before collecting data:
    - Prefer Exa semantic search/fetch/deep-search tools for broad discovery.
    - Use Chrome MCP as the first fallback/verification browser when Exa misses dynamic, PDF, table, map, ecommerce, or JavaScript-rendered evidence.
    - Fall back to general browser/search tools only after Exa and Chrome MCP are insufficient.
-   - For Heavy Workflow, use this 14-agent topology when the host supports parallel or delegated agents:
-     - Agent 0 `main_orchestrator_integrator`: owns run state, task split, depth merge, rich master JSON, canonical ledger, report writing, and final handoff.
-     - Agent 1 `market_indicators_worker`: demand/load gap, generation, installed capacity, imports/exports, latest monthly/quarterly data, and time-series indicators.
-     - Agent 2 `pipeline_worker`: project pipeline, auctions, PPA status, COD, project aliases, and confirmed/watchlist/duplicate/rejected candidates.
-     - Agent 3 `owner_developer_worker`: owners, developers, state entities, IPPs, SPVs, partner networks, key people, and procurement influence.
-     - Agent 4 `china_capital_new_entrant_worker`: Chinese capital traces, Chinese/local project names, new entrants, first-time SPVs, and local-language discovery.
-     - Agent 5 `oem_competitor_worker`: OEM awards, framework agreements, turbine models/specs, shortlist clues, absent/displaced competitors, and unallocated MW.
-     - Agent 6 `epc_logistics_localization_worker`: EPC, O&M, routes, port/rail/road constraints, heavy-lift/crane firms, localization, and component transport.
-     - Agent 7 `policy_law_tariff_worker`: policy targets, decrees, regulator orders, auction rules, PPA/FIT/tariff history, and legal/source backtrace.
-     - Agent 8 `finance_bankability_worker`: MDB/DFI finance, guarantees, PPA bankability, FX/indexation, project finance, and sponsor financials.
-     - Agent 9 `grid_storage_worker`: transmission, substations, grid-code, curtailment, balancing, storage, and interconnection constraints affecting wind.
-     - Agent 10 `adjacent_opportunity_worker`: solar, BESS, hydrogen, ammonia, methanol, green-power demand, I-REC, CBAM, and industrial offtake only where they affect wind opportunity.
-     - Agent 11 `product_fit_sales_worker`: Mingyang/MySE factual fit, entry windows, priority accounts, procurement routes, decision-chain clues, relevance rationale, and optional sales-action hypotheses for separate briefs.
-     - Agent 12 `verification_agent`: independently verifies critical fields through Chrome MCP, Exa fetch, or original files and writes source-audit artifacts.
-     - Agent 13 `reflection_reviewer`: scores coverage, ledger integrity, participant linkage, report structure, citation audit, and benchmark absorption; writes gap tasks.
-   - When host policy and user request allow parallel agents, assign each dimension to a child agent that writes JSON under `depth/` and replies only `DONE`.
-   - If parallel agents are unavailable, perform the same dimensions sequentially and still write per-dimension JSON files.
+   - For V4 full reports, use the `v4-heavy-chapter-agent` topology from `workflow.md`, `agent_roles.md`, and the generated search plan. It has at least 15 logical agents and targets 20 roles: main integrator, chapter workers for Chapters 0 and 2-16, delayed Chapter 1 summary worker, independent `verification_agent`, and independent `reflection_reviewer`.
+   - Critical chapters require work/verification separation before final release: Chapters 1, 3, 4, 5, 6, 9, 13, 14, and 16.
+   - When host policy and user request allow parallel agents, assign each role or dimension to a child agent that writes its assigned file artifact and replies only `DONE`.
+   - If parallel agents are unavailable, perform the same roles sequentially, record `agentMode=collapsed-sequential`, and still write per-role or per-dimension JSON/Markdown artifacts.
    - Never paste large raw search results into the main response.
    - Workers should follow the generated search plan: use query variants, domain boosts, freshness hints, and minimum evidence gates per dimension.
    - During Recall Mode, workers must not silently discard project-like leads. Write all candidate leads to `data/renewable-market/{slug}-candidate_project_pool.json` or to depth files that the main agent merges into that pool.
@@ -221,12 +208,16 @@ Also produce:
 - `data/renewable-market/{slug}-evidence_table.json`
 - `data/renewable-market/{slug}-risk_matrix.json`
 - `data/renewable-market/{slug}-tracking_watchlist.json`
+- `data/renewable-market/{slug}-v4_agent_plan.json`
+- `data/renewable-market/report_chapters/{slug}-chapter-*.md`
+- `data/renewable-market/chapter_verification/{slug}-chapter-*-verification.json`
 - `data/renewable-market/{slug}-search_coverage_matrix.md`
 - `data/renewable-market/{slug}-frontier_convergence.json`
 - `data/renewable-market/{slug}-capacity_reconciliation.md`
 - `data/renewable-market/{slug}-contradiction_queue.json`
 - `data/renewable-market/{slug}-integrity.json`
 - `data/renewable-market/{slug}-source-audit.json` in Heavy Workflow
+- `data/renewable-market/chapter_verification/` artifacts for critical V4 chapters in Heavy Workflow
 - `data/renewable-market/{slug}-reflection-review.json` in Heavy Workflow
 - `data/renewable-market/{slug}-gap-tasks.json` in Heavy Workflow when gaps remain
 
@@ -301,7 +292,7 @@ Main agent responsibilities:
 - rerun summary/conclusion backpropagation after downstream section updates
 - run validations and final business judgment
 
-Heavy Workflow uses 14 logical execution roles: one main/orchestrator integrator, eleven research workers, one verification agent, and one reflection/reviewer agent. Workers may be real child agents when the host supports that pattern, or sequential lanes when it does not. The final aggregation, canonical ledger, synthesis, executive summary, and report writing remain single-owner tasks under the main agent.
+Heavy Workflow uses the V4 chapter-agent profile for full reports: at least 15 logical agents, with a target topology of 20 roles. Workers may be real child agents when the host supports that pattern, or sequential lanes when it does not. The final aggregation, canonical ledger, synthesis integration, executive summary refresh, and final report assembly remain single-owner tasks under the main agent. Critical chapters require a separate verification artifact before release.
 
 Worker agent responsibilities:
 - only the assigned research module

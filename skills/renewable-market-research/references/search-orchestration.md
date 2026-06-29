@@ -220,6 +220,8 @@ Keep these as hard gates for a JS scheduler or equivalent deterministic runner, 
 - `no_strategy_recommendation_gate`: full report prose cannot contain strategy-action language such as building a factory, must enter, recommended bid, binding an EPC, or investing resources.
 - `baseline_inheritance_gate`: all baseline/candidate projects must flow into confirmed, watchlist, duplicate, rejected, or unresolved outcomes.
 - `lite_from_full_gate`: lite report is extracted from the validated full-report artifacts, not generated directly from raw notes.
+- `v4_minimum_agent_topology_gate`: V4 full reports default to `v4-heavy-chapter-agent` with at least 15 logical agents and a target topology of 20 roles; collapsed sequential execution must be recorded if real child agents are unavailable.
+- `chapter_work_verification_gate`: every V4 chapter needs a writer owner and reviewer pass; Chapters 1, 3, 4, 5, 6, 9, 13, 14, and 16 also need an independent verification artifact before release.
 
 ## V4 Full Report Generation Pipeline
 
@@ -239,6 +241,17 @@ Do not let the writer jump directly from search notes to `{slug}-report.md`. The
 ```
 
 Current search strategy should remain high-recall but bounded: search broadly, write all leads into `candidate_project_pool`, then stop expansion when P0/P1 convergence rules pass. Do not add new open-ended search lanes to fix V4 report quality; the main bottleneck is now ledger admission, card completeness, evidence boundaries, and capacity reconciliation.
+
+## V4 Agent Profile
+
+The V4 full report has two schedules:
+
+- Artifact order: the 10-step generation pipeline above.
+- Role ownership: `v4-heavy-chapter-agent`, with at least 15 logical agents and a target topology of 20 roles.
+
+The generated plan must expose `v4FullReportAgentProfile`, `v4AgentTopology`, `v4ChapterVerificationPolicy`, and `v4ChapterAgentPlan`. Use the plan to assign chapter writers, the delayed Chapter 1 summary worker, the independent `verification_agent`, and the independent `reflection_reviewer`.
+
+Critical chapters requiring work/verification separation are 1, 3, 4, 5, 6, 9, 13, 14, and 16. All chapters require reviewer pass; critical chapters also require a separate verification artifact in `data/renewable-market/chapter_verification/`.
 
 ## Coverage Validation
 

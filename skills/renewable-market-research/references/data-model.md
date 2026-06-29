@@ -64,6 +64,12 @@ candidate_project_pool
 
 Do not let an agent write `{slug}-report.md` directly from notes or depth files. The report writer reads the gate artifacts and expresses the current market status; it does not become the database.
 
+For V4 full reports, also generate or maintain these agent-control artifacts:
+
+- `{slug}-v4_agent_plan.json`: copied or distilled from the generated plan's `v4FullReportAgentProfile`, `v4AgentTopology`, `v4ChapterVerificationPolicy`, and `v4ChapterAgentPlan`.
+- `report_chapters/{slug}-chapter-*.md`: per-chapter writer outputs before final assembly.
+- `chapter_verification/{slug}-chapter-*-verification.json`: independent verification outputs for critical chapters 1, 3, 4, 5, 6, 9, 13, 14, and 16.
+
 The validator can enforce the V4 gates:
 
 ```text

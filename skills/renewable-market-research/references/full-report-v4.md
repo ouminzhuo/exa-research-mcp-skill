@@ -49,6 +49,32 @@ Hard rule: key project-card fields must not be deleted because the body text is 
 | 15 | Risk matrix and constraint conditions | What current market risks and constraints exist | risk matrix and constraint notes |
 | 16 | Data-source and conclusion-confidence appendix | Which evidence supports which conclusions | conclusion-evidence table, source table, pending-verification items |
 
+## Chapter-Agent Ownership
+
+V4 full reports default to `v4-heavy-chapter-agent`, not the 10-agent Standard profile. Use at least 15 logical agents and target 20 roles: main integrator, chapter workers, delayed Chapter 1 summary worker, independent verification agent, and independent reflection reviewer. If real subagents are unavailable, run the same roles sequentially and record `agentMode=collapsed-sequential`.
+
+| Chapter | Writer Role | Verification |
+|---|---|---|
+| 0 | `chapter_0_scope_evidence_worker` | reviewer pass |
+| 1 | `chapter_1_executive_summary_worker` | independent verification + reviewer pass after Chapters 2-16 |
+| 2 | `chapter_2_market_fundamentals_worker` | reviewer pass |
+| 3 | `chapter_3_policy_permitting_worker` | independent verification + reviewer pass |
+| 4 | `chapter_4_capacity_segmentation_worker` | independent verification + reviewer pass |
+| 5 | `chapter_5_project_ledger_worker` | independent verification + reviewer pass |
+| 6 | `chapter_6_project_cards_worker` | independent verification + reviewer pass |
+| 7 | `chapter_7_owner_decision_worker` | reviewer pass |
+| 8 | `chapter_8_wind_resource_turbine_fit_worker` | reviewer pass |
+| 9 | `chapter_9_oem_competition_worker` | independent verification + reviewer pass |
+| 10 | `chapter_10_epc_finance_om_supply_worker` | reviewer pass |
+| 11 | `chapter_11_localization_worker` | reviewer pass |
+| 12 | `chapter_12_grid_storage_worker` | reviewer pass |
+| 13 | `chapter_13_tariff_bankability_worker` | independent verification + reviewer pass |
+| 14 | `chapter_14_procurement_window_worker` | independent verification + reviewer pass |
+| 15 | `chapter_15_risk_matrix_worker` | reviewer pass |
+| 16 | `chapter_16_evidence_appendix_worker` | independent verification + reviewer pass |
+
+Critical chapter verification means the chapter writer cannot self-release the chapter. The verifier must check source-to-field continuity, capacity treatment, evidence confidence, pending-verification notes, and contradiction status before the main integrator assembles the full report.
+
 ## Chapter Requirements
 
 ### 0. Report Scope And Evidence Rules

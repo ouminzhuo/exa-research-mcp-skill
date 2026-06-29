@@ -34,8 +34,9 @@ Return or write machine-readable JSON with this shape:
 - Maintain source-to-final continuity: depth records -> rich master JSON -> canonical project ledger -> synthesis -> final report.
 - Require official/local-language search plus English, and ensure required search passes are visible in depth records.
 - Preserve broad search coverage while forcing final project counts, MW totals, and opportunity claims through confirmed/watchlist/duplicate/rejected ledger buckets.
-- Select Heavy Workflow by default when the user asks for a benchmark-surpassing country report, full wind-market assessment, project pipeline accuracy, market participant depth, OEM competition, or sales-entry strategy.
-- Treat Standard and Lite as reductions of Heavy Workflow. If fewer real agents are available, run Heavy lanes sequentially but preserve the same artifacts, ownership rules, and review gates.
+- Select Heavy Workflow by default when the user asks for a V4 full report, benchmark-surpassing country report, full wind-market assessment, project pipeline accuracy, market participant depth, OEM competition, procurement-window mapping, or sales-entry context.
+- For V4 full reports, use the generated `v4FullReportAgentProfile` and `v4ChapterAgentPlan`: at least 15 logical agents, target 20 roles, chapter workers for Chapters 0 and 2-16, delayed Chapter 1 summary worker, independent verification agent, and independent reflection reviewer.
+- Treat Standard and Lite as reductions of Heavy Workflow only when the user asks for speed or a smaller deliverable. If fewer real agents are available, run Heavy lanes sequentially, record `agentMode=collapsed-sequential`, and preserve the same artifacts, ownership rules, and review gates.
 - Trigger Reflection Gate review after search planning, evidence collection, ledger aggregation, and report drafting. Do not advance a stage based only on score improvement; require threshold pass and zero critical blockers.
 
 ## Allowed Actions
@@ -51,7 +52,8 @@ Return or write machine-readable JSON with this shape:
 - Keep storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial offtake subordinate to wind-market status; include them only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, bankability, or procurement-window facts.
 - Trigger a summary/conclusion backpropagation pass after downstream chapter, ledger, or synthesis updates.
 - Require `chrome-mcp`, `exa-fetch`, or `manual-file` verification for confirmed-pipeline critical fields before final report writing.
-- For Heavy Workflow, assign the 14 logical roles from `workflow.md` and `agent_roles.md`; record collapsed/sequential lanes when the host cannot spawn real child agents.
+- For Heavy Workflow, assign the V4 chapter-agent roles from `workflow.md`, `agent_roles.md`, and `scripts/search_orchestration.py plan`; do not fall back to the 10-agent Standard profile for a V4 full report unless the user explicitly asks.
+- Require writer/verifier separation for critical V4 chapters: 1, 3, 4, 5, 6, 9, 13, 14, and 16. The chapter writer may draft, but release requires a separate `verification_agent` artifact and reviewer pass.
 - Require the verification agent to write source-audit artifacts before the reviewer scores evidence, ledger, or report stages.
 - Require the reviewer to write gap tasks with owner lane, missing artifact, required evidence method, and acceptance criterion whenever a stage fails.
 - Require full-report writers to follow `references/full-report-v4.md` and keep recommendations out of the full report. If recommendations are needed, assign them to a separate executive/action brief.

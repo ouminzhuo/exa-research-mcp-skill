@@ -109,7 +109,7 @@ P0/P1 entries also require execution/evaluation separation before ledger admissi
 
 ## Child Agent Prompt Template
 
-Use only when the host allows child agents and the user has requested/authorized parallel research.
+For V4 full reports, use child agents whenever the host supports delegated or parallel agents. If the host cannot spawn real child agents, run the same role prompts as separate sequential lanes and record `agentMode=collapsed-sequential`. For Lite/Standard reductions, use child agents only when the scope warrants them or the user asks.
 
 ```text
 Task: Research [dimension or recall entry category] for [country] [technology].
@@ -207,8 +207,8 @@ Record the verification in `criticalFieldVerification`, `sourceTrace`, `sources`
 
 ## Safety Limits
 
-- Use file mode for all large evidence. Do not let 4-15 workers stream evidence back to the main chat.
-- Prefer 4-8 concurrent workers. Higher concurrency risks WebSocket slow-consumer errors in some hosts.
+- Use file mode for all large evidence. Do not let 15+ logical roles stream evidence back to the main chat.
+- Prefer 4-8 concurrent workers even when the logical role plan has 15+ agents. Queue additional chapter/research roles in batches to avoid WebSocket slow-consumer errors in some hosts.
 - Store raw extracts sparingly; store source URLs and concise factual notes instead.
 - If advanced Exa quota is exhausted, continue with basic search/fetch and Chrome MCP verification, then mark the limitation in `index.json`.
 - On Windows native, workers should write JSON with Python or PowerShell-safe file operations; do not depend on Bash utilities.

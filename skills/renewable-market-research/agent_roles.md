@@ -12,26 +12,34 @@ The workflow separates writers, reviewers, synthesizers, and executive compressi
 
 ## Heavy Execution Topology
 
-For benchmark-surpassing country wind-market reports, use Heavy Workflow unless the user requests a smaller run.
+For benchmark-surpassing V4 country wind-market reports, use Heavy Workflow unless the user requests a smaller run.
 
-Heavy Workflow uses 14 logical execution roles:
+Heavy Workflow uses the `v4-heavy-chapter-agent` profile by default: at least 15 logical agents and a target topology of 20 roles.
 
-1. `main_orchestrator_integrator`: assigns lanes, owns harness state, merges depth files, maintains the rich master JSON, derives the canonical ledger, runs validations, writes final reports, and refreshes summary/conclusion.
-2. `market_indicators_worker`: demand/load gap, generation, installed capacity, imports/exports, latest monthly/quarterly data, and time-series market indicators.
-3. `pipeline_worker`: project pipeline, auctions, PPA/COD/status, aliases, phase boundaries, and confirmed/watchlist/duplicate/rejected classification.
-4. `owner_developer_worker`: owners, developers, state entities, IPPs, SPVs, partner networks, key people, procurement influence, and local presence.
-5. `china_capital_new_entrant_worker`: Chinese capital, Chinese/local project names, first-time entrants, local-language blind spots, and anomaly candidates.
-6. `oem_competitor_worker`: OEM awards, turbine models/specs, product roadmaps, framework agreements, shortlist clues, absent/displaced competitors, and unallocated MW.
-7. `epc_logistics_localization_worker`: EPC, O&M, logistics routes, heavy-lift/crane firms, installation constraints, localization, and supply-chain bottlenecks.
-8. `policy_law_tariff_worker`: policy targets, decrees, legal IDs, regulator orders, auction rules, PPA/FIT/tariff history, and source backtrace.
-9. `finance_bankability_worker`: MDB/DFI finance, project finance, guarantees, FX/indexation, sponsor financials, IRR/ROE where supportable, and bankability constraints.
-10. `grid_storage_worker`: transmission, substations, grid-code, curtailment, balancing, storage, hybrid constraints, and interconnection risk.
-11. `adjacent_opportunity_worker`: solar, BESS, hydrogen, ammonia, methanol, green-power demand, I-REC, CBAM, and industrial offtake only where they alter wind value, PPA, grid, procurement, or sales entry.
-12. `product_fit_sales_worker`: Mingyang/MySE factual fit, priority accounts, procurement windows, current OEM status, decision-chain clues, relevance rationale, and optional sales-action hypotheses for separate briefs.
-13. `verification_agent`: independently verifies critical fields through Chrome MCP, Exa fetch, or original files and writes source-audit artifacts.
-14. `reflection_reviewer`: independently scores stage quality, identifies critical blockers, and writes executable gap tasks.
+1. `main_orchestrator_integrator`: assigns lanes, owns harness state, merges depth files, maintains the rich master JSON, derives the canonical ledger, runs validations, assembles final reports, and refreshes summary/conclusion.
+2. `chapter_0_scope_evidence_worker`: writes Chapter 0 scope, capacity definitions, stage definitions, opportunity definitions, and confidence rules.
+3. `chapter_2_market_fundamentals_worker`: writes Chapter 2 national power fundamentals, demand/load gap, generation, imports/exports, and market indicators.
+4. `chapter_3_policy_permitting_worker`: writes Chapter 3 policy, permitting, development flow, and PPA mechanism.
+5. `chapter_4_capacity_segmentation_worker`: writes Chapter 4 capacity segmentation from the ledger and capacity reconciliation.
+6. `chapter_5_project_ledger_worker`: writes Chapter 5 full project ledger from the canonical ledger and rich master JSON.
+7. `chapter_6_project_cards_worker`: writes Chapter 6 complete project cards from project-card JSON and depth cross-reads.
+8. `chapter_7_owner_decision_worker`: writes Chapter 7 developer, owner, SPV, and decision-right structure.
+9. `chapter_8_wind_resource_turbine_fit_worker`: writes Chapter 8 wind resource, geography, and turbine-fit inference.
+10. `chapter_9_oem_competition_worker`: writes Chapter 9 OEM competition, locked MW, shortlist clues, and unallocated OEM MW.
+11. `chapter_10_epc_finance_om_supply_worker`: writes Chapter 10 EPC, financiers, O&M, logistics, and supply-chain network.
+12. `chapter_11_localization_worker`: writes Chapter 11 localization and industrial policy status.
+13. `chapter_12_grid_storage_worker`: writes Chapter 12 grid, storage, interconnection, and curtailment constraints.
+14. `chapter_13_tariff_bankability_worker`: writes Chapter 13 tariff, project economics, and bankability status.
+15. `chapter_14_procurement_window_worker`: writes Chapter 14 procurement window, decision chain, and factual Mingyang/MySE relevance.
+16. `chapter_15_risk_matrix_worker`: writes Chapter 15 risk matrix and constraint conditions.
+17. `chapter_16_evidence_appendix_worker`: writes Chapter 16 source table, conclusion-confidence appendix, and pending-verification table.
+18. `chapter_1_executive_summary_worker`: writes Chapter 1 only after Chapters 2-16, capacity reconciliation, and no-strategy scan are current.
+19. `verification_agent`: independently verifies critical fields through Chrome MCP, Exa fetch, or original files and writes source-audit and chapter-verification artifacts.
+20. `reflection_reviewer`: independently scores stage and chapter quality, identifies critical blockers, and writes executable gap tasks.
 
-If the host cannot spawn 14 real agents, run the same lanes sequentially. Keep the file outputs and review gates identical; do not collapse the canonical ledger, verification, review, synthesis, and final report writing into worker outputs.
+If the host cannot spawn 20 real agents, run the same lanes sequentially and record `agentMode=collapsed-sequential`. Keep the file outputs and review gates identical; do not collapse the canonical ledger, verification, review, synthesis, and final report writing into worker outputs.
+
+Critical chapters requiring independent `verification_agent` artifacts before release: 1, 3, 4, 5, 6, 9, 13, 14, and 16. All other chapters still require a `reflection_reviewer` pass.
 
 ## Common Agent Output Contract
 
