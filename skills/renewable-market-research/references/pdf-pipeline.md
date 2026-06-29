@@ -2,27 +2,31 @@
 
 ## Full Report
 
-Default target: 15 chapters or equivalent MD depth. Use the Lite Report for short delivery summaries; the Full Report should preserve the market, project, developer, equipment, logistics, policy, tariff, carbon, and conclusion depth needed for management review.
+Default target: the V4 0-16 chapter structure in `references/full-report-v4.md`. Use the Lite Report for short delivery summaries; the Full Report is the country wind-market status master report.
 
-Quality target: retain benchmark-style breadth while using the verified ledger to prevent overcounting. A stronger new report is not the one with the most project names; it is the one that preserves discovered breadth, assigns every project candidate to confirmed/watchlist/duplicate/rejected, ties participants to project roles, and turns the remaining confirmed opportunities into sales actions.
+Quality target: retain benchmark-style breadth while using the verified ledger to prevent overcounting. A stronger report is not the one with the most project names; it is the one that preserves discovered breadth, assigns every project candidate to confirmed/watchlist/duplicate/rejected/unresolved, ties participants to project roles, and clearly separates verified facts, assumptions, and pending verification.
 
-Recommended sections:
+The full report is not a strategy recommendation memo. Do not use it to decide whether to enter a market, build a factory, price a bid, or prescribe Mingyang/MySE actions. When Mingyang/MySE is in scope, express only factual relevance: Opportunity MW, unallocated OEM status, procurement window, decision maker, influencers, technical fit, relationship evidence, risk, and pending verification.
 
-1. Executive summary and weekly update timestamp
-2. Market key indicators and time-series dashboard
-3. Demand, power mix, market size, and confirmed/all-phase capacity
-4. Policy, legal framework, tariff reform, and target-change timeline
-5. Auction/PPA winning-tariff comparison
-6. Project pipeline cards
-7. Developer and sponsor landscape
-8. Anchor developer deep dives
-9. Chinese developers, entrants, and participation routes
-10. Equipment supplier and OEM panorama
-11. EPC and finance ecosystem
-12. Logistics, transport, and installation constraints
-13. Grid infrastructure, interconnection, storage, and curtailment
-14. Carbon markets, I-REC, CBAM, green hydrogen, and green power offtake
-15. Conclusions, risks, sales implications, update plan, and source/confidence appendix
+Required V4 sections:
+
+0. Report scope and evidence rules
+1. Executive summary
+2. National power fundamentals
+3. Policy, permitting, development flow, and PPA mechanism
+4. Market capacity definitions and project segmentation
+5. Full project ledger
+6. Key project cards
+7. Developers, owners, and decision-right structure
+8. Wind resource, geography, and turbine-fit inference
+9. OEM competition landscape
+10. EPC, financiers, O&M, and supply-chain network
+11. Localization and industrial policy status
+12. Grid, storage, interconnection, and curtailment constraints
+13. Tariff, project economics, and bankability status
+14. Procurement window and decision-chain status
+15. Risk matrix and constraint conditions
+16. Data-source and conclusion-confidence appendix
 
 Do not include a default `Regional benchmark comparison` section. Add a regional or peer-country benchmark only when the user explicitly asks for it.
 
@@ -35,13 +39,13 @@ The executive summary must include a clear time anchor:
 - report date;
 - data cutoff date;
 - `This-week / latest major updates` bullets when recent project, policy, tariff, grid, or developer facts changed;
-- whether the update changed market judgment, confirmed pipeline, watchlist, or sales priority.
+- whether the update changed confirmed pipeline, opportunity MW, watchlist, procurement window, or evidence confidence.
 
 Do not freeze the executive summary before the final ledger, tariff comparison, policy backtrace, and developer deep dives are current.
 
 ## Market Key Indicators
 
-Include a standalone key-indicator chapter in the full report. Aim for about 15-20 rows when evidence exists.
+Include key indicators in Chapter 2 and capacity/opportunity indicators in Chapter 4. Aim for about 15-20 rows when evidence exists.
 
 Indicators should include, where available:
 
@@ -84,23 +88,23 @@ If operational projects are excluded from the lite version, still summarize tota
 
 ## Project Pipeline Cards
 
-In both full and lite reports, present the project pipeline as cards by default, not as a dense section table. Use the validated master JSON as the source for rich card fields, cross-read the matching depth records, and use the canonical project ledger only for identity, status grouping, dedupe, and watchlist/rejected decisions.
+In the full report, Chapter 5 is the full project ledger and Chapter 6 is the key project-card section. Use the validated master JSON as the source for rich card fields, cross-read the matching depth records, and use the canonical project ledger only for identity, status grouping, dedupe, and watchlist/rejected/unresolved decisions.
 
 Before writing cards, read the `sourceTrace` or `mergedFromDepthRecords` references for each project and compare the depth records against the master JSON. If depth contains annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, coordinates, logistics, community impact, biodiversity/bird protection, jobs/local employment, or personnel/developer data that is missing from the master JSON, update the master JSON and rerun integrity validation before report writing.
 
 Each project card should include:
 
 - project name plus local/translated alias when material;
-- status bucket and evidence stage;
+- status bucket, evidence stage, and status basis;
 - capacity, coordinates, site area/land footprint, location, owner/developer/SPV;
 - COD or target COD, PPA/auction/financing/construction milestones when verified;
 - technology route, hub height, rotor/blade diameter, turbine model/count, storage/hybrid notes when material;
 - annual generation, annual emission reduction, jobs/local employment, and investment when verified;
 - bird/biodiversity protection, land/community impacts, ESIA constraints, and mitigation status when material;
-- Mingyang/MySE opportunity or sales implication;
+- Opportunity MW, Mingyang/MySE factual relevance, relevance rationale, and pending verification when in scope;
 - confidence, uncertainty, and critical-field verification note;
 - source references or evidence IDs.
-- procurement window, likely decision maker, influencers, tender route, current OEM status, shortlist clues, bankability constraint, and sales entry point when evidence supports them.
+- procurement window, likely decision maker, influencers, tender route, current OEM status, shortlist clues, and bankability constraint when evidence supports them.
 
 Use compact grouping before cards:
 
@@ -109,11 +113,11 @@ Use compact grouping before cards:
 - `Awarded or PPA signed`;
 - `MOU / framework / watchlist`.
 
-Tables are allowed only as appendices, exports, or compact summary indexes. Do not replace project cards with a large project-by-project table in the report body.
+Tables are allowed in Chapter 5 because the full project ledger is a required table. Do not replace Chapter 6 project cards with only a dense project table.
 
 ## Deep-Dive Chapter Requirements
 
-Use dedicated deep-dive chapters when an owner/developer, Chinese entrant, OEM, logistics route, or tariff issue materially affects market judgment or sales strategy.
+Use dedicated deep-dive chapters or subsections when an owner/developer, Chinese entrant, OEM, logistics route, localization issue, grid constraint, procurement window, or tariff issue materially affects the current market-status description.
 
 Anchor developer deep dives should include:
 
@@ -123,7 +127,7 @@ Anchor developer deep dives should include:
 - China cooperation matrix and procurement/EPC/OEM ties;
 - project economics or IRR/return assumptions only when sourced or clearly marked as assumptions;
 - current operating status and recent updates.
-- project-linked procurement influence: which MW the developer controls, current OEM ties, EPC/finance constraints, likely tender timing, and the practical route to influence decisions.
+- project-linked procurement influence: which MW the developer controls, current OEM ties, EPC/finance constraints, likely tender timing, and decision-chain role.
 
 Chinese developer/entrant deep dives should include listed code, revenue/profit/margin when public, team/local presence, financing or Sinosure/policy-bank structures, and project-level role.
 
@@ -131,9 +135,9 @@ Equipment supplier panorama should include as complete an OEM/supplier list as f
 
 Logistics and installation should include route length, transit time, ports/rail/road/border crossings, component dimensions/weights, heavy-lift and crane suppliers, seasonal/weather limits, abnormal-load permits, and installation risks.
 
-Auction/PPA tariff comparison should be a standalone chapter when auctions or PPAs are material. Compare project names, award dates, tariff currency and units, PPA tenor, sponsor, capacity, indexation/FX risk if known, and confidence/source notes.
+Auction/PPA tariff comparison belongs in Chapter 13 when auctions or PPAs are material. Compare project names, award dates, tariff currency and units, PPA tenor, sponsor, capacity, indexation/FX risk if known, and confidence/source notes.
 
-The conclusion chapter must include a sales-action matrix with: target actor, project/portfolio, MW scale, decision timing, current OEM status, procurement route, relationship path, evidence confidence, and recommended next action. Avoid generic market-potential summaries.
+Chapter 14 must include a procurement-window and decision-chain table with: project, capacity, Opportunity MW, current stage, OEM status, RFQ/tender/NTP timing, decision maker, influencer, and pending verification. Avoid generic market-potential summaries and do not insert recommended sales actions into the full report. Put recommendations into a separate executive brief or action memo only when requested.
 
 ## Report Format Requirements
 

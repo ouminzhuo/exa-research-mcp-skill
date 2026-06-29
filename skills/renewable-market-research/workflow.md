@@ -4,7 +4,7 @@
 
 ## Core Workflow Principles
 
-1. Follow the hard order: wind first, ledger first, sales judgment last.
+1. Follow the hard order: wind first, ledger first, full report descriptive, strategy/action briefs separate.
 2. Separate collection, review, synthesis, and executive compression.
 3. Keep writer agents and reviewer agents separate.
 4. Store evidence in files before writing conclusions.
@@ -40,7 +40,7 @@ Outputs:
 - Confirmed leads and watchlist leads.
 - Rich master JSON plus a canonical project ledger or compact project registry for any project claims.
 - Top policy, grid, product-fit, and execution risks.
-- Immediate next sales actions.
+- Immediate next actions only when the user asks for strategy or sales follow-up.
 - Three executive judgments with evidence support after Continuity, Evidence, and Contradiction Gate review.
 
 ## Standard Workflow
@@ -63,22 +63,23 @@ Agents:
 Outputs:
 
 - Lite report.
-- Full report using the 15-chapter deep structure in `references/pdf-pipeline.md`.
+- Full report using the V4 0-16 chapter structure in `references/full-report-v4.md`.
+- V4 gate artifacts in order: candidate project pool, source trace/evidence table, project ledger, capacity reconciliation, participant ledger, OEM competition matrix, procurement window table, detailed project cards, full report, then lite report.
 - Standalone market key-indicator dashboard with time-series comparisons.
 - Rich master JSON and canonical project pipeline ledger.
 - Project pipeline cards in the report body, plus CSV/appendix tables when useful.
 - Owner/developer/EPC/competitor map.
 - Anchor developer deep dives when material to the market, such as ACWA, Masdar, state entities, or dominant IPPs.
 - OEM/equipment supplier panorama, logistics/installation analysis, and auction/PPA tariff comparison.
-- Participant-role matrix tying every material owner, OEM, EPC, financier, and channel actor to project roles, MW exposure, procurement influence, relationship strength, and sales entry point.
+- Participant-role matrix tying every material owner, OEM, EPC, financier, and channel actor to project roles, MW exposure, procurement influence, relationship strength, and evidence confidence.
 - Product-fit assessment for Mingyang/MySE solutions.
-- Sales-action plan.
+- Separate sales-action plan only when the user asks for strategy or next actions.
 - Executive brief based only on conclusions that passed the Continuity, Evidence, and Contradiction gates.
 - Evidence archive and rejected-claims register.
 
 ## Heavy Workflow
 
-Use for benchmark-surpassing country wind-market reports where pipeline accuracy, participant depth, OEM competition, citation auditability, and sales-action usefulness are more important than speed.
+Use for benchmark-surpassing country wind-market reports where pipeline accuracy, participant depth, OEM competition, procurement-window clarity, citation auditability, and evidence-bound market status are more important than speed.
 
 Agent topology:
 
@@ -93,7 +94,7 @@ Agent topology:
 9. `finance_bankability_worker`: MDB/DFI finance, project finance, guarantees, FX/indexation, sponsor financials, IRR/ROE where supportable, and bankability constraints.
 10. `grid_storage_worker`: transmission, substations, grid-code, curtailment, balancing, storage, hybrid constraints, and interconnection risk.
 11. `adjacent_opportunity_worker`: solar, BESS, hydrogen, ammonia, methanol, green-power demand, I-REC, CBAM, and industrial offtake only where they change wind opportunity.
-12. `product_fit_sales_worker`: Mingyang/MySE fit, priority accounts, procurement windows, current OEM status, route-to-entry, and sales-action hypotheses.
+12. `product_fit_sales_worker`: Mingyang/MySE factual fit, priority accounts, procurement windows, current OEM status, decision-chain clues, relevance rationale, and optional sales-action hypotheses for separate briefs.
 13. `verification_agent`: verifies critical project/policy/tariff/participant fields through Chrome MCP, Exa fetch, or original files and writes source-audit artifacts.
 14. `reflection_reviewer`: independently scores each stage, lists critical blockers, and writes executable gap tasks.
 
@@ -102,7 +103,7 @@ Heavy Workflow stage loop:
 1. Search plan reflection: reviewer checks local-language coverage, Chinese-capital search, new-entrant search, anomaly hunting, official-source backtrace, and mandatory evidence thresholds before workers start.
 2. Evidence reflection: reviewer checks depth files for coverage, source quality, search passes, critical-field verification, and unexplained blind spots.
 3. Ledger reflection: reviewer checks canonical IDs, alias merging, confirmed/watchlist/duplicate/rejected buckets, capacity totals, rich-field propagation, and source-to-final continuity.
-4. Report reflection: reviewer checks the 15-chapter structure, project cards, developer/OEM depth, logistics, tariff comparison, source appendix, summary freshness, and absence of benchmark sections unless requested.
+4. Report reflection: reviewer checks the V4 0-16 chapter structure, full project ledger, project cards, developer/OEM depth, logistics, tariff/bankability status, procurement-window table, source-confidence appendix, summary freshness, and absence of benchmark sections unless requested.
 
 Stage advancement rules:
 
@@ -152,6 +153,6 @@ Research collection can be broad. Final writing must be narrow:
 - Move interesting but non-decision-useful information to appendices.
 - Do not let adjacent-energy topics displace wind project pipeline, market participants, OEM competition, or procurement-window analysis.
 - Do not list participants as generic company profiles; tie each material company to projects, role, MW exposure, procurement influence, and sales relevance.
-- Sales conclusions must name the target actor, project or portfolio, MW scale, timing, procurement route, and recommended entry action.
+- Full-report procurement conclusions must name the project or portfolio, MW scale, timing, procurement route, current OEM status, decision maker/influencer, evidence confidence, and pending verification. Recommended actions belong in a separate brief when requested.
 - Do not write claims that cannot pass the review gates.
 - Do not write or freeze executive summaries until the final master JSON, project ledger, policy backtrace, and synthesis are current.

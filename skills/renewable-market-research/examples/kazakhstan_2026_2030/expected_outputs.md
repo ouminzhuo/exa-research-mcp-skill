@@ -7,7 +7,7 @@ The example run must produce:
 3. Owner, developer, EPC, and competitor mapping.
 4. Product-fit judgment for Mingyang / MySE solutions.
 5. Key risks, including policy, grid, finance, logistics, localization, and competitive risks.
-6. Next sales actions by account, project, and timing.
+6. Procurement-window, factual relevance, and pending-verification view by account, project, and timing; next sales actions only when separately requested.
 7. Two-minute executive briefing with exactly three core judgments.
 8. Market key-indicator dashboard with latest available generation, YoY, quarterly/monthly data, and wind/solar trend.
 9. Auction/PPA tariff comparison with source confidence.
@@ -18,12 +18,12 @@ The example run must produce:
 ## Minimum Deliverable Package
 
 - One-page market judgment.
-- Full 15-chapter report structure when running Standard or Deep mode.
+- V4 0-16 full-report structure when running Standard or Deep mode.
 - Project pipeline cards, with CSV/appendix table only if useful.
 - Watchlist and rejected-claims register.
 - Market key-indicator dashboard.
 - Tariff comparison.
 - Developer/OEM/logistics deep-dive sections.
-- Sales-action plan.
+- Separate sales-action plan only when requested; the V4 full report uses procurement-window, relevance, and pending-verification tables instead of recommendations.
 - Executive brief.
 - Evidence archive.

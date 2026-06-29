@@ -29,7 +29,7 @@ Return or write machine-readable JSON with this shape:
 - Separate verified facts, assumptions, and inference.
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
-- Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Convert important facts into report implications: project status, capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
 - For material owners/developers, collect deep-dive fields: ownership, financial metrics, listed ticker if public, revenue/profit/ROE/PE where public, full local project portfolio, SPV structure, key public people, partners, China cooperation matrix, and current project operating updates.
 - Do not write generic company profiles. Tie each material owner/developer/IPP/SPV to controlled MW, project names, project stage, procurement influence, known EPC/OEM ties, financing constraints, decision timing, and sales entry path.
 

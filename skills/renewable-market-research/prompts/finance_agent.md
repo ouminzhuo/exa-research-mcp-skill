@@ -29,7 +29,7 @@ Return or write machine-readable JSON with this shape:
 - Separate verified facts, assumptions, and inference.
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
-- Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Convert important facts into report implications: project status, capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
 - Capture project-level tariff/PPA evidence, PPA tenor, currency/indexation, award date, sponsor, project finance status, MDB/ECA/policy-bank role, and public sponsor financial metrics where available.
 - Estimate IRR or project economics only when assumptions are explicit and sourced; otherwise mark as assumption or `not found`.
 - Keep policy, tariff, speech targets, tender prices, and PPA prices in separate evidence buckets. Do not merge them into one market-price narrative.

@@ -28,7 +28,7 @@ New usage feedback to address:
 - Search can miss projects when local-language, Chinese-capital, new-entrant, legal-backtrace, or anomaly-hunter passes are not mandatory.
 - Same-name/different-source records need executable dedupe review, not only cross-reference awareness.
 - Confirmed-pipeline critical fields must be verified by Chrome MCP or original-file fetch, not by Exa search snippets alone.
-- Full reports should preserve the 15-chapter benchmark-style depth instead of collapsing into a 6-section compressed report.
+- Full reports should preserve the V4 0-16 country wind-market status depth instead of collapsing into a 6-section compressed report.
 - Project pipeline cards need richer card fields: coordinates, land footprint, turbine specs, generation, CO2 reduction, jobs, biodiversity, and community impacts when evidence exists.
 
 Gaps to close:
@@ -115,5 +115,5 @@ Add `examples/kazakhstan_2026_2030/` with goal, scope, and expected outputs for 
 - Search orchestration now includes official-language, Chinese-capital/local-name, new-entrant, policy-law-backtrace, and anomaly-hunter passes.
 - Source-to-final continuity now requires a canonical project ledger, integrity validation, and final summary backpropagation.
 - Integrity validation now fails confirmed-pipeline records whose present critical fields lack `chrome-mcp`, `exa-fetch`, or `manual-file` verification.
-- Report guidance now requires a 15-chapter full report structure with weekly update timestamp, market key indicators, tariff comparison, project cards, anchor developer deep dives, OEM panorama, logistics/installation, grid, carbon/green hydrogen/CBAM, and conclusions.
+- Report guidance now requires the V4 0-16 full report structure with scope/evidence rules, capacity definitions, full project ledger, key project cards, developer/decision-right structure, turbine-fit inference, OEM panorama, EPC/finance/O&M/supply chain, localization, grid/storage/curtailment, tariff/bankability, procurement-window status, risks, and source-confidence appendix.
 - Search orchestration now includes market key indicators/time series, auction tariff comparison, anchor developer deep dives, and Chinese developer deep dives as default non-benchmark dimensions.

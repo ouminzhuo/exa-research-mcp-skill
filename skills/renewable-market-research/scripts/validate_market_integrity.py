@@ -27,6 +27,118 @@ SOURCE_TRACE_ALIASES = ("sourceTrace", "source_trace")
 NAME_VARIANT_ALIASES = ("nameVariants", "name_variants", "aliases")
 VERIFIED_COLLECTION_METHODS = {"chrome-mcp", "exa-fetch", "manual-file"}
 CRITICAL_FIELD_VERIFICATION_ALIASES = ("criticalFieldVerification", "critical_field_verification")
+UNKNOWN_ALLOWED_MARKERS = {"待核", "待核实", "未公开", "未披露", "not found", "unavailable", "not applicable", "unknown"}
+V4_LEDGER_REQUIRED_FIELDS = [
+    "projectId",
+    "aliasGroupId",
+    "canonicalProjectName",
+    "capacityMW",
+    "opportunityMW",
+    "projectStage",
+    "statusBasis",
+    "countedInConfirmedCapacity",
+    "countedInOpportunityCapacity",
+    "sponsorOwner",
+    "spv",
+    "equityStructure",
+    "oem",
+    "procurementStatus",
+    "turbineModel",
+    "epc",
+    "omParty",
+    "financiers",
+    "ppaOfftaker",
+    "tariff",
+    "codTimeline",
+    "nextMilestone",
+    "decisionMaker",
+    "keyEvidence",
+    "fieldConfidence",
+    "pendingVerification",
+    "mingyangRelevance",
+    "mainRisks",
+]
+V4_PROJECT_CARD_REQUIRED_PATHS = [
+    "basicInformation.projectName",
+    "basicInformation.capacityMW",
+    "basicInformation.location",
+    "basicInformation.stage",
+    "basicInformation.cod",
+    "ownerStructure.developer",
+    "ownerStructure.spv",
+    "ownerStructure.equity",
+    "ownerStructure.governmentCounterparty",
+    "technicalPlan.oem",
+    "technicalPlan.turbineModel",
+    "technicalPlan.turbineCount",
+    "technicalPlan.bess",
+    "technicalPlan.transmissionLine",
+    "commercialStructure.ppa",
+    "commercialStructure.offtaker",
+    "commercialStructure.tariff",
+    "commercialStructure.tenor",
+    "commercialStructure.guarantee",
+    "financingStructure.totalInvestment",
+    "financingStructure.lenders",
+    "financingStructure.financialCloseStatus",
+    "developmentFlow.land",
+    "developmentFlow.esia",
+    "developmentFlow.interconnection",
+    "developmentFlow.constructionPermit",
+    "developmentFlow.electricityLicense",
+    "engineeringSupplyChain.epc",
+    "engineeringSupplyChain.logistics",
+    "engineeringSupplyChain.lifting",
+    "engineeringSupplyChain.localizationRequirements",
+    "omArrangement.omParty",
+    "omArrangement.serviceTenor",
+    "omArrangement.spareParts",
+    "omArrangement.localServiceBase",
+    "currentProgress.latestEvent",
+    "currentProgress.nextNode",
+    "currentProgress.procurementWindow",
+    "decisionChain.decisionMaker",
+    "decisionChain.influencers",
+    "decisionChain.mdbGovernmentEpcRoles",
+    "mingyangRelevance.opportunityMW",
+    "mingyangRelevance.relevanceRationale",
+    "mingyangRelevance.pendingVerification",
+    "risksAndConstraints.grid",
+    "risksAndConstraints.land",
+    "risksAndConstraints.esg",
+    "risksAndConstraints.financing",
+    "risksAndConstraints.competition",
+    "evidenceBoundary.verifiedFacts",
+    "evidenceBoundary.reasonableAssumptions",
+    "evidenceBoundary.pendingVerification",
+]
+V4_EVIDENCE_REQUIRED_FIELDS = [
+    "projectStage",
+    "capacityMW",
+    "oem",
+    "tariff",
+    "financing",
+    "ppaOfftaker",
+    "procurementWindow",
+    "mingyangRelevance",
+]
+NO_STRATEGY_PATTERNS = [
+    "应当建厂",
+    "建议建厂",
+    "必须进入",
+    "建议报价",
+    "必须绑定",
+    "应绑定",
+    "应该投入资源",
+    "应投入资源",
+    "must enter",
+    "should enter",
+    "must build",
+    "should build",
+    "build a factory",
+    "recommended bid",
+    "must bind",
+]
 CRITICAL_PROJECT_FIELDS = [
     ("project_name", ("project_name", "name", "canonicalName", "canonical_name"), ("project", "name", "alias")),
     ("capacity_mw", ("capacityMW", "capacity_mw"), ("capacity", "mw")),
@@ -170,6 +282,94 @@ def has_value(value: Any) -> bool:
     if isinstance(value, list):
         return any(has_value(item) for item in value)
     return True
+
+
+def read_json_file(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def nested_get(mapping: dict[str, Any], dotted_path: str) -> Any:
+    current: Any = mapping
+    for part in dotted_path.split("."):
+        if not isinstance(current, dict) or part not in current:
+            return None
+        current = current[part]
+    return current
+
+
+def present_or_unknown(value: Any) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped == "":
+            return False
+        return True
+    if isinstance(value, list):
+        return True
+    if isinstance(value, dict):
+        return True
+    return True
+
+
+def as_number(value: Any) -> float:
+    if value in (None, "", []):
+        return 0.0
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        match = re.search(r"-?\d+(?:\.\d+)?", value.replace(",", ""))
+        if match:
+            return float(match.group(0))
+    return 0.0
+
+
+def normalize_stage(value: Any) -> str:
+    return str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+
+
+def collect_v4_ledger_projects(ledger: Any) -> list[dict[str, Any]]:
+    if isinstance(ledger, list):
+        return [item for item in ledger if isinstance(item, dict)]
+    if isinstance(ledger, dict):
+        for key in ("projects", "projectLedger", "project_ledger", "items"):
+            value = ledger.get(key)
+            if isinstance(value, list):
+                return [item for item in value if isinstance(item, dict)]
+    return []
+
+
+def collect_v4_project_cards(cards: Any) -> list[dict[str, Any]]:
+    if isinstance(cards, list):
+        return [item for item in cards if isinstance(item, dict)]
+    if isinstance(cards, dict):
+        for key in ("projectCards", "project_cards", "cards", "items"):
+            value = cards.get(key)
+            if isinstance(value, list):
+                return [item for item in value if isinstance(item, dict)]
+    return []
+
+
+def collect_v4_evidence_items(evidence_table: Any) -> list[dict[str, Any]]:
+    if isinstance(evidence_table, list):
+        return [item for item in evidence_table if isinstance(item, dict)]
+    if isinstance(evidence_table, dict):
+        for key in ("items", "evidence", "evidenceTable", "evidence_table", "conclusions"):
+            value = evidence_table.get(key)
+            if isinstance(value, list):
+                return [item for item in value if isinstance(item, dict)]
+    return []
+
+
+def append_warning(result: dict[str, Any], message: str) -> None:
+    result.setdefault("warnings", []).append(message)
+    result.setdefault("counts", {})["warnings"] = len(result.get("warnings", []))
+
+
+def add_gate_gap(result: dict[str, Any], key: str, gap: dict[str, Any], warning: str | None = None) -> None:
+    result.setdefault(key, []).append(gap)
+    if warning:
+        append_warning(result, warning)
 
 
 def get_nested_any(mapping: dict[str, Any], aliases: tuple[str, ...]) -> Any:
@@ -691,16 +891,299 @@ def validate_market(data: dict[str, Any], depth_dir: Path | None = None) -> dict
     }
 
 
+def validate_project_ledger_gate(result: dict[str, Any], ledger: Any) -> list[dict[str, Any]]:
+    gaps: list[dict[str, Any]] = []
+    projects = collect_v4_ledger_projects(ledger)
+    if not projects:
+        gap = {"gate": "project_ledger_schema_gate", "issue": "project ledger has no projects array"}
+        add_gate_gap(result, "projectLedgerFieldGaps", gap, "project ledger has no projects array")
+        return gaps
+    for index, project in enumerate(projects):
+        pid = str(project.get("projectId") or project.get("canonicalProjectId") or project.get("id") or f"index-{index}")
+        for field in V4_LEDGER_REQUIRED_FIELDS:
+            if field not in project or not present_or_unknown(project.get(field)):
+                gap = {"projectId": pid, "field": field}
+                gaps.append(gap)
+                add_gate_gap(
+                    result,
+                    "projectLedgerFieldGaps",
+                    gap,
+                    f"project ledger {pid} missing required V4 field {field}",
+                )
+    return gaps
+
+
+def validate_project_card_completeness_gate(result: dict[str, Any], cards_data: Any) -> list[dict[str, Any]]:
+    gaps: list[dict[str, Any]] = []
+    cards = collect_v4_project_cards(cards_data)
+    if not cards:
+        gap = {"gate": "project_card_completeness_gate", "issue": "project cards file has no cards array"}
+        add_gate_gap(result, "projectCardCompletenessGaps", gap, "project cards file has no cards array")
+        return gaps
+    for index, card in enumerate(cards):
+        pid = str(card.get("projectId") or card.get("id") or f"index-{index}")
+        for path in V4_PROJECT_CARD_REQUIRED_PATHS:
+            if not present_or_unknown(nested_get(card, path)):
+                gap = {"projectId": pid, "fieldPath": path}
+                gaps.append(gap)
+                add_gate_gap(
+                    result,
+                    "projectCardCompletenessGaps",
+                    gap,
+                    f"project card {pid} missing required V4 field {path}",
+                )
+    return gaps
+
+
+def ledger_capacity_reconciliation(ledger: Any) -> dict[str, float]:
+    projects = collect_v4_ledger_projects(ledger)
+    confirmed = 0.0
+    opportunity = 0.0
+    watchlist = 0.0
+    for project in projects:
+        capacity = as_number(project.get("capacityMW") or project.get("capacity_mw"))
+        opportunity_mw = as_number(project.get("opportunityMW") or project.get("opportunity_mw"))
+        stage = normalize_stage(project.get("projectStage") or project.get("pipelineBucket") or project.get("status"))
+        if project.get("countedInConfirmedCapacity") is True:
+            confirmed += capacity
+        if project.get("countedInOpportunityCapacity") is True:
+            opportunity += opportunity_mw
+        if "watchlist" in stage:
+            watchlist += capacity
+    return {
+        "computedConfirmedCapacityMW": confirmed,
+        "computedOpportunityCapacityMW": opportunity,
+        "computedWatchlistCapacityMW": watchlist,
+    }
+
+
+def validate_capacity_reconciliation_gate(result: dict[str, Any], ledger: Any, tolerance: float = 0.1) -> dict[str, float]:
+    computed = ledger_capacity_reconciliation(ledger)
+    declared = ledger.get("capacityReconciliation") if isinstance(ledger, dict) else None
+    if not isinstance(declared, dict):
+        add_gate_gap(
+            result,
+            "capacityReconciliationGaps",
+            {"issue": "ledger missing capacityReconciliation object", **computed},
+            "ledger missing capacityReconciliation object",
+        )
+        return computed
+    expected_fields = [
+        ("confirmedCapacityMW", "computedConfirmedCapacityMW"),
+        ("opportunityCapacityMW", "computedOpportunityCapacityMW"),
+        ("watchlistCapacityMW", "computedWatchlistCapacityMW"),
+    ]
+    for declared_field, computed_field in expected_fields:
+        if declared_field not in declared:
+            add_gate_gap(
+                result,
+                "capacityReconciliationGaps",
+                {"field": declared_field, "issue": "missing", "computed": computed[computed_field]},
+                f"capacity reconciliation missing {declared_field}",
+            )
+            continue
+        declared_value = as_number(declared.get(declared_field))
+        if abs(declared_value - computed[computed_field]) > tolerance:
+            add_gate_gap(
+                result,
+                "capacityReconciliationGaps",
+                {
+                    "field": declared_field,
+                    "declared": declared_value,
+                    "computed": computed[computed_field],
+                },
+                f"capacity reconciliation mismatch for {declared_field}: declared {declared_value}, computed {computed[computed_field]}",
+            )
+    result["computedCapacityReconciliation"] = computed
+    return computed
+
+
+def validate_evidence_boundary_gate(result: dict[str, Any], evidence_table: Any) -> list[dict[str, Any]]:
+    gaps: list[dict[str, Any]] = []
+    items = collect_v4_evidence_items(evidence_table)
+    if not items:
+        gap = {"gate": "evidence_boundary_gate", "issue": "evidence table has no conclusion evidence items"}
+        add_gate_gap(result, "evidenceBoundaryGaps", gap, "evidence table has no conclusion evidence items")
+        return gaps
+    related_fields = {normalize_text(item.get("relatedField") or item.get("related_field")) for item in items}
+    related_fields.update(normalize_text(item.get("conclusionType") or item.get("conclusion_type")) for item in items)
+    for field in V4_EVIDENCE_REQUIRED_FIELDS:
+        key = normalize_text(field)
+        if not any(key in related or related in key for related in related_fields if related):
+            gap = {"relatedField": field}
+            gaps.append(gap)
+            add_gate_gap(
+                result,
+                "evidenceBoundaryGaps",
+                gap,
+                f"evidence table missing conclusion-level evidence for {field}",
+            )
+    for index, item in enumerate(items):
+        for required in (
+            "conclusion",
+            "conclusionType",
+            "source",
+            "sourceGrade",
+            "directlyProves",
+            "confidence",
+            "relatedField",
+            "pendingVerificationAction",
+        ):
+            if required not in item or not present_or_unknown(item.get(required)):
+                gap = {"itemIndex": index, "field": required}
+                gaps.append(gap)
+                add_gate_gap(
+                    result,
+                    "evidenceBoundaryGaps",
+                    gap,
+                    f"evidence table item {index} missing {required}",
+                )
+    return gaps
+
+
+def validate_no_strategy_recommendation_gate(result: dict[str, Any], report_text: str) -> list[dict[str, Any]]:
+    gaps: list[dict[str, Any]] = []
+    lowered = report_text.lower()
+    for pattern in NO_STRATEGY_PATTERNS:
+        if pattern.lower() in lowered:
+            gap = {"pattern": pattern}
+            gaps.append(gap)
+            add_gate_gap(
+                result,
+                "strategyRecommendationGaps",
+                gap,
+                f"full report contains strategy/recommendation phrase blocked by V4: {pattern}",
+            )
+    return gaps
+
+
+def collect_candidate_records(candidate_pool: Any) -> list[dict[str, Any]]:
+    if isinstance(candidate_pool, list):
+        return [item for item in candidate_pool if isinstance(item, dict)]
+    if isinstance(candidate_pool, dict):
+        for key in ("candidates", "projects", "items", "candidateProjectPool", "candidate_project_pool"):
+            value = candidate_pool.get(key)
+            if isinstance(value, list):
+                return [item for item in value if isinstance(item, dict)]
+    return []
+
+
+def candidate_names(record: dict[str, Any]) -> list[str]:
+    names = []
+    for key in ("projectName", "project_name", "name", "canonicalProjectName", "canonicalName", "project"):
+        value = record.get(key)
+        if isinstance(value, str) and value.strip():
+            names.append(value)
+    for key in ("aliases", "projectAliases", "project_aliases", "nameVariants", "name_variants"):
+        names.extend(collect_name_values(record.get(key)))
+    return names
+
+
+def ledger_outcome_names(ledger: Any) -> set[str]:
+    names: set[str] = set()
+    if isinstance(ledger, dict):
+        containers = [ledger.get("projects")]
+        containers.extend(
+            ledger.get(key)
+            for key in (
+                "watchlist",
+                "duplicate",
+                "duplicates",
+                "duplicateCandidates",
+                "rejected",
+                "rejectedClaims",
+                "unresolved",
+            )
+        )
+    else:
+        containers = [ledger]
+    for container in containers:
+        for item in as_list(container):
+            if isinstance(item, dict):
+                for name in candidate_names(item):
+                    key = normalize_text(name)
+                    if key:
+                        names.add(key)
+                for field in ("projectId", "canonicalProjectId", "id", "aliasGroupId"):
+                    value = item.get(field)
+                    if value:
+                        names.add(normalize_text(value))
+    return names
+
+
+def validate_baseline_inheritance_gate(result: dict[str, Any], candidate_pool: Any, ledger: Any) -> list[dict[str, Any]]:
+    gaps: list[dict[str, Any]] = []
+    candidates = collect_candidate_records(candidate_pool)
+    if not candidates:
+        append_warning(result, "candidate pool is empty or missing; baseline_inheritance_gate could not verify recall retention")
+        return gaps
+    outcome_names = ledger_outcome_names(ledger)
+    for index, candidate in enumerate(candidates):
+        names = [normalize_text(name) for name in candidate_names(candidate)]
+        names = [name for name in names if name]
+        if not names:
+            continue
+        if not any(name in outcome_names for name in names):
+            gap = {"candidateIndex": index, "candidateNames": candidate_names(candidate)}
+            gaps.append(gap)
+            add_gate_gap(
+                result,
+                "baselineInheritanceGaps",
+                gap,
+                f"candidate pool record {index} did not flow into confirmed/watchlist/duplicate/rejected/unresolved ledger outcomes",
+            )
+    return gaps
+
+
+def update_v4_gate_status(result: dict[str, Any]) -> None:
+    gate_keys = [
+        "projectLedgerFieldGaps",
+        "projectCardCompletenessGaps",
+        "capacityReconciliationGaps",
+        "evidenceBoundaryGaps",
+        "strategyRecommendationGaps",
+        "baselineInheritanceGaps",
+    ]
+    result["v4GateSummary"] = {key: len(result.get(key, [])) for key in gate_keys}
+    if any(result["v4GateSummary"].values()):
+        result["status"] = "needs-review"
+    result.setdefault("counts", {}).update(result["v4GateSummary"])
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate renewable market source-to-final integrity.")
     parser.add_argument("market_json", type=Path)
     parser.add_argument("--depth-dir", type=Path, help="Depth JSON directory used to verify rich-field propagation.")
+    parser.add_argument("--project-ledger", type=Path, help="V4 project_ledger.json or {slug}-pipeline-ledger.json.")
+    parser.add_argument("--project-cards", type=Path, help="V4 project_cards.json with full project-card modules.")
+    parser.add_argument("--evidence-table", type=Path, help="V4 evidence_table.json with conclusion-level evidence.")
+    parser.add_argument("--candidate-pool", type=Path, help="candidate_project_pool.json for baseline inheritance checks.")
+    parser.add_argument("--full-report", type=Path, help="Full report Markdown/HTML text for no-strategy recommendation checks.")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--strict", action="store_true", help="Exit non-zero on warnings as well as errors.")
     args = parser.parse_args()
 
     data = json.loads(args.market_json.read_text(encoding="utf-8-sig"))
     result = validate_market(data, args.depth_dir)
+
+    ledger_data: Any | None = None
+    if args.project_ledger:
+        ledger_data = read_json_file(args.project_ledger)
+        validate_project_ledger_gate(result, ledger_data)
+        validate_capacity_reconciliation_gate(result, ledger_data)
+    if args.project_cards:
+        validate_project_card_completeness_gate(result, read_json_file(args.project_cards))
+    if args.evidence_table:
+        validate_evidence_boundary_gate(result, read_json_file(args.evidence_table))
+    if args.full_report:
+        validate_no_strategy_recommendation_gate(result, args.full_report.read_text(encoding="utf-8-sig"))
+    if args.candidate_pool:
+        if ledger_data is None:
+            append_warning(result, "candidate pool was provided without --project-ledger; baseline_inheritance_gate skipped")
+        else:
+            validate_baseline_inheritance_gate(result, read_json_file(args.candidate_pool), ledger_data)
+    update_v4_gate_status(result)
+
     text = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -714,6 +1197,12 @@ def main() -> int:
         or result["criticalFieldGaps"]
         or result["reportCardFieldGaps"]
         or result["depthPropagationGaps"]
+        or result.get("projectLedgerFieldGaps")
+        or result.get("projectCardCompletenessGaps")
+        or result.get("capacityReconciliationGaps")
+        or result.get("evidenceBoundaryGaps")
+        or result.get("strategyRecommendationGaps")
+        or result.get("baselineInheritanceGaps")
         or (args.strict and result["warnings"])
     ):
         return 1

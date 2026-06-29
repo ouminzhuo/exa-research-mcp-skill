@@ -7,7 +7,7 @@ The workflow separates writers, reviewers, synthesizers, and executive compressi
 - Writer agents collect and structure evidence for a specific domain.
 - Reviewer agents challenge evidence quality and contradictions.
 - The main/orchestrator agent owns rich master JSON aggregation, the canonical project ledger, and source-to-final continuity.
-- Synthesis agents combine only reviewed findings, the latest validated master JSON, and the canonical ledger into decision-useful outputs in the order: wind project ledger, participant/competitor map, then sales judgment.
+- Synthesis agents combine only reviewed findings, the latest validated master JSON, and the canonical ledger into decision-useful outputs in the order: wind project ledger, participant/competitor map, procurement-window/factual relevance view, then optional sales judgment for a separate brief.
 - Executive agents compress reviewed conclusions into management-ready judgments only after the final backpropagation pass.
 
 ## Heavy Execution Topology
@@ -27,7 +27,7 @@ Heavy Workflow uses 14 logical execution roles:
 9. `finance_bankability_worker`: MDB/DFI finance, project finance, guarantees, FX/indexation, sponsor financials, IRR/ROE where supportable, and bankability constraints.
 10. `grid_storage_worker`: transmission, substations, grid-code, curtailment, balancing, storage, hybrid constraints, and interconnection risk.
 11. `adjacent_opportunity_worker`: solar, BESS, hydrogen, ammonia, methanol, green-power demand, I-REC, CBAM, and industrial offtake only where they alter wind value, PPA, grid, procurement, or sales entry.
-12. `product_fit_sales_worker`: Mingyang/MySE fit, priority accounts, procurement windows, current OEM status, route-to-entry, and sales-action hypotheses.
+12. `product_fit_sales_worker`: Mingyang/MySE factual fit, priority accounts, procurement windows, current OEM status, decision-chain clues, relevance rationale, and optional sales-action hypotheses for separate briefs.
 13. `verification_agent`: independently verifies critical fields through Chrome MCP, Exa fetch, or original files and writes source-audit artifacts.
 14. `reflection_reviewer`: independently scores stage quality, identifies critical blockers, and writes executable gap tasks.
 
@@ -81,7 +81,7 @@ Maps OEM, EPC, BESS, developer, and localization competitors, including installe
 
 ### `product_fit_agent`
 
-Evaluates Mingyang/MySE product fit against wind regime, terrain, grid, logistics, localization, turbine class, hybrid/storage demand, O&M, and bankability constraints. It must tie recommendations to specific projects, actors, MW, procurement windows, and entry routes.
+Evaluates Mingyang/MySE factual relevance and product fit against wind regime, terrain, grid, logistics, localization, turbine class, hybrid/storage demand, O&M, and bankability constraints. It must tie relevance statements to specific projects, actors, MW, procurement windows, evidence confidence, and pending verification. Recommendations belong only in separate action briefs when requested.
 
 ## Verification Agent
 
@@ -95,7 +95,7 @@ It writes source-audit results and field-level verification notes. It does not w
 
 ### `skeptic_agent`
 
-Challenges writer outputs. It checks source strength, contradictions, duplicate project records, COD conflicts, status conflicts, phase confusion, unjustified confidence levels, generic company profiles, adjacent-topic drift, and sales conclusions that lack actor/project/MW/timing/entry route. It cannot write final conclusions; it produces review decisions and required fixes.
+Challenges writer outputs. It checks source strength, contradictions, duplicate project records, COD conflicts, status conflicts, phase confusion, unjustified confidence levels, generic company profiles, adjacent-topic drift, V4 full-report structure, recommendation leakage inside the full report, and sales conclusions in separate briefs that lack actor/project/MW/timing/entry route. It cannot write final conclusions; it produces review decisions and required fixes.
 
 For Heavy Workflow, the reviewer also acts as `reflection_reviewer` and must score stage quality:
 
@@ -124,7 +124,7 @@ The reviewer must not release a stage merely because the score improved. A stage
 
 ### `synthesis_agent`
 
-Combines only reviewed findings into market judgment, confirmed pipeline, risk view, product-fit judgment, and sales-action plan. It must preserve evidence traceability and avoid unsupported narrative claims.
+Combines only reviewed findings into market-status judgment, confirmed pipeline, risk view, product-fit or factual relevance judgment, procurement-window facts, and optional sales-action plan for separate briefs. It must preserve evidence traceability and avoid unsupported narrative claims.
 
 It must read rich project fields from the latest validated master JSON and use the canonical pipeline ledger for identity, dedupe, status buckets, and watchlist/rejected state.
 

@@ -20,7 +20,7 @@ User request
 
 The main session owns orchestration, schema, master JSON aggregation, deduplication, canonical project ledger, source-to-final continuity, report writing, and validation. Research workers own one narrow dimension and must not stream raw pages back into chat.
 
-For wind-market work, file mode should maximize search breadth while keeping final judgment narrow. Workers may discover many project-like records and adjacent opportunity facts, but the main session must first preserve them in `candidate_project_pool.json`, then classify them through the master JSON and ledger before any final count, MW total, participant ranking, or sales action is written.
+For wind-market work, file mode should maximize search breadth while keeping final judgment narrow. Workers may discover many project-like records and adjacent opportunity facts, but the main session must first preserve them in `candidate_project_pool.json`, then classify them through the master JSON and ledger before any final count, MW total, participant ranking, procurement-window statement, or separate sales action is written.
 
 ## Two-Stage Search Discipline
 
@@ -105,6 +105,8 @@ Use this priority boundary before scheduling follow-up searches:
 | P3 | Storage, solar, hydrogen, ammonia, methanol, carbon/I-REC/CBAM, industrial offtake | Expand only if the source states a wind opportunity impact |
 | P4 | Broad energy macro without wind linkage | Record as deferred background; do not expand |
 
+P0/P1 entries also require execution/evaluation separation before ledger admission. Assign `executor_role` and a different `evaluator_role`. The executor writes the collection/synthesis artifact; the evaluator writes an independent verification artifact and sets `evaluation_status`. P2/P3/P4 do not need this hard gate unless promoted to P0/P1.
+
 ## Child Agent Prompt Template
 
 Use only when the host allows child agents and the user has requested/authorized parallel research.
@@ -123,6 +125,7 @@ Write an array of records. Each record must include:
 - recallEntryCategory when the record came from a Recall Mode entry point
 - frontierEntityId when the record came from `search_frontier.json`
 - priority_level, wind_linkage, expansion_allowed, defer_reason, and promote_reason when the record creates or updates a frontier entry
+- for P0/P1 frontier entries: evaluation_required, executor_role, evaluator_role, execution_artifact, evaluation_artifact, evaluation_status, and evaluation_notes
 - searchPass or searchPasses
 - sourceTrace note explaining how this record should map into the canonical ledger or policy/legal backtrace
 - criticalFieldVerification for confirmed-pipeline fields verified by Chrome MCP or original-file fetch
@@ -169,12 +172,19 @@ Each canonical project should include:
 - dedupe key and duplicate-resolution notes;
 - merged depth records and sourceTrace entries;
 - criticalFieldVerification for present key fields, using `chrome-mcp`, `exa-fetch`, or `manual-file`;
+- for P0/P1 candidates, role-separated execution/evaluation metadata from `frontier_execution_review.json`;
 - evidence layers such as `mou-framework`, `ppa-signed`, `financing-closed`, `construction-started`, or `cod-operational`;
 - ledger status as `operational`, `financing_closed`, `under_construction`, `ppa_signed`, `decree_backed`, `mou_or_early_stage`, `watchlist`, `duplicate`, `rejected`, or `unresolved`;
 - evidence grade;
 - confirmed-pipeline eligibility and exclusion reason when not eligible.
 
 No chapter may maintain an independent project list after aggregation. Chapters read rich report fields from the master JSON and use the ledger for canonical IDs, status buckets, dedupe decisions, and watchlist/rejected/unresolved state. If a new chapter discovers a project candidate, alias, or richer field, it must update the candidate pool and master JSON first, refresh the ledger, then refresh synthesis and summary.
+
+P0/P1 ledger admission:
+
+- `passed`: may enter the appropriate ledger status when all other source/evidence gates pass.
+- `passed_with_gaps`: may enter watchlist/unresolved or downgraded fields, but not confirmed capacity totals.
+- `blocked` or `pending`: cannot enter confirmed totals and must carry a blocker/gap reason.
 
 ## Critical Field Verification
 

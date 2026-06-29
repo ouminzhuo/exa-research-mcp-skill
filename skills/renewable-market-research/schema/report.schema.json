@@ -99,8 +99,13 @@
           "category": {
             "enum": [
               "sales_action",
+              "capacity_treatment",
+              "procurement_window",
+              "factual_relevance",
               "product_fit",
               "risk_judgment",
+              "pending_verification",
+              "status_description",
               "executive_decision",
               "appendix_only"
             ]

@@ -112,12 +112,13 @@ python .\skills\renewable-market-research\scripts\search_orchestration.py plan `
 - `data/renewable-market/{slug}-discovered_entries.json`
 - `data/renewable-market/{slug}-candidate_project_pool.json`
 - `data/renewable-market/{slug}-pipeline-ledger.json`
+- `data/renewable-market/{slug}-frontier_execution_review.json`
 - `data/renewable-market/{slug}-search_coverage_matrix.md`
 - `data/renewable-market/{slug}-frontier_convergence.json`
 - `data/renewable-market/{slug}-report.md`
 - `data/renewable-market/{slug}-lite.md`
 
-进入正式报告前，必须确认：Recall 已完成至少 5 轮；所有 P0/P1 frontier 已搜索、分类或明确 deferred；历史 baseline seed 没有静默消失；政府/法令、IFI、开发商、OEM/EPC、中文、本地语言权威来源都已尝试；连续两轮没有新增 P0/P1 高价值入口；容量汇总来自 ledger，而不是叙述笔记。
+进入正式报告前，必须确认：Recall 已完成至少 5 轮；所有 P0/P1 frontier 已搜索、分类或明确 deferred；P0/P1 已有执行/评估分离的 artifact 且 `evaluation_status` 允许入账；历史 baseline seed 没有静默消失；政府/法令、IFI、开发商、OEM/EPC、中文、本地语言权威来源都已尝试；连续两轮没有新增 P0/P1 高价值入口；容量汇总来自 ledger，而不是叙述笔记。
 
 ### `effective-harnesses`
 

@@ -29,8 +29,8 @@ Return or write machine-readable JSON with this shape:
 - Separate verified facts, assumptions, and inference.
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
-- Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
-- Enforce the operating order: wind first, ledger first, sales judgment last.
+- Convert important facts into report implications: project status, capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
+- Enforce the operating order: wind first, ledger first, full report descriptive, strategy/action briefs separate.
 - Maintain source-to-final continuity: depth records -> rich master JSON -> canonical project ledger -> synthesis -> final report.
 - Require official/local-language search plus English, and ensure required search passes are visible in depth records.
 - Preserve broad search coverage while forcing final project counts, MW totals, and opportunity claims through confirmed/watchlist/duplicate/rejected ledger buckets.
@@ -46,14 +46,17 @@ Return or write machine-readable JSON with this shape:
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
 - Build or refresh the rich master JSON first, then derive or refresh the canonical project ledger before synthesis and final report writing.
-- Require a participant-role matrix before final writing: each material owner, developer, OEM, EPC, financier, and channel actor must be tied to project role, MW exposure, procurement influence, relationship strength, and sales relevance.
+- Require a participant-role matrix before final writing: each material owner, developer, OEM, EPC, financier, and channel actor must be tied to project role, MW exposure, procurement influence, relationship strength, factual relevance, and evidence confidence.
 - Require report writers to cross-read project depth records before writing cards or deep-dive chapters. If depth contains richer project-card fields than the master JSON, update the master JSON and rerun integrity validation first.
-- Keep storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial offtake subordinate to wind-market judgment; include them only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry.
+- Keep storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial offtake subordinate to wind-market status; include them only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, bankability, or procurement-window facts.
 - Trigger a summary/conclusion backpropagation pass after downstream chapter, ledger, or synthesis updates.
 - Require `chrome-mcp`, `exa-fetch`, or `manual-file` verification for confirmed-pipeline critical fields before final report writing.
 - For Heavy Workflow, assign the 14 logical roles from `workflow.md` and `agent_roles.md`; record collapsed/sequential lanes when the host cannot spawn real child agents.
 - Require the verification agent to write source-audit artifacts before the reviewer scores evidence, ledger, or report stages.
 - Require the reviewer to write gap tasks with owner lane, missing artifact, required evidence method, and acceptance criterion whenever a stage fails.
+- Require full-report writers to follow `references/full-report-v4.md` and keep recommendations out of the full report. If recommendations are needed, assign them to a separate executive/action brief.
+- Enforce the V4 generation order before full-report prose: candidate project pool, source trace/evidence table, project ledger, capacity reconciliation, participant ledger, OEM competition matrix, procurement window table, detailed project cards, full report, then lite report.
+- Require `scripts/validate_market_integrity.py` with `--project-ledger`, `--project-cards`, `--evidence-table`, and `--full-report` before releasing the full report. Nonzero V4 gate gaps block release.
 
 ## Prohibited Actions
 
@@ -63,7 +66,7 @@ Return or write machine-readable JSON with this shape:
 - Do not use a single weak media source to support a high-confidence claim.
 - Do not introduce cross-country comparisons unless the user explicitly asks for a benchmark.
 - Do not let adjacent-energy material displace wind project pipeline, market participants, OEM competition, or procurement-window analysis.
-- Do not accept generic company profiles in final deliverables unless the company is tied to specific projects, roles, MW exposure, procurement influence, or sales actions.
+- Do not accept generic company profiles in final deliverables unless the company is tied to specific projects, roles, MW exposure, procurement influence, factual relevance, or pending verification.
 - Do not overwrite other agents' files or expand beyond the assigned scope without recording the reason.
 - Do not let chapters maintain separate project pipeline tables that bypass the canonical ledger.
 - Do not let final reports use `{slug}-pipeline-ledger.json` as a substitute for the rich master JSON.

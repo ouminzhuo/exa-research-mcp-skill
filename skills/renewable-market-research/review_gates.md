@@ -6,7 +6,7 @@ Final outputs must pass these gates before release.
 
 Rules:
 
-- Final summaries, conclusions, project counts, capacity totals, and recommendations must trace to the latest canonical project ledger or reviewed synthesis.
+- Final summaries, conclusions, project counts, capacity totals, procurement-window statements, and any separate recommendations must trace to the latest canonical project ledger or reviewed synthesis.
 - The executive summary must be written or refreshed after all downstream chapters and project ledger changes are complete.
 - No chapter may maintain a separate project pipeline table that diverges from `{slug}-pipeline-ledger.json` or the master JSON.
 - Every final project claim must include a source trace from depth record -> canonical ledger -> synthesis/report section.
@@ -16,9 +16,10 @@ Rules:
 Pass criteria:
 
 - `metadata.sourceToFinal` records the pipeline ledger path, ledger update time, summary backpropagation time, and whether final claims were checked against the ledger.
-- The report's executive summary, project cards or compact project index, risk section, and sales-action section use the same project count, capacity totals, status buckets, and key caveats.
+- The report's executive summary, project cards or compact project index, procurement-window section, risk section, and source-confidence appendix use the same project count, capacity totals, status buckets, and key caveats.
 - Any changed downstream chapter has either updated the summary or recorded why the summary is unaffected.
 - `scripts/validate_market_integrity.py --depth-dir ...` returns no `depthPropagationGaps` or `reportCardFieldGaps`.
+- `scripts/validate_market_integrity.py --project-ledger ... --project-cards ... --evidence-table ... --full-report ...` returns a `v4GateSummary` with zero gaps for project ledger fields, project-card completeness, capacity reconciliation, evidence boundary, strategy leakage, and baseline inheritance.
 
 Remediation:
 
@@ -100,25 +101,25 @@ Remediation:
 
 Rules:
 
-- Every important fact must be converted into a business implication.
-- Business implications must support sales action, product-fit judgment, risk judgment, or executive decision-making.
+- Every important fact must be converted into a report implication.
+- Report implications must support project-status interpretation, capacity treatment, procurement-window clarity, product-fit relevance, risk judgment, pending verification, or executive decision context.
 - Non-decision-useful information should move to appendix.
 - A fact is not important merely because it is interesting; it must affect market judgment, pipeline conversion, product fit, risk, timing, or account strategy.
-- Market participants must be tied to projects, MW exposure, role, procurement influence, relationship strength, or sales entry route. Generic company profiles do not pass.
-- Adjacent opportunities such as storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake pass only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry.
-- Sales recommendations must name actor, project or portfolio, MW scale, decision timing, current OEM status, procurement route, confidence, and next action.
+- Market participants must be tied to projects, MW exposure, role, procurement influence, relationship strength, factual relevance, or pending verification. Generic company profiles do not pass.
+- Adjacent opportunities such as storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake pass only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, bankability, or procurement-window facts.
+- In the V4 full report, do not write recommended actions. Use procurement-window, decision-chain, Mingyang/MySE relevance, risk, and pending-verification tables. If the user requested a separate action brief, sales recommendations must name actor, project or portfolio, MW scale, decision timing, current OEM status, procurement route, confidence, and next action.
 
 Pass criteria:
 
-- Each key finding has at least one implication category: `sales_action`, `product_fit`, `risk_judgment`, `executive_decision`, or `appendix_only`.
-- The final report contains a concrete next-action list.
-- The final report includes a participant-role matrix or equivalent structured section for owners/developers, OEMs, EPC/finance actors, and priority sales targets.
+- Each key finding has at least one implication category: `capacity_treatment`, `procurement_window`, `factual_relevance`, `product_fit`, `risk_judgment`, `pending_verification`, `executive_decision`, or `appendix_only`.
+- The V4 full report contains procurement-window and pending-verification tables instead of a recommended-action list.
+- The final report includes a participant-role matrix or equivalent structured section for owners/developers, OEMs, EPC/finance actors, financiers, O&M actors, and material decision-chain participants.
 
 Remediation:
 
 - Add implication text.
 - Move low-value information to appendix.
-- Remove narrative filler.
+- Remove narrative filler and recommendation leakage from the full report.
 - Convert generic participant descriptions into project-linked role and procurement-influence records.
 
 ## 5. Reflection Gate
@@ -128,7 +129,8 @@ Rules:
 - The reflection/reviewer agent must review independently from the worker that produced the artifact.
 - Reflection applies after four stages in Heavy Workflow: search plan, evidence/depth collection, ledger aggregation, and report drafting.
 - Score improvement alone is not enough to advance. A stage must meet its threshold and have zero critical blockers.
-- Critical blockers include: missing mandatory search lane, confirmed critical fields supported only by discovery snippets, unreconciled duplicate projects, confirmed/watchlist leakage, missing source-to-final trace, stale executive summary, missing 15-chapter report structure, missing project-card fields without gap notes, generic participant profiles, or benchmark sections included without explicit request.
+- Critical blockers include: missing mandatory search lane, confirmed critical fields supported only by discovery snippets, unreconciled duplicate projects, confirmed/watchlist leakage, missing source-to-final trace, stale executive summary, missing V4 0-16 full-report structure, missing full project ledger, missing project-card fields without gap notes, recommendation leakage inside the full report, generic participant profiles, or benchmark sections included without explicit request.
+- V4 gate blockers include nonzero `projectLedgerFieldGaps`, `projectCardCompletenessGaps`, `capacityReconciliationGaps`, `evidenceBoundaryGaps`, `strategyRecommendationGaps`, or `baselineInheritanceGaps` in `{slug}-integrity.json`.
 - If a stage fails, the reviewer must write executable gap tasks with owner lane, missing artifact, required evidence method, and acceptance criterion.
 
 Default score thresholds:

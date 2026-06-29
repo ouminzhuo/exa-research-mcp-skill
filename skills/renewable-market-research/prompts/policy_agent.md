@@ -29,7 +29,7 @@ Return or write machine-readable JSON with this shape:
 - Separate verified facts, assumptions, and inference.
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
-- Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Convert important facts into report implications: project status, capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
 - Trace targets, tariffs, auction volumes, local-content rules, and capacity goals back to original laws, decrees, orders, auction documents, regulator notices, or grid/operator documents where possible.
 - Keep policy target, official speech, ministry update, auction result, PPA tariff, FIT/subsidy, and grid-connection rule as separate evidence buckets. Do not merge them into one undifferentiated policy narrative.
 - Tie policy and tariff findings back to wind project pipeline, procurement timing, project economics, and sales opportunity.

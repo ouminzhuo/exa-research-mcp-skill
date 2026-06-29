@@ -4,6 +4,16 @@ param(
 
     [string]$DepthDir,
 
+    [string]$ProjectLedger,
+
+    [string]$ProjectCards,
+
+    [string]$EvidenceTable,
+
+    [string]$CandidatePool,
+
+    [string]$FullReport,
+
     [string]$Output,
 
     [switch]$Strict
@@ -16,6 +26,21 @@ $pythonScript = Join-Path $scriptDir "validate_market_integrity.py"
 $argsForPython = @($MarketJson)
 if ($DepthDir) {
     $argsForPython += @("--depth-dir", $DepthDir)
+}
+if ($ProjectLedger) {
+    $argsForPython += @("--project-ledger", $ProjectLedger)
+}
+if ($ProjectCards) {
+    $argsForPython += @("--project-cards", $ProjectCards)
+}
+if ($EvidenceTable) {
+    $argsForPython += @("--evidence-table", $EvidenceTable)
+}
+if ($CandidatePool) {
+    $argsForPython += @("--candidate-pool", $CandidatePool)
+}
+if ($FullReport) {
+    $argsForPython += @("--full-report", $FullReport)
 }
 if ($Output) {
     $argsForPython += @("--output", $Output)

@@ -1,7 +1,7 @@
 interface:
   display_name: "Renewable Market Research"
-  short_description: "Two-stage renewable market workflow with bounded dynamic-frontier recall, ledger verification, sales actions, and executive briefs"
-  default_prompt: "Use $renewable-market-research to run a two-stage renewable market workflow: first run at least five bounded high-recall search-frontier rounds from seed templates, baseline entities, authority sources, and newly discovered entries, with P0/P1 automatic expansion and P2-P4 drift control; then verify, dedupe, reconcile the project ledger, generate sales actions, and produce full/lite reports plus an executive brief."
+  short_description: "Two-stage renewable market workflow with dynamic-frontier recall, ledger verification, and V4 full country wind-market status reports"
+  default_prompt: "Use $renewable-market-research to run a two-stage renewable market workflow: first run bounded high-recall search-frontier rounds, then verify, dedupe, reconcile the project ledger, and produce a V4 full country wind-market status report plus lite or executive outputs when needed."
 dependencies:
   tools:
     - type: "mcp"

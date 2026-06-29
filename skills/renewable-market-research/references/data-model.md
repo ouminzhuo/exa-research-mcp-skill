@@ -21,6 +21,10 @@ data/renewable-market/
 Also produce:
 
 - `{country}-{technology}-pipeline-ledger.json`: compact canonical project registry for identity, dedupe, evidence layers, and confirmed/watchlist/rejected state.
+- `{country}-{technology}-project_ledger.json`: V4 full project ledger using `schema/project-ledger.schema.json`; this is the report database core.
+- `{country}-{technology}-project_cards.json`: complete V4 project cards using `schema/project-card.schema.json`; report prose may summarize, but this file must preserve all card fields.
+- `{country}-{technology}-evidence_table.json`: conclusion-level evidence table using `schema/evidence-table.schema.json`; this is required for evidence-boundary checks.
+- `{country}-{technology}-participant_ledger.json`, `{country}-{technology}-oem_competition.json`, `{country}-{technology}-procurement_window.json`, `{country}-{technology}-risk_matrix.json`, and `{country}-{technology}-tracking_watchlist.json` when enough data exists.
 - `{country}-{technology}-integrity.json`: output from `scripts/validate_market_integrity.py`.
 
 ## File Roles and Source Priority
@@ -30,12 +34,43 @@ Also produce:
 | `{slug}.json` | Rich master data source. It must preserve the full schema fields needed for project cards, market indicators, developer deep dives, OEM/specs, logistics, policy, tariff, carbon, and conclusions. | Yes. This is the primary report source after validation. |
 | `depth/*.json` | Detailed per-dimension evidence and raw structured findings. Use it to cross-read card/chapter details and backfill the master JSON. | Yes as fallback/evidence, but normalize into `{slug}.json` before final writing. |
 | `{slug}-pipeline-ledger.json` | Canonical project registry for dedupe, aliases, evidence layers, confirmed/watchlist/rejected decisions, and source-trace control. | No. It is intentionally compact and must not replace the rich master JSON for report cards. |
+| `{slug}-project_ledger.json` | V4 full ledger with capacity MW, Opportunity MW, count flags, owner/SPV/equity, OEM/procurement/turbine, EPC/O&M, finance, PPA/tariff, COD, evidence, confidence, pending verification, and Mingyang relevance. | Yes for ledger tables and capacity reconciliation. |
+| `{slug}-project_cards.json` | Complete project-card objects. Unknown values are allowed only as explicit `待核`, `unavailable`, `not found`, or equivalent markers. | Yes for Chapter 6/project-card appendix. |
+| `{slug}-evidence_table.json` | Conclusion-level evidence records linking claims to source grade, direct proof, confidence, related field, and pending verification action. | Yes for Chapter 16/source-confidence appendix. |
 
 Source priority for writing reports:
 
 1. Read `{slug}.json` for report-ready fields.
 2. Cross-read the matching `depth/*.json` records named in `sourceTrace` or `mergedFromDepthRecords`.
 3. Use `{slug}-pipeline-ledger.json` only for canonical project identity, status grouping, dedupe decisions, evidence layers, and watchlist/rejected state.
+4. Use `{slug}-project_ledger.json`, `{slug}-project_cards.json`, and `{slug}-evidence_table.json` as the V4 gate artifacts before final report prose is released.
+
+## V4 Gate Artifacts
+
+The full report generation order is fixed:
+
+```text
+candidate_project_pool
+  -> source_trace / evidence_table
+  -> project_ledger
+  -> capacity_reconciliation
+  -> participant_ledger
+  -> oem_competition_matrix
+  -> procurement_window_table
+  -> detailed_project_cards
+  -> full_report
+  -> lite_report
+```
+
+Do not let an agent write `{slug}-report.md` directly from notes or depth files. The report writer reads the gate artifacts and expresses the current market status; it does not become the database.
+
+The validator can enforce the V4 gates:
+
+```text
+python skills/renewable-market-research/scripts/validate_market_integrity.py data/renewable-market/{slug}.json --depth-dir data/renewable-market/depth --candidate-pool data/renewable-market/{slug}-candidate_project_pool.json --project-ledger data/renewable-market/{slug}-project_ledger.json --project-cards data/renewable-market/{slug}-project_cards.json --evidence-table data/renewable-market/{slug}-evidence_table.json --full-report data/renewable-market/{slug}-report.md --output data/renewable-market/{slug}-integrity.json
+```
+
+The `v4GateSummary` in `{slug}-integrity.json` must show zero gaps before release, or the report must explicitly remain in draft/gap status.
 
 ## Rich Field Propagation Contract
 

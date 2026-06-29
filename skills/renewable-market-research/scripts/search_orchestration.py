@@ -359,6 +359,14 @@ FRONTIER_CLASSIFICATIONS = [
 ]
 
 HIGH_PRIORITY_FRONTIER_LEVELS = ["P0", "P1"]
+EVALUATION_REQUIRED_PRIORITY_LEVELS = ["P0", "P1"]
+FRONTIER_EVALUATION_STATUSES = [
+    "not_required",
+    "pending",
+    "passed",
+    "passed_with_gaps",
+    "blocked",
+]
 
 FRONTIER_PRIORITY_LEVELS = [
     {
@@ -411,6 +419,28 @@ FRONTIER_BOUNDARY_POLICY = {
     "defaultDeferred": ["P4"],
     "promotionRule": "Promote P2/P3 entries to P0/P1 only when a source links them to wind project capacity/status, PPA/tariff, grid, offtake, procurement, OEM/EPC, or project finance.",
     "reportRule": "P4 background and unlinked P3 adjacent topics stay out of the report body unless synthesis proves direct wind relevance.",
+}
+
+P0_P1_EXECUTION_EVALUATION_POLICY = {
+    "requiredForPriorityLevels": EVALUATION_REQUIRED_PRIORITY_LEVELS,
+    "notRequiredForPriorityLevels": ["P2", "P3", "P4"],
+    "principle": "P0/P1 entries require role-separated execution and evaluation before ledger admission; P2-P4 do not unless promoted.",
+    "roleSeparation": "executor_role must differ from evaluator_role. If the host cannot spawn real child agents, run the two roles as separate passes and write separate artifacts.",
+    "requiredBeforeLedgerAdmission": [
+        "executor_role is assigned",
+        "evaluator_role is assigned",
+        "executor_role != evaluator_role",
+        "execution_artifact is present",
+        "evaluation_artifact is present",
+        "evaluation_status is passed or passed_with_gaps",
+    ],
+    "ledgerAdmissionRule": {
+        "passed": "may enter the appropriate ledger status when source/evidence requirements are also met",
+        "passed_with_gaps": "may enter watchlist/unresolved or downgraded fields, but not confirmed capacity totals",
+        "blocked": "must remain unresolved/rejected/watchlist with blocker reason; cannot enter confirmed totals",
+        "pending": "cannot enter the ledger except as an explicitly pending candidate",
+    },
+    "allowedEvaluationStatuses": FRONTIER_EVALUATION_STATUSES,
 }
 
 PRIORITY_MAX_EXPANSION_DEPTH = {
@@ -512,6 +542,15 @@ FRONTIER_ENTITY_CONTRACT = {
         "max_expansion_depth",
         "defer_reason",
         "promote_reason",
+        "evaluation_required",
+        "role_separation_required",
+        "executor_role",
+        "evaluator_role",
+        "execution_artifact",
+        "evaluation_artifact",
+        "evaluation_status",
+        "evaluation_notes",
+        "ledger_admission_blocked_reason",
         "search_round",
         "queries_generated",
         "search_status",
@@ -524,10 +563,13 @@ FRONTIER_ENTITY_CONTRACT = {
     "priorityLevels": FRONTIER_PRIORITY_LEVELS,
     "highPriorityLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
     "boundaryPolicy": FRONTIER_BOUNDARY_POLICY,
+    "executionEvaluationPolicy": P0_P1_EXECUTION_EVALUATION_POLICY,
+    "evaluationStatuses": FRONTIER_EVALUATION_STATUSES,
     "notes": [
         "Search entry names are not assumed complete at initialization.",
         "Every discovered project, developer, SPV, OEM, EPC, lender, law/decree, offtaker, grid entity, region, authority source, and adjacent-opportunity signal is recorded unless it is a normalized duplicate.",
         "P0/P1 entries expand automatically and block Verification Mode while pending; P2 is one-hop; P3 requires explicit wind linkage; P4 is deferred background by default.",
+        "P0/P1 entries also require role-separated execution and evaluation artifacts before ledger admission; P2-P4 do not unless promoted.",
     ],
 }
 
@@ -738,6 +780,104 @@ LEDGER_STATUSES = [
     "unresolved",
 ]
 
+FULL_REPORT_ARCHITECTURE = {
+    "id": "v4-country-wind-market-status",
+    "reference": "skills/renewable-market-research/references/full-report-v4.md",
+    "positioning": (
+        "Country wind-market status master report; not a strategy recommendation memo "
+        "and not the lite delivery version."
+    ),
+    "recommendationPolicy": (
+        "Keep go/no-go, factory-build, bid-pricing, and recommended Mingyang/MySE actions "
+        "out of the full report. Put recommendations in a separate executive/action brief "
+        "only when requested."
+    ),
+    "chapters": [
+        "0. Report scope and evidence rules",
+        "1. Executive summary",
+        "2. National power fundamentals",
+        "3. Policy, permitting, development flow, and PPA mechanism",
+        "4. Market capacity definitions and project segmentation",
+        "5. Full project ledger",
+        "6. Key project cards",
+        "7. Developers, owners, and decision-right structure",
+        "8. Wind resource, geography, and turbine-fit inference",
+        "9. OEM competition landscape",
+        "10. EPC, financiers, O&M, and supply-chain network",
+        "11. Localization and industrial policy status",
+        "12. Grid, storage, interconnection, and curtailment constraints",
+        "13. Tariff, project economics, and bankability status",
+        "14. Procurement window and decision-chain status",
+        "15. Risk matrix and constraint conditions",
+        "16. Data-source and conclusion-confidence appendix",
+    ],
+    "ledgerRequiredFieldsReference": "full-report-v4.md#5-full-project-ledger",
+    "projectCardRequiredFieldsReference": "full-report-v4.md#6-key-project-cards",
+}
+
+V4_REPORT_GENERATION_PIPELINE = [
+    {
+        "order": 1,
+        "id": "candidate_project_pool",
+        "output": "candidate_project_pool.json",
+        "gate": "baseline_inheritance_gate",
+    },
+    {
+        "order": 2,
+        "id": "source_trace_evidence_table",
+        "output": "source_trace.json + evidence_table.json",
+        "gate": "source_trace_evidence_boundary_gate",
+    },
+    {
+        "order": 3,
+        "id": "project_ledger",
+        "output": "project_ledger.json or {slug}-pipeline-ledger.json",
+        "gate": "project_ledger_schema_gate",
+    },
+    {
+        "order": 4,
+        "id": "capacity_reconciliation",
+        "output": "capacity_reconciliation.json/md",
+        "gate": "capacity_reconciliation_gate",
+    },
+    {
+        "order": 5,
+        "id": "participant_ledger",
+        "output": "participant_ledger.json",
+        "gate": "participant_project_linkage_gate",
+    },
+    {
+        "order": 6,
+        "id": "oem_competition_matrix",
+        "output": "oem_competition.json",
+        "gate": "oem_opportunity_consistency_gate",
+    },
+    {
+        "order": 7,
+        "id": "procurement_window_table",
+        "output": "procurement_window.json",
+        "gate": "procurement_window_gate",
+    },
+    {
+        "order": 8,
+        "id": "detailed_project_cards",
+        "output": "project_cards.json",
+        "gate": "project_card_completeness_gate",
+    },
+    {
+        "order": 9,
+        "id": "full_report",
+        "output": "{slug}-report.md",
+        "gate": "no_strategy_recommendation_gate",
+    },
+    {
+        "order": 10,
+        "id": "lite_report",
+        "output": "{slug}-lite.md",
+        "gate": "lite_from_full_gate",
+    },
+]
+
 WORKFLOW_PHASES = [
     {
         "id": "phase-0-initialize",
@@ -762,7 +902,7 @@ WORKFLOW_PHASES = [
     {
         "id": "phase-4-ledger-build",
         "name": "Ledger Build",
-        "output": "project_ledger JSON/CSV",
+        "output": "project_ledger JSON/CSV before any report prose",
     },
     {
         "id": "phase-5-reconciliation",
@@ -772,12 +912,12 @@ WORKFLOW_PHASES = [
     {
         "id": "phase-6-commercial-synthesis",
         "name": "Commercial Synthesis",
-        "output": "participant map, OEM/EPC competition, finance/risk view, sales paths",
+        "output": "participant map, OEM/EPC competition, finance/risk view, procurement-window and factual relevance view",
     },
     {
         "id": "phase-7-report-generation",
         "name": "Report Generation",
-        "output": "full report, executive brief, PDF when available",
+        "output": "V4 full report, lite report, optional executive/action brief, PDF when available",
     },
 ]
 
@@ -807,6 +947,14 @@ SCHEDULER_GATES = {
         "rule": "Every new non-duplicate entity is recorded, but only entries allowed by frontier_priority_gate, wind_relevance_gate, and expansion_depth_gate are enqueued for a later search round.",
         "writes": "search_frontier.json",
     },
+    "p0_p1_execution_evaluation_gate": {
+        "rule": "P0/P1 entries must have role-separated execution and evaluation before ledger admission; P2-P4 do not require this unless promoted to P0/P1.",
+        "requiredPriorityLevels": EVALUATION_REQUIRED_PRIORITY_LEVELS,
+        "requiredBeforeLedgerAdmission": P0_P1_EXECUTION_EVALUATION_POLICY["requiredBeforeLedgerAdmission"],
+        "allowedEvaluationStatuses": ["passed", "passed_with_gaps"],
+        "roleSeparation": "executor_role != evaluator_role",
+        "writes": ["execution_artifact", "evaluation_artifact", "source_trace.json"],
+    },
     "historical_entry_retention_gate": {
         "rule": "Baseline seed entities from prior reports must be searched or explicitly classified; they must not silently disappear.",
         "allowedClassifications": ["confirmed", "watchlist", "duplicate", "rejected", "unresolved", "deferred"],
@@ -825,17 +973,112 @@ SCHEDULER_GATES = {
         "highPriorityLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
     },
     "verification_gate": {
-        "rule": "Ledger-admitted projects require sourceTrace, evidenceGrade, and field-level verification for present critical fields.",
+        "rule": "Ledger-admitted projects require sourceTrace, evidenceGrade, field-level verification for present critical fields, and P0/P1 execution/evaluation status passed or passed_with_gaps.",
         "verifiedMethods": ["chrome-mcp", "exa-fetch", "manual-file"],
+        "p0p1EvaluationStatusesAllowedForLedger": ["passed", "passed_with_gaps"],
+        "confirmedTotalsRequire": ["evaluation_status == passed", "confirmed_pipeline_eligibility == true"],
     },
     "capacity_sum_gate": {
         "rule": "Capacity totals must be computed from project_ledger, not manually copied into report prose.",
+    },
+    "project_ledger_schema_gate": {
+        "rule": "Every ledger project must include the V4 full project ledger fields, including Project ID, Alias Group ID, capacity MW, Opportunity MW, status basis, count flags, owner/SPV/equity, OEM/procurement/turbine, EPC/O&M, financiers, PPA/offtaker, tariff, COD/timeline, next milestone, decision maker, key evidence, field confidence, pending verification, Mingyang relevance, and main risks.",
+        "schema": "skills/renewable-market-research/schema/project-ledger.schema.json",
+        "blocks": ["capacity_reconciliation", "project_cards", "full_report"],
+    },
+    "capacity_reconciliation_gate": {
+        "rule": "Confirmed capacity, opportunity MW, and watchlist capacity must be recalculated from project_ledger. National targets are reported separately and must not be mixed into project pipeline capacity.",
+        "formula": {
+            "confirmedCapacityMW": "sum(capacityMW where countedInConfirmedCapacity == true)",
+            "opportunityCapacityMW": "sum(opportunityMW where countedInOpportunityCapacity == true)",
+            "watchlistCapacityMW": "sum(capacityMW where projectStage == watchlist)",
+            "nationalTargetCapacityMW": "separate policy/target field, never included in pipeline totals",
+        },
+        "validator": "scripts/validate_market_integrity.py --project-ledger ...",
+        "blocks": ["full_report", "lite_report"],
+    },
+    "project_card_completeness_gate": {
+        "rule": "Every key project card must preserve the complete V4 modules. Unknown values may be written as pending verification/unavailable, but fields cannot disappear.",
+        "schema": "skills/renewable-market-research/schema/project-card.schema.json",
+        "requiredModules": [
+            "basicInformation",
+            "ownerStructure",
+            "technicalPlan",
+            "commercialStructure",
+            "financingStructure",
+            "developmentFlow",
+            "engineeringSupplyChain",
+            "omArrangement",
+            "currentProgress",
+            "decisionChain",
+            "mingyangRelevance",
+            "risksAndConstraints",
+            "evidenceBoundary",
+        ],
+        "blocks": ["full_report"],
+    },
+    "evidence_boundary_gate": {
+        "rule": "Key conclusions must have conclusion-level evidence records, especially project stage, capacity, OEM award/status, tariff, financing close, PPA signing, procurement window, and Mingyang relevance.",
+        "schema": "skills/renewable-market-research/schema/evidence-table.schema.json",
+        "blocks": ["full_report", "lite_report", "executive_brief"],
+    },
+    "source_trace_evidence_boundary_gate": {
+        "rule": "Before project ledger, derived judgments, project cards, or report prose, source_trace.json must link critical claims back to source/depth records and evidence_table.json must carry conclusion-level evidence boundaries.",
+        "requires": ["source_trace.json", "evidence_table.json"],
+        "blocks": [
+            "project_ledger",
+            "capacity_reconciliation",
+            "participant_ledger",
+            "oem_competition_matrix",
+            "procurement_window_table",
+            "detailed_project_cards",
+            "full_report",
+            "lite_report",
+        ],
+    },
+    "participant_project_linkage_gate": {
+        "rule": "Participant ledger entries must tie owners, developers, EPCs, financiers, O&M actors, and channel actors to project role, MW exposure, procurement influence, evidence confidence, and pending verification. Generic company profiles do not pass.",
+        "blocks": ["full_report"],
+    },
+    "oem_opportunity_consistency_gate": {
+        "rule": "OEM competition and opportunity tables must reconcile with project_ledger OEM/procurement fields and cannot count locked/awarded OEM MW as unallocated opportunity MW.",
+        "blocks": ["procurement_window_table", "full_report"],
+    },
+    "procurement_window_gate": {
+        "rule": "Procurement-window records must name project, capacity, Opportunity MW, current stage, OEM status, RFQ/tender/NTP timing when known, decision maker, influencer, confidence, and pending verification.",
+        "blocks": ["full_report"],
+    },
+    "no_strategy_recommendation_gate": {
+        "rule": "Full report text must not contain final decision or action language such as should build factory, must enter, recommended bid, must bind EPC, or should invest resources. Rewrite as factual status, relevance, or pending verification.",
+        "blockedPatterns": ["应当建厂", "必须进入", "建议报价", "必须绑定", "应该投入资源"],
+        "blocks": ["full_report_release"],
+    },
+    "baseline_inheritance_gate": {
+        "rule": "Every candidate or historical baseline project must flow into confirmed, watchlist, duplicate, rejected, or unresolved outcomes. No candidate may silently disappear.",
+        "validator": "scripts/validate_market_integrity.py --candidate-pool ... --project-ledger ...",
+        "blocks": ["project_ledger_release", "full_report"],
+    },
+    "lite_from_full_gate": {
+        "rule": "Lite report must be derived from the validated full-report artifacts and cannot bypass the project ledger, project cards, capacity reconciliation, or evidence table.",
+        "blocks": ["lite_report_release"],
     },
     "duplicate_gate": {
         "rule": "Aliases and renamed phases must be merged or given explicit duplicate/rejected decisions.",
     },
     "opportunity_gate": {
         "rule": "OEM opportunity tables may include only projects where OEM is TBD, unconfirmed, undisclosed, or non-final framework.",
+    },
+    "full_report_v4_gate": {
+        "rule": "Full reports must follow the V4 0-16 country wind-market status structure, can be written only after the V4 pipeline artifacts pass gates, and must keep recommendations out of the full report.",
+        "reference": FULL_REPORT_ARCHITECTURE["reference"],
+        "pipeline": V4_REPORT_GENERATION_PIPELINE,
+        "requires": [
+            "report scope and evidence rules",
+            "full project ledger",
+            "key project cards",
+            "procurement-window and decision-chain status",
+            "source-confidence appendix",
+        ],
     },
 }
 
@@ -1027,6 +1270,51 @@ def local_context_for_entity(text: str, name: str, window: int = 160) -> str:
     return text[start:end]
 
 
+def recommended_executor_role(entity_type: str) -> str:
+    if entity_type in {"project", "spv"}:
+        return "pipeline_worker"
+    if entity_type == "developer":
+        return "owner_developer_worker"
+    if entity_type == "oem":
+        return "oem_competitor_worker"
+    if entity_type == "epc":
+        return "epc_logistics_localization_worker"
+    if entity_type == "finance":
+        return "finance_bankability_worker"
+    if entity_type in {"law_decree", "authority_source"}:
+        return "policy_law_tariff_worker"
+    if entity_type in {"offtaker", "grid_entity"}:
+        return "grid_storage_worker"
+    if entity_type == "region":
+        return "pipeline_worker"
+    if entity_type in {"supply_chain", "local_manufacturing", "logistics"}:
+        return "epc_logistics_localization_worker"
+    if entity_type == "adjacent_opportunity":
+        return "adjacent_opportunity_worker"
+    return "market_indicators_worker"
+
+
+def build_execution_evaluation_fields(priority_level: str, entity_type: str) -> dict[str, Any]:
+    evaluation_required = priority_level in EVALUATION_REQUIRED_PRIORITY_LEVELS
+    executor_role = recommended_executor_role(entity_type) if evaluation_required else ""
+    evaluator_role = "verification_agent" if evaluation_required else ""
+    return {
+        "evaluation_required": evaluation_required,
+        "role_separation_required": evaluation_required,
+        "executor_role": executor_role,
+        "evaluator_role": evaluator_role,
+        "execution_artifact": "",
+        "evaluation_artifact": "",
+        "evaluation_status": "pending" if evaluation_required else "not_required",
+        "evaluation_notes": "",
+        "ledger_admission_blocked_reason": (
+            "P0/P1 entries require role-separated execution and evaluation artifacts before ledger admission."
+            if evaluation_required
+            else ""
+        ),
+    }
+
+
 def build_frontier_priority_fields(
     name: str,
     entity_type: str,
@@ -1078,6 +1366,7 @@ def build_frontier_priority_fields(
     elif priority_level == "P3" and expansion_allowed:
         promote_reason = "Adjacent topic is linked to wind configuration, grid, PPA, offtake, procurement, or OEM opportunity."
 
+    execution_evaluation_fields = build_execution_evaluation_fields(priority_level, entity_type)
     return {
         "search_priority": search_priority,
         "priority_level": priority_level,
@@ -1087,6 +1376,7 @@ def build_frontier_priority_fields(
         "max_expansion_depth": max_depth,
         "defer_reason": defer_reason,
         "promote_reason": promote_reason,
+        **execution_evaluation_fields,
     }
 
 
@@ -1282,12 +1572,15 @@ def build_plan(
         "slug": slug,
         "toolLanes": TOOL_LANES,
         "workflowPhases": WORKFLOW_PHASES,
+        "fullReportArchitecture": FULL_REPORT_ARCHITECTURE,
+        "fullReportGenerationPipeline": V4_REPORT_GENERATION_PIPELINE,
         "seedEntitiesPath": f"data/renewable-market/{slug}-seed_entities.json",
         "searchFrontierPath": f"data/renewable-market/{slug}-search_frontier.json",
         "discoveredEntriesPath": f"data/renewable-market/{slug}-discovered_entries.json",
         "authoritySourceRegistryPath": f"data/renewable-market/{slug}-authority_sources.json",
         "searchCoverageMatrixPath": f"data/renewable-market/{slug}-search_coverage_matrix.md",
         "frontierConvergenceReportPath": f"data/renewable-market/{slug}-frontier_convergence.json",
+        "frontierExecutionReviewPath": f"data/renewable-market/{slug}-frontier_execution_review.json",
         "recallMode": {
             "minimumRecallRounds": MINIMUM_RECALL_ROUNDS,
             "frontierStallRoundsAfterMinimum": FRONTIER_STALL_ROUNDS,
@@ -1300,6 +1593,7 @@ def build_plan(
             "frontierPriorityLevels": FRONTIER_PRIORITY_LEVELS,
             "frontierBoundaryPolicy": FRONTIER_BOUNDARY_POLICY,
             "highPriorityFrontierLevels": HIGH_PRIORITY_FRONTIER_LEVELS,
+            "p0p1ExecutionEvaluationPolicy": P0_P1_EXECUTION_EVALUATION_POLICY,
             "authoritySourceCategories": AUTHORITY_SOURCE_CATEGORIES,
             "frontierConvergencePolicy": FRONTIER_CONVERGENCE_POLICY,
             "admissionRule": (
@@ -1317,13 +1611,15 @@ def build_plan(
         },
         "verificationMode": {
             "sourceTrace": f"data/renewable-market/{slug}-source_trace.json",
+            "frontierExecutionReview": f"data/renewable-market/{slug}-frontier_execution_review.json",
             "ledgerStatuses": LEDGER_STATUSES,
             "verifiedMethods": ["chrome-mcp", "exa-fetch", "manual-file"],
             "canEnterVerificationMode": {
                 "requires": FRONTIER_CONVERGENCE_POLICY["requiredBeforeVerification"],
                 "minimumRecallRounds": MINIMUM_RECALL_ROUNDS,
             },
-            "rule": "Final reports are generated from the reconciled ledger and rich master JSON, not raw recall notes.",
+            "ledgerAdmissionRequires": P0_P1_EXECUTION_EVALUATION_POLICY["requiredBeforeLedgerAdmission"],
+            "rule": "V4 full reports are generated from the reconciled ledger and rich master JSON, not raw recall notes.",
         },
         "schedulerGates": SCHEDULER_GATES,
         "dimensions": dimensions,
@@ -1336,8 +1632,17 @@ def build_plan(
             "candidateProjectPool": f"data/renewable-market/{slug}-candidate_project_pool.json",
             "developerProjectMap": f"data/renewable-market/{slug}-developer_project_map.json",
             "sourceTrace": f"data/renewable-market/{slug}-source_trace.json",
+            "frontierExecutionReview": f"data/renewable-market/{slug}-frontier_execution_review.json",
             "mainJson": f"data/renewable-market/{slug}.json",
             "pipelineLedger": f"data/renewable-market/{slug}-pipeline-ledger.json",
+            "projectLedger": f"data/renewable-market/{slug}-project_ledger.json",
+            "projectCards": f"data/renewable-market/{slug}-project_cards.json",
+            "participantLedger": f"data/renewable-market/{slug}-participant_ledger.json",
+            "oemCompetition": f"data/renewable-market/{slug}-oem_competition.json",
+            "procurementWindow": f"data/renewable-market/{slug}-procurement_window.json",
+            "evidenceTable": f"data/renewable-market/{slug}-evidence_table.json",
+            "riskMatrix": f"data/renewable-market/{slug}-risk_matrix.json",
+            "trackingWatchlist": f"data/renewable-market/{slug}-tracking_watchlist.json",
             "projectsCsv": f"data/renewable-market/{slug}.csv",
             "timelineCsv": f"data/renewable-market/{slug}-project-timeline.csv",
             "capacityReconciliationMd": f"data/renewable-market/{slug}-capacity_reconciliation.md",

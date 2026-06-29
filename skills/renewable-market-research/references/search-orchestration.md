@@ -71,6 +71,28 @@ High recall must be bounded by priority rather than early deletion. The schedule
 
 Promotion requires a source-level reason. A P2/P3/P4 entry may move up only when evidence links it to wind capacity, project status, PPA/tariff, grid, offtake, procurement, OEM/EPC, or project finance. Verification Mode cannot fix infinite frontier drift; this priority gate must run before scheduling follow-up searches.
 
+## P0/P1 Execution And Evaluation Gate
+
+P0/P1 entries require role-separated execution and evaluation before ledger admission. This is a hard gate for ledger build and final reporting, not a reason to delete candidates during Recall Mode.
+
+Each P0/P1 frontier entry must carry:
+
+- `evaluation_required: true`
+- `executor_role`
+- `evaluator_role`
+- `execution_artifact`
+- `evaluation_artifact`
+- `evaluation_status`
+
+`executor_role` must differ from `evaluator_role`. If the host supports real child agents, use separate agents. If it does not, run separate executor and evaluator passes in the same session and write separate artifacts. P2/P3/P4 entries use `evaluation_required: false` and `evaluation_status: not_required` unless promoted to P0/P1.
+
+Allowed P0/P1 evaluation outcomes:
+
+- `passed`: may enter the appropriate ledger status when evidence/source requirements are also met.
+- `passed_with_gaps`: may enter watchlist/unresolved or downgraded fields, but not confirmed capacity totals.
+- `blocked`: must remain unresolved/rejected/watchlist with a blocker reason; it cannot enter confirmed totals.
+- `pending`: cannot enter the ledger except as an explicitly pending candidate.
+
 ## Minimum Recall Rounds
 
 Recall Mode must run at least five rounds:
@@ -106,7 +128,7 @@ Use `scripts/search_orchestration.py` to generate a deterministic search plan. I
 
 Regional/peer-country benchmark is excluded by default. Add `--include-benchmark` only when the user explicitly asks for regional comparison.
 
-The standard plan includes depth lanes needed for the 15-chapter full report, including market key indicators/time series, auction/PPA tariff comparison, anchor developer deep dives, Chinese developer deep dives, OEM panorama, logistics/installation, grid, carbon/green hydrogen/CBAM, and source-to-final project pipeline evidence.
+The standard plan includes depth lanes needed for the V4 0-16 full report in `references/full-report-v4.md`, including report scope/evidence rules, market key indicators/time series, capacity segmentation, full project ledger, project cards, developer/decision-right structure, turbine-fit inference, OEM panorama, EPC/finance/O&M/supply chain, localization, logistics/installation, grid/storage/curtailment, tariff/bankability, procurement-window status, risk matrix, and source-to-final evidence.
 
 For wind-market tasks, the search plan must preserve benchmark-style breadth while final reporting remains ledger-constrained. Broad discovery should surface the full project universe, market participants, OEM/EPC/finance actors, and adjacent opportunity signals. The final report should then separate confirmed pipeline, watchlist, duplicate/merged, rejected, unresolved, official targets, and optimistic scenarios instead of treating all discovered records as confirmed capacity.
 
@@ -181,14 +203,42 @@ Keep these as hard gates for a JS scheduler or equivalent deterministic runner, 
 - `wind_relevance_gate`: adjacent P3 entries expand only with explicit wind-opportunity impact; P4 macro background is deferred by default.
 - `expansion_depth_gate`: P0/P1 entries may continue to convergence, P2 and linked P3 are one-hop unless promoted, and P4 does not expand.
 - `frontier_expansion_gate`: every new non-duplicate entry is recorded, but only entries allowed by the priority, wind-relevance, and depth gates are enqueued for a later search round.
+- `p0_p1_execution_evaluation_gate`: P0/P1 entries require executor/evaluator role separation, execution artifact, evaluation artifact, and `evaluation_status` of `passed` or `passed_with_gaps` before ledger admission. P2-P4 do not require this unless promoted.
 - `historical_entry_retention_gate`: baseline entries must be classified as confirmed, watchlist, duplicate, rejected, unresolved, or explicitly deferred.
 - `authority_source_gate`: government/legal, IFI/DFI, developer, OEM/EPC, Chinese, and local-language source categories must each be attempted.
 - `minimum_recall_round_gate`: Verification Mode is blocked until at least five Recall Mode rounds are complete.
 - `frontier_exhaustion_gate`: after round five, Recall continues until all P0/P1 frontier entries are processed and two consecutive expansion rounds add zero P0/P1 entries.
-- `verification_gate`: ledger-admitted projects must have `sourceTrace`, `evidenceGrade`, and field-level verification for present critical fields.
+- `verification_gate`: ledger-admitted projects must have `sourceTrace`, `evidenceGrade`, field-level verification for present critical fields, and P0/P1 execution/evaluation status that permits ledger admission.
 - `capacity_sum_gate`: installed, confirmed pipeline, watchlist, unresolved, and opportunity MW totals must be computed from `project_ledger`, not manually in report prose.
 - `duplicate_gate`: aliases and renamed phases must merge or receive explicit duplicate/rejected decisions.
 - `opportunity_gate`: OEM opportunity tables may include only projects where OEM is TBD, unconfirmed, undisclosed, or covered by a non-final framework.
+- `project_ledger_schema_gate`: every ledger project must satisfy `schema/project-ledger.schema.json`.
+- `capacity_reconciliation_gate`: confirmed capacity, opportunity MW, and watchlist capacity must be recalculated from `project_ledger`; national targets remain separate.
+- `project_card_completeness_gate`: every key project card must satisfy `schema/project-card.schema.json`; unknown values may be marked as pending/unavailable, but fields cannot disappear.
+- `evidence_boundary_gate`: every key conclusion must have conclusion-level evidence in `schema/evidence-table.schema.json`, especially project stage, capacity, OEM, tariff, financing, PPA/offtaker, procurement window, and Mingyang relevance.
+- `source_trace_evidence_boundary_gate`: source_trace and evidence_table must exist before detailed project cards and report prose.
+- `no_strategy_recommendation_gate`: full report prose cannot contain strategy-action language such as building a factory, must enter, recommended bid, binding an EPC, or investing resources.
+- `baseline_inheritance_gate`: all baseline/candidate projects must flow into confirmed, watchlist, duplicate, rejected, or unresolved outcomes.
+- `lite_from_full_gate`: lite report is extracted from the validated full-report artifacts, not generated directly from raw notes.
+
+## V4 Full Report Generation Pipeline
+
+Do not let the writer jump directly from search notes to `{slug}-report.md`. The deterministic runner must enforce this order:
+
+```text
+1. candidate_project_pool
+2. source_trace / evidence_table
+3. project_ledger
+4. capacity_reconciliation
+5. participant_ledger
+6. oem_competition_matrix
+7. procurement_window_table
+8. detailed_project_cards
+9. full_report
+10. lite_report
+```
+
+Current search strategy should remain high-recall but bounded: search broadly, write all leads into `candidate_project_pool`, then stop expansion when P0/P1 convergence rules pass. Do not add new open-ended search lanes to fix V4 report quality; the main bottleneck is now ledger admission, card completeness, evidence boundaries, and capacity reconciliation.
 
 ## Coverage Validation
 

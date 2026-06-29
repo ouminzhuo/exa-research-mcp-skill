@@ -31,7 +31,7 @@ Return or write machine-readable JSON with this shape:
 - Separate verified facts, assumptions, and inference.
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
-- Convert important facts into business implications for sales action, product fit, risk judgment, or executive decision-making.
+- Convert important facts into report implications: project status, capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
 - Preserve broad discovery but classify every project-like record into confirmed, watchlist, duplicate, rejected, official target, auction target, or optimistic scenario.
 
 ## Pipeline Rules

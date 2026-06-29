@@ -1,28 +1,31 @@
 ---
 name: renewable-market-research
-description: Workflow skill for evidence-based renewable energy market judgment, source-to-final continuity, project pipeline verification, deduplication, product-fit analysis, sales-action generation, and executive briefing compression. Use for overseas wind, solar, storage, hydrogen, grid, or clean-energy market research where evidence quality, source traceability, omission control, uncertainty control, and decision usefulness matter more than long reports.
+description: Workflow skill for evidence-based renewable energy market research, V4 full country wind-market status reports, source-to-final continuity, project pipeline verification, deduplication, product-fit analysis, factual procurement-window mapping, and executive briefing compression. Use for overseas wind, solar, storage, hydrogen, grid, or clean-energy market research where evidence quality, source traceability, omission control, uncertainty control, and decision usefulness matter more than long reports.
 ---
 
 # Renewable Market Research
 
 ## Goal
 
-Research **any country + any renewable/new-energy technology** as an evidence-driven market intelligence workflow for market judgment, project pipeline verification, product-fit analysis, sales-action generation, and executive reporting. Preserve reusable market data plus traditional report deliverables:
+Research **any country + any renewable/new-energy technology** as an evidence-driven market intelligence workflow for market judgment, project pipeline verification, product-fit analysis, factual procurement-window mapping, and executive reporting. Preserve reusable market data plus traditional report deliverables:
 
-1. **Full report**: deep internal report with project pipeline, policy, developers, financing, technology, environment, carbon/hydrogen, risks, and sources.
+1. **Full report**: V4 country wind-market status master report with scope/evidence rules, capacity segmentation, full project ledger, key project cards, participant/decision-chain mapping, OEM/EPC/finance/O&M/localization/grid/tariff/risk facts, and source-confidence appendix. It is not a strategy recommendation memo.
 2. **Lite report**: shorter delivery version with polished structure, project pipeline essentials, and reduced deep/proprietary analysis.
+3. **Executive or action brief**: optional separate output when the user asks for strategy, sales actions, or management recommendations.
 
 Use an effective-harnesses mindset: persist state to files, make progress resumable, validate outputs, and avoid returning large raw search payloads through chat.
 
 ## Operating Principle
 
-**Wind first, recall first, ledger strict, sales judgment last.**
+**Wind first, recall first, ledger strict, full report descriptive.**
 
-For wind-market tasks, treat the report as a national wind market study, not a broad energy overview. The core line is project pipeline, market participants, OEM/EPC competition, policy/PPA/tariff context, and sales opportunity.
+For wind-market tasks, treat the report as a national wind market study, not a broad energy overview. The core line is project pipeline, market participants, OEM/EPC competition, policy/PPA/tariff context, procurement-window facts, and evidence boundaries. Keep recommendations outside the full report unless the user asks for a separate executive or action brief.
 
 Run research in two modes. First, run high-recall discovery with dynamic frontier expansion: search entry names must not be assumed complete at initialization. Start from fixed seed templates, historical baseline entries, and authority-source categories; then extract every discovered project, developer, SPV, OEM, EPC, lender, law/decree, offtaker, grid entity, region, authority source, and adjacent-opportunity signal into `search_frontier.json`. Search the newly discovered entries in later rounds. Do not reject early-stage items during recall. Any candidate with a project name plus at least one signal such as capacity, actor, location, agreement, decree, news, financing, OEM/EPC link, or grid/PPA clue must enter `candidate_project_pool.json`.
 
 Bound high recall with frontier priority, not with early deletion. Treat P0 as wind project/commercial core, P1 as wind policy/grid/revenue context, P2 as one-hop market enablers, P3 as adjacent topics that expand only with explicit wind impact, and P4 as deferred macro background. P0/P1 entries drive convergence; P2/P3/P4 entries are preserved but must not create infinite search drift unless promoted by wind-linked evidence.
+
+Harden P0/P1 with role-separated execution and evaluation. Every P0/P1 frontier entry must receive an executor role, a different evaluator role, an execution artifact, an evaluation artifact, and an evaluation status before ledger admission. P2/P3/P4 entries do not need this hard gate unless promoted to P0/P1. Role separation does not require two real processes when unavailable; a single session may run separate executor and evaluator passes, but must write separate artifacts.
 
 Second, run verification and reconciliation: merge duplicates, classify every candidate as `operational`, `financing_closed`, `under_construction`, `ppa_signed`, `decree_backed`, `mou_or_early_stage`, `watchlist`, `duplicate`, `rejected`, or `unresolved`, backtrace policies and tariffs, verify source traces, and calculate all capacity totals from `{slug}-pipeline-ledger.json`. Search should be broad; ledger admission should be strict. Final reports must be generated from the reconciled ledger and rich master JSON, not from raw notes.
 
@@ -39,6 +42,7 @@ Load only the reference needed for the current step:
 - `review_gates.md`: Evidence, Contradiction, Business, and Executive gates that final claims must pass.
 - `schema/*.schema.json`: machine-readable schemas for evidence, findings, projects, decisions, reviews, and reports.
 - `prompts/*.md`: role-specific prompts for orchestrator, policy, pipeline, owner, product-fit, grid, finance, competitor, verification, skeptic/reflection, synthesis, and executive agents.
+- `references/full-report-v4.md`: required V4 full-report architecture, chapter contract, project-ledger fields, project-card fields, and full-report writer flow.
 - `references/pdf-pipeline.md`: full/lite report structure, Markdown/HTML/PDF pipeline, Chinese/English font handling, table alignment, and output risks.
 - `references/windows-native.md`: Windows native PowerShell/Python startup commands, CSV export wrapper, PDF caveats, and Chrome MCP browser rules.
 - `references/search-orchestration.md`: intent-aware query planning, search-lane coverage gates, local-language/china-capital/anomaly passes, validation script usage, and evidence-ranking guidance.
@@ -48,7 +52,7 @@ Load only the reference needed for the current step:
 Choose the mode in `workflow.md` before collecting data:
 
 - **Lite Workflow**: quick market checks using policy, pipeline, product-fit, skeptic, synthesis, and executive agents. Output a one-page market judgment, confirmed leads, risks, and next actions.
-- **Standard Workflow**: country-level reports using policy, pipeline, owner, grid, product-fit, finance, competitor, skeptic, synthesis, and executive agents. Output lite report, full report, project pipeline cards, sales-action plan, and executive brief.
+- **Standard Workflow**: country-level reports using policy, pipeline, owner, grid, product-fit, finance, competitor, skeptic, synthesis, and executive agents. Output lite report, V4 full report, project ledger/cards, procurement-window and decision-chain tables, and an executive brief or action memo only when requested.
 - **Heavy Workflow**: default for benchmark-surpassing country wind-market reports. Use one main/orchestrator agent, eleven focused research workers, one independent verification agent, and one independent reflection/reviewer agent. Output all Standard deliverables plus source-audit, reflection-review, and gap-task artifacts. If fewer real agents are available, collapse lanes sequentially but keep the same files, gates, and review loops.
 - **Deep Workflow**: strategic questions requiring multiple review loops, scenario comparison, assumptions register, evidence archive, and human review gates.
 
@@ -109,7 +113,7 @@ Choose the mode in `workflow.md` before collecting data:
      - Agent 8 `finance_bankability_worker`: MDB/DFI finance, guarantees, PPA bankability, FX/indexation, project finance, and sponsor financials.
      - Agent 9 `grid_storage_worker`: transmission, substations, grid-code, curtailment, balancing, storage, and interconnection constraints affecting wind.
      - Agent 10 `adjacent_opportunity_worker`: solar, BESS, hydrogen, ammonia, methanol, green-power demand, I-REC, CBAM, and industrial offtake only where they affect wind opportunity.
-     - Agent 11 `product_fit_sales_worker`: Mingyang/MySE fit, entry windows, priority accounts, procurement routes, and sales-action hypotheses.
+     - Agent 11 `product_fit_sales_worker`: Mingyang/MySE factual fit, entry windows, priority accounts, procurement routes, decision-chain clues, relevance rationale, and optional sales-action hypotheses for separate briefs.
      - Agent 12 `verification_agent`: independently verifies critical fields through Chrome MCP, Exa fetch, or original files and writes source-audit artifacts.
      - Agent 13 `reflection_reviewer`: scores coverage, ledger integrity, participant linkage, report structure, citation audit, and benchmark absorption; writes gap tasks.
    - When host policy and user request allow parallel agents, assign each dimension to a child agent that writes JSON under `depth/` and replies only `DONE`.
@@ -119,6 +123,7 @@ Choose the mode in `workflow.md` before collecting data:
    - During Recall Mode, workers must not silently discard project-like leads. Write all candidate leads to `data/renewable-market/{slug}-candidate_project_pool.json` or to depth files that the main agent merges into that pool.
    - Search entry coverage must include fixed seed templates, historical baseline entries, authority-source enumeration, and dynamically discovered project, developer, SPV, OEM, EPC, finance, policy/legal, region, local-language, Chinese-language, and adjacent-opportunity entries. Each lane must either produce candidate/frontier records or record a clear no-find/gap note.
    - Apply frontier priority before scheduling follow-up searches: P0 wind project/commercial-core and P1 policy/grid/revenue entries expand automatically; P2 supply-chain/logistics/local-manufacturing/finance background is one-hop; P3 storage, solar, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial green-power traces expand only when they affect wind opportunities; P4 generic energy macro is deferred background.
+   - For P0/P1 entries, assign `executor_role` and a different `evaluator_role` before ledger admission. The executor writes the collection/synthesis artifact; the evaluator writes the independent verification artifact and sets `evaluation_status` to `passed`, `passed_with_gaps`, or `blocked`.
    - Recall Mode must run at least five rounds: fixed seed templates, baseline/authority enumeration, entity expansion, reverse-source search, then alias/anomaly/source-backtrace search. After round five, continue until the P0/P1 high-priority frontier is exhausted.
    - Every depth record should include `searchPass` or `searchPasses` such as `english-broad`, `official-language`, `china-capital-local-language`, `new-entrant`, `source-backtrace`, `anomaly-hunter`, or `chrome-verification`.
    - Treat Chrome MCP as an integrated verification lane, not only a debug check: when Exa finds a candidate official PDF/table/map/dynamic page, verify it in Chrome MCP when available and record the verification method.
@@ -132,15 +137,19 @@ Choose the mode in `workflow.md` before collecting data:
 
 6. **Verify, reconcile, and aggregate data**
    - Treat `candidate_project_pool.json` as the required recall artifact. Every candidate must be carried forward into a ledger treatment such as confirmed, watchlist, duplicate, rejected, or unresolved; never make old leads disappear without a classification.
-   - Build source-specific verification artifacts such as `{slug}-source_trace.json`.
+   - Build source-specific verification artifacts such as `{slug}-source_trace.json` and conclusion-level `{slug}-evidence_table.json` before ledger admission. `evidence_table` must follow `schema/evidence-table.schema.json` and record evidence boundaries for project stage, capacity, OEM, tariff, financing, PPA/offtaker, procurement window, and Mingyang relevance.
    - Split aggregation into two required passes. First, merge all depth files and candidate records into the full `{slug}.json` using the rich schema in `references/data-model.md`; preserve project-card fields such as coordinates, site area, annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, logistics, community impact, and personnel/developer data when found.
    - Validate the full `{slug}.json` before deriving downstream files. If a rich field exists in a depth file but is absent from the matching main JSON project, update the main JSON or mark the field explicitly as `not found`, `unavailable`, or `not applicable` with a gap note.
-   - Build `{slug}-pipeline-ledger.json` from the validated main JSON, not directly as a replacement for it. The ledger owns canonical project IDs, local/English/Chinese aliases, dedupe keys, source traces, evidence layers, confirmed/watchlist/rejected state, and merge/reject decisions.
+   - Build `{slug}-project_ledger.json` or `{slug}-pipeline-ledger.json` from the validated main JSON, not directly as a replacement for it. The ledger owns canonical project IDs, local/English/Chinese aliases, dedupe keys, source traces, evidence layers, confirmed/watchlist/rejected state, merge/reject decisions, `Opportunity MW`, and V4 fields in `schema/project-ledger.schema.json`.
    - Treat `{slug}.json` as the rich report data source, `depth/*.json` as the required cross-read/fallback evidence layer, and `{slug}-pipeline-ledger.json` as the canonical dedupe/evidence registry. The ledger alone is not sufficient to write final project cards or deep-dive chapters.
+   - Generate `{slug}-participant_ledger.json` after capacity reconciliation, using the already-created source/evidence artifacts so owners, developers, EPCs, OEMs, financiers, and O&M actors are tied to project role and procurement influence.
+   - Generate `{slug}-source_trace.json` and `{slug}-evidence_table.json` before detailed project cards or report prose. `evidence_table` must follow `schema/evidence-table.schema.json` and record conclusion-level evidence for project stage, capacity, OEM, tariff, financing, PPA/offtaker, procurement window, and Mingyang relevance.
+   - Generate `{slug}-project_cards.json` only after source/evidence artifacts exist. Project cards must follow `schema/project-card.schema.json`; unknown values may be `待核`, `unavailable`, or `not found`, but required fields cannot disappear.
    - Export project rows to `{slug}.csv`; use `scripts/export_projects_csv.py` when convenient.
    - Deduplicate by canonical name, local-language aliases, translated names, location, sponsor/SPV, capacity, coordinates if available, phase boundaries, and source URL. Same-name/different-source records must be merged or explicitly rejected/watchlisted.
    - For project pipeline, classify each project evidence layer as one of: `news-announcement`, `mou-framework`, `ppa-signed`, `financing-closed`, `construction-started`, `cod-operational`.
    - For ledger status, classify every candidate as exactly one of: `operational`, `financing_closed`, `under_construction`, `ppa_signed`, `decree_backed`, `mou_or_early_stage`, `watchlist`, `duplicate`, `rejected`, or `unresolved`.
+   - Admit P0/P1 candidates to the ledger only after role-separated execution/evaluation exists. `passed` may enter the appropriate ledger status when source/evidence requirements are met. `passed_with_gaps` may enter watchlist/unresolved or downgraded fields, but not confirmed capacity totals. `blocked` or `pending` cannot enter confirmed totals.
    - Policy targets, auction targets, tariff numbers, and capacity goals must include an original legal/regulator/auction backtrace or be downgraded with an uncertainty note.
    - For confirmed projects, verify these critical fields with `chrome-mcp`, `exa-fetch`, or `manual-file` before final writing when the field is present: project name/alias, capacity, status/evidence stage, owner/developer/SPV, location, COD/target COD, PPA, financing/investment, EPC/OEM/turbine, and construction start.
    - Preserve both breadth and convergence: keep all discovered project candidates in confirmed/watchlist/duplicate/rejected/unresolved buckets, but report confirmed capacity only from verified, deduplicated ledger records.
@@ -149,8 +158,10 @@ Choose the mode in `workflow.md` before collecting data:
 7. **Generate reports**
    - Write `{slug}-report.md` for the full internal report.
    - Write `{slug}-lite.md` for the lite delivery report.
-   - Full reports should follow the 15-chapter structure in `references/pdf-pipeline.md`, including weekly update timestamp, standalone market indicators, tariff comparison, developer deep dives, OEM panorama, logistics/installation, and conclusion/outlook.
+   - Full reports must follow the V4 0-16 chapter structure in `references/full-report-v4.md`, including report scope/evidence rules, market capacity definitions, full project ledger, key project cards, developer/decision-right structure, turbine-fit inference, OEM competition, EPC/finance/O&M/supply chain, localization, grid/storage/curtailment, tariff/bankability, procurement-window status, risks, and source-confidence appendix.
+   - Do not write the full report until the V4 generation pipeline is complete: `candidate_project_pool` -> `source_trace/evidence_table` -> `project_ledger` -> `capacity_reconciliation` -> `participant_ledger` -> `oem_competition_matrix` -> `procurement_window_table` -> `detailed_project_cards` -> `full_report` -> `lite_report`.
    - Present the project pipeline in the report body as project cards grouped by status/evidence stage. Use tables only for appendices, CSV exports, or compact summary indexes.
+   - Chapter 5 is an exception: the full project ledger table is required. Chapter 6 must still preserve complete project cards.
    - Before writing each project card or project/developer chapter, cross-read the matching `depth/*.json` records named in `sourceTrace` or `mergedFromDepthRecords`. Check at minimum annualGenerationGWh, annualCO2ReductionTonnes, investmentUSD, turbineModel, turbineCount, storageMWh, coordinates, turbine specs, logistics route, community/land impact, biodiversity/bird protection, jobs/local employment, and personnel/developer data.
    - If a depth file contains a richer field than `{slug}.json`, update `{slug}.json` and rerun integrity validation before writing the report. Do not silently downgrade to `{slug}-pipeline-ledger.json` when the main JSON is incomplete.
    - Do not include a Regional Benchmark Comparison section unless the user explicitly requests a benchmark.
@@ -159,8 +170,8 @@ Choose the mode in `workflow.md` before collecting data:
    - Render PDFs when the environment has a working HTML/PDF stack; otherwise deliver MD and HTML and explain the limitation. On Windows native, prefer PowerShell/Python steps over Bash or `make.sh`.
    - Full/lite reports must cite sources and include data-confidence notes.
    - Market participants must be tied to projects and procurement influence. Do not list owners, OEMs, EPCs, financiers, or adjacent-energy actors unless their role, project link, competitive position, or sales relevance is stated.
-   - Sales judgment must answer who, which project, how many MW, decision timing, procurement route, current OEM status, and feasible entry point. Avoid generic "market is attractive" conclusions.
-   - Write the executive summary and conclusion after all chapters, then run a backpropagation pass: compare every summary number, project count, risk, and recommendation against the latest canonical ledger and synthesis. If any downstream chapter changed, update the summary before release.
+   - In the full report, Mingyang/MySE content must be factual relevance and pending verification: project, Opportunity MW, current OEM status, procurement route/window, decision maker, influencers, technical fit, risk, and evidence confidence. Put recommended actions in a separate executive/action brief only when requested.
+   - Write the executive summary after Chapters 2-16 are current, then run a backpropagation pass: compare every summary number, project count, capacity total, risk, procurement-window statement, and confidence note against the latest canonical ledger and synthesis. If any downstream chapter changed, update the summary before release.
 
 8. **Validate and hand off**
    - Validate JSON syntax, CSV row count, and search coverage; use `scripts/search_orchestration.py validate` when a search plan exists.
@@ -201,6 +212,15 @@ Also produce:
 - `data/renewable-market/{slug}-candidate_project_pool.json`
 - `data/renewable-market/{slug}-developer_project_map.json`
 - `data/renewable-market/{slug}-source_trace.json`
+- `data/renewable-market/{slug}-frontier_execution_review.json`
+- `data/renewable-market/{slug}-project_ledger.json`
+- `data/renewable-market/{slug}-project_cards.json`
+- `data/renewable-market/{slug}-participant_ledger.json`
+- `data/renewable-market/{slug}-oem_competition.json`
+- `data/renewable-market/{slug}-procurement_window.json`
+- `data/renewable-market/{slug}-evidence_table.json`
+- `data/renewable-market/{slug}-risk_matrix.json`
+- `data/renewable-market/{slug}-tracking_watchlist.json`
 - `data/renewable-market/{slug}-search_coverage_matrix.md`
 - `data/renewable-market/{slug}-frontier_convergence.json`
 - `data/renewable-market/{slug}-capacity_reconciliation.md`
@@ -218,7 +238,7 @@ Before final writing, apply `review_gates.md`:
 2. **Evidence Gate**: unsupported claims and weak single-source claims cannot become high-confidence final claims; every final conclusion must pass this gate.
 3. **Critical Field Gate**: confirmed-pipeline critical fields must have `chrome-mcp`, `exa-fetch`, or `manual-file` verification. Otherwise downgrade the project/field to watchlist or uncertainty; do not leave it as a final confirmed fact.
 4. **Contradiction Gate**: reconcile installed/planned/pipeline capacity, status conflicts, COD conflicts, duplicates, translated names, local-language aliases, phase confusion, and offshore/floating/onshore classification; every final conclusion must pass this gate before synthesis.
-5. **Business Gate**: convert important facts into implications for sales action, product fit, risk judgment, or executive decision-making.
+5. **Business Gate**: convert important facts into report implications such as capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
 6. **Reflection Gate**: require the independent reviewer to score each stage, list critical blockers, and generate gap tasks. Do not advance a stage merely because its score improved; it must meet the stage threshold and have zero critical blockers.
 7. **Executive Gate**: compress final output into three evidence-backed core judgments and avoid vague potential claims unless quantified and qualified.
 
@@ -229,8 +249,11 @@ Run these checks when files are produced. Use the host's Python launcher (`pytho
 ```text
 python -m json.tool data/renewable-market/index.json > <temp>/renewable-index.validated.json
 python -m json.tool data/renewable-market/{slug}.json > <temp>/renewable-main.validated.json
+python -m json.tool data/renewable-market/{slug}-project_ledger.json > <temp>/renewable-project-ledger.validated.json
+python -m json.tool data/renewable-market/{slug}-project_cards.json > <temp>/renewable-project-cards.validated.json
+python -m json.tool data/renewable-market/{slug}-evidence_table.json > <temp>/renewable-evidence-table.validated.json
 python skills/renewable-market-research/scripts/export_projects_csv.py data/renewable-market/{slug}.json data/renewable-market/{slug}.csv
-python skills/renewable-market-research/scripts/validate_market_integrity.py data/renewable-market/{slug}.json --depth-dir data/renewable-market/depth --output data/renewable-market/{slug}-integrity.json
+python skills/renewable-market-research/scripts/validate_market_integrity.py data/renewable-market/{slug}.json --depth-dir data/renewable-market/depth --candidate-pool data/renewable-market/{slug}-candidate_project_pool.json --project-ledger data/renewable-market/{slug}-project_ledger.json --project-cards data/renewable-market/{slug}-project_cards.json --evidence-table data/renewable-market/{slug}-evidence_table.json --full-report data/renewable-market/{slug}-report.md --output data/renewable-market/{slug}-integrity.json
 ```
 
 On Windows native, use the PowerShell commands in `references/windows-native.md`. Mark unavailable checks as skipped only with an explicit environment reason.
@@ -243,7 +266,7 @@ When running on Windows native, read `references/windows-native.md` and use Powe
 New-Item -ItemType Directory -Force data/renewable-market/depth | Out-Null
 py -3 -m json.tool data/renewable-market/index.json > $env:TEMP\renewable-index.validated.json
 .\skills\renewable-market-research\scripts\export_projects_csv.ps1 -InputJson .\data\renewable-market\{slug}.json -OutputCsv .\data\renewable-market\{slug}.csv
-.\skills\renewable-market-research\scripts\validate_market_integrity.ps1 -MarketJson .\data\renewable-market\{slug}.json -DepthDir .\data\renewable-market\depth -Output .\data\renewable-market\{slug}-integrity.json
+.\skills\renewable-market-research\scripts\validate_market_integrity.ps1 -MarketJson .\data\renewable-market\{slug}.json -DepthDir .\data\renewable-market\depth -CandidatePool .\data\renewable-market\{slug}-candidate_project_pool.json -ProjectLedger .\data\renewable-market\{slug}-project_ledger.json -ProjectCards .\data\renewable-market\{slug}-project_cards.json -EvidenceTable .\data\renewable-market\{slug}-evidence_table.json -FullReport .\data\renewable-market\{slug}-report.md -Output .\data\renewable-market\{slug}-integrity.json
 ```
 
 Do not require WSL, Git Bash, `make.sh`, or Bash-only syntax for the standard workflow.
@@ -366,7 +389,7 @@ Main agent should implement/maintain:
 ### Report Quality Gates
 
 - Markdown/CSV/PDF must be human-readable outputs, not raw JSON object dumps.
-- Standard and Deep full reports must follow the 15-chapter structure in `references/pdf-pipeline.md`; a 6-section compressed structure is acceptable only for Lite mode.
+- Standard and Deep full reports must follow the V4 0-16 chapter structure in `references/full-report-v4.md`; a 6-section compressed structure is acceptable only for Lite mode.
 - Report-body project pipeline must be rendered as project cards grouped by status/evidence stage, not as a large table.
 - Regional benchmark sections are omitted by default and included only when the user explicitly requests a benchmark.
 - Do not render raw structures such as `{\"claim\": ...}` or `{\"sources\": ...}` directly in reports.
