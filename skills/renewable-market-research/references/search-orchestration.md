@@ -38,6 +38,8 @@ The search plan also requires explicit search passes, not just tool lanes:
 
 For confirmed-pipeline critical fields, only `chrome-mcp`, `exa-fetch`, or `manual-file` count as final verification. `exa-search` is discovery-only for those fields. This means Recall Mode may accept weak or partial leads, but Verification Mode must keep them out of confirmed ledger totals until field-level support exists.
 
+Exa search boundary is not a completion condition. If Exa reports search boundary, quota boundary, no more results, or unreliable extraction for dynamic/PDF/table/map sources, the runner must hand off candidate URLs to `chrome-verification` or record `tool_unavailable=chrome-mcp` with affected fields and `verification_status=pending` or `blocked`. Without one of those outcomes, project ledger release and full-report release remain blocked.
+
 ## Dynamic Search Frontier
 
 Recall Mode must not assume entry names are complete at initialization. The scheduler or equivalent runner should maintain these files:
@@ -209,6 +211,7 @@ Keep these as hard gates for a JS scheduler or equivalent deterministic runner, 
 - `minimum_recall_round_gate`: Verification Mode is blocked until at least five Recall Mode rounds are complete.
 - `frontier_exhaustion_gate`: after round five, Recall continues until all P0/P1 frontier entries are processed and two consecutive expansion rounds add zero P0/P1 entries.
 - `verification_gate`: ledger-admitted projects must have `sourceTrace`, `evidenceGrade`, field-level verification for present critical fields, and P0/P1 execution/evaluation status that permits ledger admission.
+- `exa_boundary_chrome_handoff_gate`: Exa search/quota/no-more-results boundary triggers Chrome verification or an explicit Chrome-unavailable gap record; it does not release the run by itself.
 - `capacity_sum_gate`: installed, confirmed pipeline, watchlist, unresolved, and opportunity MW totals must be computed from `project_ledger`, not manually in report prose.
 - `duplicate_gate`: aliases and renamed phases must merge or receive explicit duplicate/rejected decisions.
 - `opportunity_gate`: OEM opportunity tables may include only projects where OEM is TBD, unconfirmed, undisclosed, or covered by a non-final framework.

@@ -201,6 +201,8 @@
   },
   "active": "c687c7ef0236e005",
   "lastOpenFiles": [
+    "full_report_frame.md",
+    "注意力规划.md",
     "skills/renewable-market-research/scripts/__pycache__/validate_market_integrity.cpython-312.pyc",
     "skills/renewable-market-research/scripts/__pycache__/search_orchestration.cpython-312.pyc",
     "skills/renewable-market-research/scripts/__pycache__",
@@ -208,8 +210,6 @@
     "skills/renewable-market-research/schema/evidence-table.schema.json",
     "skills/renewable-market-research/schema/project-card.schema.json",
     "skills/renewable-market-research/schema/project-ledger.schema.json",
-    "skills/renewable-market-research/references/full-report-v4.md",
-    "full_report_frame.md",
-    "注意力规划.md"
+    "skills/renewable-market-research/references/full-report-v4.md"
   ]
 }

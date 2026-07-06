@@ -114,6 +114,7 @@ Choose the mode in `workflow.md` before collecting data:
    - Recall Mode must run at least five rounds: fixed seed templates, baseline/authority enumeration, entity expansion, reverse-source search, then alias/anomaly/source-backtrace search. After round five, continue until the P0/P1 high-priority frontier is exhausted.
    - Every depth record should include `searchPass` or `searchPasses` such as `english-broad`, `official-language`, `china-capital-local-language`, `new-entrant`, `source-backtrace`, `anomaly-hunter`, or `chrome-verification`.
    - Treat Chrome MCP as an integrated verification lane, not only a debug check: when Exa finds a candidate official PDF/table/map/dynamic page, verify it in Chrome MCP when available and record the verification method.
+   - Treat Exa search/quota/no-more-results boundary as a handoff trigger, not a completion condition. When Exa reaches a boundary and Chrome MCP has not run, enter `chrome-verification` or record `tool_unavailable=chrome-mcp`, affected fields, and `verification_status=pending` or `blocked`.
    - Key confirmed-pipeline fields must be verified later by `chrome-mcp`, `exa-fetch`, or `manual-file`; `exa-search` discovery alone is not enough for final ledger admission.
 
 5. **Detect frontier convergence**

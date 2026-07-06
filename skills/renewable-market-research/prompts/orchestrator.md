@@ -52,6 +52,7 @@ Return or write machine-readable JSON with this shape:
 - Keep storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, and industrial offtake subordinate to wind-market status; include them only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, bankability, or procurement-window facts.
 - Trigger a summary/conclusion backpropagation pass after downstream chapter, ledger, or synthesis updates.
 - Require `chrome-mcp`, `exa-fetch`, or `manual-file` verification for confirmed-pipeline critical fields before final report writing.
+- Treat Exa boundary as a Chrome handoff trigger, not completion. If Exa reports search boundary, quota boundary, or no more results before Chrome verification has run, assign `chrome-verification` or record `tool_unavailable=chrome-mcp` with affected fields; do not release ledger or report.
 - For Heavy Workflow, assign the V4 chapter-agent roles from `workflow.md`, `agent_roles.md`, and `scripts/search_orchestration.py plan`; do not fall back to the 10-agent Standard profile for a V4 full report unless the user explicitly asks.
 - Require writer/verifier separation for critical V4 chapters: 1, 3, 4, 5, 6, 9, 13, 14, and 16. The chapter writer may draft, but release requires a separate `verification_agent` artifact and reviewer pass.
 - Require the verification agent to write source-audit artifacts before the reviewer scores evidence, ledger, or report stages.

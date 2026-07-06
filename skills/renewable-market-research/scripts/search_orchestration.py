@@ -318,6 +318,26 @@ TOOL_LANES = [
     },
 ]
 
+EXA_BOUNDARY_CHROME_HANDOFF_POLICY = {
+    "trigger": [
+        "exa search boundary reached",
+        "exa quota boundary reached",
+        "exa no-more-results condition reported",
+        "exa cannot reliably extract dynamic, PDF, table, map, or JavaScript-rendered evidence",
+    ],
+    "requiredAction": (
+        "Enter chrome-verification lane for candidate official/developer/regulator/PDF/table/map URLs, "
+        "or record chrome-mcp as unavailable with affected fields and pending verification status."
+    ),
+    "notACompletionCondition": "Exa boundary is not search completion and cannot by itself release project_ledger or full_report.",
+    "acceptedOutcomes": [
+        "chrome-mcp verification records written",
+        "exa-fetch/manual-file verification records written for source types that do not need browser rendering",
+        "tool_unavailable=chrome-mcp with affected_fields and verification_status=pending_or_blocked",
+    ],
+    "blocks": ["project_ledger_release", "capacity_reconciliation_final", "full_report_release", "lite_report_release"],
+}
+
 MINIMUM_RECALL_ROUNDS = 5
 FRONTIER_STALL_ROUNDS = 2
 
@@ -1290,6 +1310,16 @@ SCHEDULER_GATES = {
         "p0p1EvaluationStatusesAllowedForLedger": ["passed", "passed_with_gaps"],
         "confirmedTotalsRequire": ["evaluation_status == passed", "confirmed_pipeline_eligibility == true"],
     },
+    "exa_boundary_chrome_handoff_gate": {
+        "rule": "When Exa reaches search/quota/no-more-results boundary or cannot reliably extract a dynamic/PDF/table/map source, the run must enter chrome-verification lane or record chrome-mcp as unavailable with affected fields. Exa boundary is not a completion condition.",
+        "policy": EXA_BOUNDARY_CHROME_HANDOFF_POLICY,
+        "requiresOneOf": [
+            "collectionMethod == chrome-mcp",
+            "collectionMethod in [exa-fetch, manual-file] for non-browser source extraction",
+            "tool_unavailable == chrome-mcp with affected_fields and verification_status",
+        ],
+        "blocks": EXA_BOUNDARY_CHROME_HANDOFF_POLICY["blocks"],
+    },
     "capacity_sum_gate": {
         "rule": "Capacity totals must be computed from project_ledger, not manually copied into report prose.",
     },
@@ -1943,6 +1973,7 @@ def build_plan(
             "frontierExecutionReview": f"data/renewable-market/{slug}-frontier_execution_review.json",
             "ledgerStatuses": LEDGER_STATUSES,
             "verifiedMethods": ["chrome-mcp", "exa-fetch", "manual-file"],
+            "exaBoundaryChromeHandoffPolicy": EXA_BOUNDARY_CHROME_HANDOFF_POLICY,
             "canEnterVerificationMode": {
                 "requires": FRONTIER_CONVERGENCE_POLICY["requiredBeforeVerification"],
                 "minimumRecallRounds": MINIMUM_RECALL_ROUNDS,
@@ -2106,6 +2137,30 @@ def record_collection_methods(record: dict[str, Any]) -> list[str]:
         methods.append("chrome-mcp")
     return methods
 
+
+def record_unavailable_tools(record: dict[str, Any]) -> list[str]:
+    unavailable: list[str] = []
+    for key in ("tool_unavailable", "toolUnavailable", "unavailableTool", "unavailable_tool"):
+        value = record.get(key)
+        if isinstance(value, str) and value:
+            unavailable.append(value)
+        elif isinstance(value, list):
+            unavailable.extend(str(item) for item in value if item)
+    tools = record.get("tools", {})
+    if isinstance(tools, dict):
+        for tool_name, status in tools.items():
+            if isinstance(status, str) and status.lower() in {"unavailable", "blocked", "missing"}:
+                unavailable.append(str(tool_name))
+            elif isinstance(status, dict):
+                tool_status = str(status.get("status", "")).lower()
+                if tool_status in {"unavailable", "blocked", "missing"}:
+                    unavailable.append(str(tool_name))
+    notes = str(record.get("notes", "")).lower()
+    if "chrome" in notes and any(term in notes for term in ("unavailable", "not available", "blocked", "missing")):
+        unavailable.append("chrome-mcp")
+    return unavailable
+
+
 def record_missing_fields(record: dict[str, Any], fields: list[str]) -> list[str]:
     missing = []
     for field in fields:
@@ -2126,6 +2181,7 @@ def validate_depth_file(path: Path, minimum: dict[str, Any]) -> dict[str, Any]:
     urls: set[str] = set()
     methods: Counter[str] = Counter()
     search_passes: Counter[str] = Counter()
+    unavailable_tools: Counter[str] = Counter()
     issues = []
     for index, record in enumerate(data):
         if not isinstance(record, dict):
@@ -2139,6 +2195,8 @@ def validate_depth_file(path: Path, minimum: dict[str, Any]) -> dict[str, Any]:
         urls.update(source_urls(record))
         for method in record_collection_methods(record):
             methods[method] += 1
+        for tool in record_unavailable_tools(record):
+            unavailable_tools[tool] += 1
         for search_pass in record_search_passes(record):
             search_passes[search_pass] += 1
 
@@ -2156,6 +2214,10 @@ def validate_depth_file(path: Path, minimum: dict[str, Any]) -> dict[str, Any]:
     missing_passes = [search_pass for search_pass in required_passes if search_passes.get(search_pass, 0) == 0]
     if missing_passes:
         issues.append(f"missing required search passes: {', '.join(missing_passes)}")
+    if "chrome-verification" in required_passes and methods.get("chrome-mcp", 0) == 0 and unavailable_tools.get("chrome-mcp", 0) == 0:
+        issues.append(
+            "chrome-verification required but no chrome-mcp collectionMethod or tool_unavailable=chrome-mcp record found"
+        )
 
     status = "pass" if not issues else "needs-work"
     return {
@@ -2164,6 +2226,7 @@ def validate_depth_file(path: Path, minimum: dict[str, Any]) -> dict[str, Any]:
         "records": len(data),
         "uniqueUrls": len(urls),
         "collectionMethods": dict(methods),
+        "unavailableTools": dict(unavailable_tools),
         "searchPasses": dict(search_passes),
         "issues": issues,
     }
