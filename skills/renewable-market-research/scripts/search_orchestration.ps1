@@ -3,6 +3,7 @@ param(
     [string[]]$ArgsForPython
 )
 
+$ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PythonScript = Join-Path $ScriptDir "search_orchestration.py"
 

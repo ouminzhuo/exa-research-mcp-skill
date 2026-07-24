@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fact Freeze",
+  "type": "object",
+  "required": [
+    "version",
+    "slug",
+    "freezeId",
+    "frozenAt",
+    "basedOnLedgers",
+    "facts"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "freezeId": {
+      "type": "string"
+    },
+    "supersedes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "frozenAt": {
+      "type": "string"
+    },
+    "dataCutoff": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "basedOnLedgers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "factId",
+          "factType",
+          "statement",
+          "value",
+          "scope",
+          "evidenceIds",
+          "confidence",
+          "frozenAt"
+        ],
+        "properties": {
+          "factId": {
+            "type": "string"
+          },
+          "factType": {
+            "enum": [
+              "official_auction_total_mw",
+              "identifiable_project_capacity_mw",
+              "confirmed_project_capacity_mw",
+              "opportunity_mw",
+              "watchlist_mw",
+              "suspended_or_paused_mw",
+              "enacted_policy_target",
+              "draft_target",
+              "political_statement_target",
+              "auction_allocation",
+              "oem_firm_order",
+              "oem_preferred_supplier",
+              "oem_conditional_reservation_or_cra",
+              "oem_framework_agreement",
+              "oem_technology_partnership",
+              "oem_reported_preference",
+              "oem_unallocated",
+              "paused_or_suspended_project",
+              "project_status_definition",
+              "oem_status_definition",
+              "capacity_scope_definition"
+            ]
+          },
+          "statement": {
+            "type": "string"
+          },
+          "value": {
+            "type": [
+              "number",
+              "string",
+              "boolean",
+              "object",
+              "array",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scope": {
+            "type": "string"
+          },
+          "includedProjectIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludedProjectIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exclusionBasis": {
+            "type": [
+              "array",
+              "string",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "policyStatus": {
+            "enum": [
+              "enacted",
+              "draft",
+              "political_statement",
+              "auction_allocation",
+              "not_applicable",
+              "unknown"
+            ]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sourceTrace": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              "unknown"
+            ]
+          },
+          "pendingVerification": {
+            "type": [
+              "array",
+              "string",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "frozenAt": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "chapterUseRules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deprecatedValues": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "repairRouting": {
+      "type": "object"
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Artifact Manifest",
+  "type": "object",
+  "required": [
+    "version",
+    "slug",
+    "artifacts"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "artifactId",
+          "path",
+          "phase",
+          "ownerClass",
+          "writePolicy",
+          "status"
+        ],
+        "properties": {
+          "artifactId": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "ownerClass": {
+            "enum": [
+              "main_agent",
+              "worker_agent",
+              "verification_agent",
+              "chapter_writer",
+              "audit_agent"
+            ]
+          },
+          "ownerRole": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "writePolicy": {
+            "enum": [
+              "single_writer",
+              "append_only",
+              "read_only"
+            ]
+          },
+          "readableBy": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "frozen": {
+            "type": "boolean"
+          },
+          "freezeId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "in_progress",
+              "draft",
+              "frozen",
+              "passed",
+              "failed",
+              "stale",
+              "blocked"
+            ]
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

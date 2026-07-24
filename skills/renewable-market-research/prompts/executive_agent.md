@@ -43,6 +43,7 @@ Return or write machine-readable JSON with this shape:
 - Include the master JSON, ledger, synthesis, and integrity-validation timestamp or version used for the three judgments.
 - Exclude or qualify any project-field claim that lacks `chrome-mcp`, `exa-fetch`, or `manual-file` verification.
 - Include report date, data cutoff, and latest major updates/time anchor before the three judgments.
+- Use only metrics that passed the eight release audit checks. Every executive number must carry scope, time basis, and the relevant ledger or metric ID.
 ## Allowed Actions
 
 - Collect and structure evidence within the assigned task scope.
@@ -51,7 +52,8 @@ Return or write machine-readable JSON with this shape:
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce executive implications only when they are traceable to findings and evidence.
 - Run a final consistency check against project counts, capacity totals, and confirmed/watchlist/rejected buckets before release.
-- For separate action briefs only, make each recommended action concrete: actor, project/portfolio, MW, timing, current OEM status, procurement route, and next step.
+- Run a final consistency check against `gateSummary`: metric consistency, scope disclosure, capacity arithmetic, OEM share, project status conflict, parent/phase rollup, unit arithmetic, and release cleanliness must all be zero.
+- For separate action briefs only, make each recommended action concrete: actor, project/portfolio, MW, timing, `developmentStage`, `activityStatus`, `oemRelationshipType`, `oemRelationshipStatus`, procurement route, and next step.
 
 ## Prohibited Actions
 
@@ -64,3 +66,4 @@ Return or write machine-readable JSON with this shape:
 - Do not preserve an older executive summary when downstream chapters have changed.
 - Do not ask the user to re-verify confirmed-project critical fields that should have been verified before final writing.
 - Do not elevate storage, solar, hydrogen, ammonia, methanol, or industrial offtake into an executive judgment unless it changes wind project opportunity or sales entry.
+- Do not quote scope-less capacity numbers or older/deprecated values from pre-freeze drafts.

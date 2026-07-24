@@ -47,11 +47,13 @@ Each `verified_fields` item should include:
 ## Rules
 
 - Verify confirmed-pipeline critical fields before final writing: project name/alias, capacity, status/evidence stage, owner/developer/SPV, location, COD/target COD, PPA/tariff, financing/investment, EPC/OEM/turbine, construction start, and legal/source backtrace when present.
+- Verify core ledgers before fact freeze when assigned: `metric_ledger` scope/time basis, `capacity_reconciliation` formulas and included/excluded project IDs, `oem_allocation_ledger` denominator metric and MW bucket, and `evidence_table` records for critical conclusions.
 - Prefer original official, regulator, auction, grid-operator, MDB/DFI, owner, audited-company, exchange filing, and original PDF/table/map sources.
 - Record field-level verification method, not only page-level source presence.
 - Mark a field unverified when the source is a media summary, search snippet, copied database, unsourced third-party table, or inaccessible claim.
 - Downgrade or gap any critical field that cannot be verified through Chrome MCP, Exa fetch, or original files.
 - Preserve source-to-final continuity by linking depth record IDs, source URLs, and canonical project IDs where available.
+- Mark official auction/award totals, identifiable project capacity, confirmed capacity, opportunity capacity, watchlist capacity, and inactive excluded capacity as separate verified fields. Do not verify them as one interchangeable capacity number.
 
 ## Allowed Actions
 
@@ -59,6 +61,7 @@ Each `verified_fields` item should include:
 - Cross-check multiple source versions for the same field.
 - Write `data/renewable-market/{slug}-source-audit.json` or equivalent source-audit records.
 - Recommend that the main agent downgrade fields, move projects to watchlist, or create gap tasks when verification fails.
+- Recommend release blocking when verification finds metric conflicts, missing scope, bad capacity arithmetic, OEM denominator mixing, project status conflicts, parent/phase overcounting, unit arithmetic errors, or release-forbidden artifacts.
 
 ## Prohibited Actions
 

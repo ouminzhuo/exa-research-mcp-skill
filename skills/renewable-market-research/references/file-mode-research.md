@@ -109,7 +109,7 @@ P0/P1 entries also require execution/evaluation separation before ledger admissi
 
 ## Child Agent Prompt Template
 
-For V4 full reports, use child agents whenever the host supports delegated or parallel agents. If the host cannot spawn real child agents, run the same role prompts as separate sequential lanes and record `agentMode=collapsed-sequential`. For Lite/Standard reductions, use child agents only when the scope warrants them or the user asks.
+For full country wind-market reports, use child agents whenever the host supports delegated or parallel agents. If the host cannot spawn real child agents, run the same role prompts as separate sequential lanes and record `agentMode=collapsed-sequential`. For Lite/Standard reductions, use child agents only when the scope warrants them or the user asks.
 
 ```text
 Task: Research [dimension or recall entry category] for [country] [technology].
@@ -163,7 +163,7 @@ Record convergence in `index.json` and `{slug}-frontier_convergence.json` with `
 
 Before report writing, merge all project-like records into `candidate_project_pool.json`, then into the rich `{slug}.json`. This master JSON is the report-ready data source and must preserve rich card fields from depth records, including annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, coordinates, site area, logistics, jobs/community/ESG, and personnel/developer data when found.
 
-After the master JSON is complete, derive `{slug}-pipeline-ledger.json` from it.
+After the master JSON and evidence table are complete, derive `{slug}-pipeline-ledger.json`, `{slug}-project_ledger.json`, and the other core ledgers from the validated master JSON and source/evidence records. Then derive `{slug}-canonical_facts.json` and `{slug}-fact_freeze.json` from the reconciled ledgers before any chapter manifest or draft.
 
 Each canonical project should include:
 
@@ -174,15 +174,19 @@ Each canonical project should include:
 - criticalFieldVerification for present key fields, using `chrome-mcp`, `exa-fetch`, or `manual-file`;
 - for P0/P1 candidates, role-separated execution/evaluation metadata from `frontier_execution_review.json`;
 - evidence layers such as `mou-framework`, `ppa-signed`, `financing-closed`, `construction-started`, or `cod-operational`;
-- ledger status as `operational`, `financing_closed`, `under_construction`, `ppa_signed`, `decree_backed`, `mou_or_early_stage`, `watchlist`, `duplicate`, `rejected`, or `unresolved`;
+- `developmentStage` as `operational`, `partial_operation`, `under_construction`, `construction_ready`, `financial_close`, `contracted`, `auction_awarded`, `permitted`, `pre_auction`, `early_development`, `watchlist`, or `unverified`;
+- `activityStatus` as `active`, `delayed`, `paused`, `withdrawn`, `cancelled`, `superseded`, or `unknown`;
+- `ledgerTreatment` as `confirmed`, `watchlist`, `duplicate`, `rejected`, or `unresolved`;
+- `capacityTreatment` and `capacityScope` for MW arithmetic;
+- `oemRelationshipType` and `oemRelationshipStatus` for OEM relationship MW buckets;
 - evidence grade;
 - confirmed-pipeline eligibility and exclusion reason when not eligible.
 
-No chapter may maintain an independent project list after aggregation. Chapters read rich report fields from the master JSON and use the ledger for canonical IDs, status buckets, dedupe decisions, and watchlist/rejected/unresolved state. If a new chapter discovers a project candidate, alias, or richer field, it must update the candidate pool and master JSON first, refresh the ledger, then refresh synthesis and summary.
+No chapter may maintain an independent project list after aggregation. Chapters read rich report fields from the master JSON, cite frozen Fact IDs, and use the ledger for canonical IDs, status buckets, dedupe decisions, and watchlist/rejected/unresolved state. If a new chapter discovers a project candidate, alias, or richer field, it must update the candidate pool and master JSON first, refresh fact freeze, refresh the ledger, then refresh synthesis and summary.
 
 P0/P1 ledger admission:
 
-- `passed`: may enter the appropriate ledger status when all other source/evidence gates pass.
+- `passed`: may enter the appropriate `ledgerTreatment` when all other source/evidence gates pass.
 - `passed_with_gaps`: may enter watchlist/unresolved or downgraded fields, but not confirmed capacity totals.
 - `blocked` or `pending`: cannot enter confirmed totals and must carry a blocker/gap reason.
 

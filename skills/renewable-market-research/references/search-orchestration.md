@@ -16,7 +16,7 @@ The external `search-layer` project demonstrates several useful ideas for search
 For this repository, adapt those ideas to renewable-market research rather than copying provider-specific code. Search runs in two stages:
 
 1. **Recall Mode**: maximize candidate discovery through dynamic frontier expansion. Search broadly, extract new entry names from results, enqueue them in `search_frontier.json`, and write every project-like lead to `candidate_project_pool.json`. Do not decide truth or discard early-stage items in this stage.
-2. **Verification Mode**: turn the candidate pool into ledger-grade records. Merge aliases, classify status, verify source traces, backtrace laws/tariffs, and compute capacity totals from the ledger.
+2. **Verification Mode**: turn the candidate pool into ledger-grade records. Merge aliases, split project status into `developmentStage` and `activityStatus`, verify source traces, backtrace laws/tariffs, build rich master JSON and core ledgers, compute capacity totals from the ledger, then freeze canonical facts.
 
 The standard tool lanes are:
 
@@ -90,7 +90,7 @@ Each P0/P1 frontier entry must carry:
 
 Allowed P0/P1 evaluation outcomes:
 
-- `passed`: may enter the appropriate ledger status when evidence/source requirements are also met.
+- `passed`: may enter the appropriate `ledgerTreatment` when evidence/source requirements are also met.
 - `passed_with_gaps`: may enter watchlist/unresolved or downgraded fields, but not confirmed capacity totals.
 - `blocked`: must remain unresolved/rejected/watchlist with a blocker reason; it cannot enter confirmed totals.
 - `pending`: cannot enter the ledger except as an explicitly pending candidate.
@@ -109,18 +109,15 @@ After round five, continue searching until all P0/P1 high-priority frontier entr
 
 ## Verification Categories
 
-Verification Mode must classify every candidate into exactly one ledger treatment:
+Verification Mode must classify every candidate into exactly one `ledgerTreatment`:
 
-- `operational`
-- `financing_closed`
-- `under_construction`
-- `ppa_signed`
-- `decree_backed`
-- `mou_or_early_stage`
+- `confirmed`
 - `watchlist`
 - `duplicate`
 - `rejected`
 - `unresolved`
+
+Use `developmentStage` for the development milestone (`operational`, `partial_operation`, `under_construction`, `construction_ready`, `financial_close`, `contracted`, `auction_awarded`, `permitted`, `pre_auction`, `early_development`, `watchlist`, `unverified`) and `activityStatus` for current activity (`active`, `delayed`, `paused`, `withdrawn`, `cancelled`, `superseded`, `unknown`).
 
 The goal is not merely to find projects. It is to reconcile contested naming, status, legal basis, and capacity so cases such as renamed phases, developer portfolio claims, decree-only projects, and duplicate aliases are carried into the ledger with an explicit decision.
 
@@ -130,7 +127,7 @@ Use `scripts/search_orchestration.py` to generate a deterministic search plan. I
 
 Regional/peer-country benchmark is excluded by default. Add `--include-benchmark` only when the user explicitly asks for regional comparison.
 
-The standard plan includes depth lanes needed for the V4 0-16 full report in `references/full-report-v4.md`, including report scope/evidence rules, market key indicators/time series, capacity segmentation, full project ledger, project cards, developer/decision-right structure, turbine-fit inference, OEM panorama, EPC/finance/O&M/supply chain, localization, logistics/installation, grid/storage/curtailment, tariff/bankability, procurement-window status, risk matrix, and source-to-final evidence.
+The standard plan includes depth lanes needed for the 0-16 full report in `references/full-report-v4.md`, including report scope/evidence rules, market key indicators/time series, capacity segmentation, full project ledger, project cards, developer/decision-right structure, turbine-fit inference, OEM panorama, EPC/finance/O&M/supply chain, localization, logistics/installation, grid/storage/curtailment, tariff/bankability, procurement-window status, risk matrix, and source-to-final evidence.
 
 For wind-market tasks, the search plan must preserve benchmark-style breadth while final reporting remains ledger-constrained. Broad discovery should surface the full project universe, market participants, OEM/EPC/finance actors, and adjacent opportunity signals. The final report should then separate confirmed pipeline, watchlist, duplicate/merged, rejected, unresolved, official targets, and optimistic scenarios instead of treating all discovered records as confirmed capacity.
 
@@ -199,6 +196,14 @@ In Verification Mode, source-specific workers should produce `source_trace.json`
 
 Keep these as hard gates for a JS scheduler or equivalent deterministic runner, not as long prose in the main skill prompt:
 
+- `phase_order_gate`: Heavy work follows the 8-phase state machine. Same-phase tasks can run in parallel; cross-phase tasks cannot start until the prior phase exit gate passes.
+- `single_writer_core_ledger_gate`: only the main agent may write rich master JSON, core ledgers, canonical facts, phase state, artifact manifest, and released reports.
+- `chapter_input_manifest_gate`: every chapter requires a frozen `chapter-input-manifest.json` before drafting.
+- `chapter_no_external_fact_gate`: chapter writers cannot search, recalculate capacity, choose policy targets, change project status, explain auction deltas beyond frozen facts, or copy deprecated values.
+- `stale_artifact_gate`: if `canonical_facts.json` or `fact_freeze.json` changes, dependent manifests, drafts, audits, executive summary, full report, and lite report become stale until refreshed.
+- `cross_chapter_audit_gate`: all chapter drafts must be audited against canonical facts, ledgers, and deprecated values before release.
+- `release_gate`: release requires cross-chapter audit pass, critical chapter verification pass, executive summary generated last, no strategy leakage, and lite derived from full.
+- `report_audit_gate`: release also requires the eight report-audit checks: cross-chapter metric consistency, scope disclosure, capacity aggregation, OEM share, project current-status uniqueness, parent/phase rollup deduplication, unit arithmetic, and release cleanliness.
 - `entity_extraction_gate`: every search result is scanned for project, company, SPV, law/decree, region, authority-source, and institution names.
 - `alias_expansion_gate`: each material entry receives English, local-language, Russian when relevant, Chinese, transliteration, SPV, and decree/order variants where discoverable.
 - `frontier_priority_gate`: every frontier entry receives P0/P1/P2/P3/P4, wind linkage, expansion allowance, expansion depth, defer reason, and promotion reason.
@@ -212,47 +217,54 @@ Keep these as hard gates for a JS scheduler or equivalent deterministic runner, 
 - `frontier_exhaustion_gate`: after round five, Recall continues until all P0/P1 frontier entries are processed and two consecutive expansion rounds add zero P0/P1 entries.
 - `verification_gate`: ledger-admitted projects must have `sourceTrace`, `evidenceGrade`, field-level verification for present critical fields, and P0/P1 execution/evaluation status that permits ledger admission.
 - `exa_boundary_chrome_handoff_gate`: Exa search/quota/no-more-results boundary triggers Chrome verification or an explicit Chrome-unavailable gap record; it does not release the run by itself.
-- `capacity_sum_gate`: installed, confirmed pipeline, watchlist, unresolved, and opportunity MW totals must be computed from `project_ledger`, not manually in report prose.
+- `canonical_fact_freeze_gate`: `canonical_facts.json` and `fact_freeze.json` must exist after source_trace/evidence_table, rich master JSON, project ledger, metric ledger, policy target ledger, auction ledger, OEM allocation ledger, and capacity reconciliation. Chapters cite frozen IDs instead of recalculating capacity scopes, policy status, project activity status, auction/project deltas, or OEM relationship categories.
+- `fact_freeze_gate`: compatibility alias for `canonical_fact_freeze_gate`; it must not run before core ledgers.
+- `capacity_sum_gate`: confirmed pipeline, opportunity, watchlist, excluded inactive, and OEM relationship MW totals must be computed from `project_ledger`, not manually in report prose.
 - `duplicate_gate`: aliases and renamed phases must merge or receive explicit duplicate/rejected decisions.
 - `opportunity_gate`: OEM opportunity tables may include only projects where OEM is TBD, unconfirmed, undisclosed, or covered by a non-final framework.
 - `project_ledger_schema_gate`: every ledger project must satisfy `schema/project-ledger.schema.json`.
-- `capacity_reconciliation_gate`: confirmed capacity, opportunity MW, and watchlist capacity must be recalculated from `project_ledger`; national targets remain separate.
+- `capacity_reconciliation_gate`: confirmed capacity, opportunity MW, watchlist capacity, excluded inactive MW, Firm MW, Committed MW, Influenced MW, and Unallocated MW must be recalculated from `project_ledger`; national targets and auction totals remain separate.
 - `project_card_completeness_gate`: every key project card must satisfy `schema/project-card.schema.json`; unknown values may be marked as pending/unavailable, but fields cannot disappear.
-- `evidence_boundary_gate`: every key conclusion must have conclusion-level evidence in `schema/evidence-table.schema.json`, especially project stage, capacity, OEM, tariff, financing, PPA/offtaker, procurement window, and Mingyang relevance.
-- `source_trace_evidence_boundary_gate`: source_trace and evidence_table must exist before detailed project cards and report prose.
+- `evidence_boundary_gate`: every key conclusion must have conclusion-level evidence in `schema/evidence-table.schema.json`, especially developmentStage, activityStatus, capacityTreatment, capacity MW, OEM relationship type/status, tariff, financing, PPA/offtaker, procurement window, and Mingyang relevance.
+- `source_trace_evidence_boundary_gate`: source_trace and evidence_table must exist before rich master JSON, core ledgers, canonical facts/fact freeze, detailed project cards, and report prose.
 - `no_strategy_recommendation_gate`: full report prose cannot contain strategy-action language such as building a factory, must enter, recommended bid, binding an EPC, or investing resources.
 - `baseline_inheritance_gate`: all baseline/candidate projects must flow into confirmed, watchlist, duplicate, rejected, or unresolved outcomes.
 - `lite_from_full_gate`: lite report is extracted from the validated full-report artifacts, not generated directly from raw notes.
-- `v4_minimum_agent_topology_gate`: V4 full reports default to `v4-heavy-chapter-agent` with at least 15 logical agents and a target topology of 20 roles; collapsed sequential execution must be recorded if real child agents are unavailable.
-- `chapter_work_verification_gate`: every V4 chapter needs a writer owner and reviewer pass; Chapters 1, 3, 4, 5, 6, 9, 13, 14, and 16 also need an independent verification artifact before release.
+- `minimum_agent_topology_gate`: full reports default to the heavy state-machine profile with at least 15 logical agents and a target topology of 20 roles; collapsed sequential execution must be recorded if real child agents are unavailable.
+- `chapter_work_verification_gate`: every chapter needs a writer owner and reviewer pass; Chapters 1, 3, 4, 5, 6, 9, 13, 14, and 16 also need an independent verification artifact before release.
 
-## V4 Full Report Generation Pipeline
+## Full Report Generation Pipeline
 
 Do not let the writer jump directly from search notes to `{slug}-report.md`. The deterministic runner must enforce this order:
 
 ```text
-1. candidate_project_pool
-2. source_trace / evidence_table
-3. project_ledger
-4. capacity_reconciliation
-5. participant_ledger
-6. oem_competition_matrix
-7. procurement_window_table
-8. detailed_project_cards
-9. full_report
-10. lite_report
+1. phase_state / artifact_manifest / agent_plan
+2. candidate_project_pool
+3. source_trace / evidence_table
+4. rich_master_json
+5. project_ledger / metric_ledger / policy_target_ledger / auction_ledger / oem_allocation_ledger / capacity_reconciliation
+6. canonical_facts / fact_freeze
+7. participant_ledger / oem_competition_matrix / procurement_window_table / detailed_project_cards / risk_matrix
+8. chapter_input_manifests
+9. chapter_drafts
+10. cross_chapter_audit / repair
+11. full_report
+12. lite_report
 ```
 
-Current search strategy should remain high-recall but bounded: search broadly, write all leads into `candidate_project_pool`, then stop expansion when P0/P1 convergence rules pass. Do not add new open-ended search lanes to fix V4 report quality; the main bottleneck is now ledger admission, card completeness, evidence boundaries, and capacity reconciliation.
+Current search strategy should remain high-recall but bounded: search broadly, write all leads into `candidate_project_pool`, then stop expansion when P0/P1 convergence rules pass. Do not add new open-ended search lanes to fix full-report quality; the main bottleneck is now ledger admission, capacity reconciliation, canonical fact freeze, chapter input control, card completeness, evidence boundaries, and cross-chapter audit.
 
-## V4 Agent Profile
+Release is blocked if `{slug}-integrity.json` reports any of `metricConsistencyGaps`, `scopeDisclosureGaps`, `capacityArithmeticGaps`, `oemShareGaps`, `projectStatusConflictGaps`, `parentPhaseRollupGaps`, `unitArithmeticGaps`, or `releaseCleanlinessGaps`. Repair the relevant ledger, frozen fact, chapter manifest, chapter draft, or report text, then rerun validation before deriving the lite report.
 
-The V4 full report has two schedules:
+## Heavy Agent Profile
 
-- Artifact order: the 10-step generation pipeline above.
-- Role ownership: `v4-heavy-chapter-agent`, with at least 15 logical agents and a target topology of 20 roles.
+The full report has two schedules:
 
-The generated plan must expose `v4FullReportAgentProfile`, `v4AgentTopology`, `v4ChapterVerificationPolicy`, and `v4ChapterAgentPlan`. Use the plan to assign chapter writers, the delayed Chapter 1 summary worker, the independent `verification_agent`, and the independent `reflection_reviewer`.
+- Artifact order: the generation pipeline above.
+- Phase order: the 8-phase state machine. Same-phase work may run in parallel; cross-phase work is serial.
+- Role ownership: the heavy state-machine profile, with at least 15 logical agents and a target topology of 20 roles.
+
+The generated plan must expose `fullReportAgentProfile`, `agentTopology`, `chapterVerificationPolicy`, `chapterAgentPlan`, `heavyWorkflowStateMachine`, `artifactPermissionContract`, and `chapterInputManifestContract`. Use the plan to assign phase workers, chapter writers, the delayed Chapter 1 summary worker, the independent `verification_agent`, and the independent `reflection_reviewer`.
 
 Critical chapters requiring work/verification separation are 1, 3, 4, 5, 6, 9, 13, 14, and 16. All chapters require reviewer pass; critical chapters also require a separate verification artifact in `data/renewable-market/chapter_verification/`.
 

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OEM Allocation Ledger",
+  "type": "object",
+  "required": [
+    "version",
+    "slug",
+    "allocations"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "allocations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "allocationId",
+          "scopeId",
+          "oem",
+          "capacityLayer",
+          "mw",
+          "sharePercent",
+          "denominatorMetricId",
+          "projectIds",
+          "sourceIds",
+          "confidence"
+        ],
+        "properties": {
+          "allocationId": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string"
+          },
+          "oem": {
+            "type": "string"
+          },
+          "capacityLayer": {
+            "enum": [
+              "firm_mw",
+              "committed_mw",
+              "influenced_mw",
+              "unallocated_mw",
+              "excluded_inactive_mw"
+            ]
+          },
+          "mw": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ]
+          },
+          "sharePercent": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ]
+          },
+          "denominatorMetricId": {
+            "type": "string"
+          },
+          "projectIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "relationshipTypes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "firm_supply_contract",
+                "preferred_supplier",
+                "conditional_reservation_or_cra",
+                "framework_agreement",
+                "technology_partnership",
+                "reported_preference",
+                "unallocated",
+                "unknown"
+              ]
+            }
+          },
+          "relationshipStatuses": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "active",
+                "conditional",
+                "expired",
+                "terminated",
+                "superseded",
+                "disputed",
+                "unknown"
+              ]
+            }
+          },
+          "sourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              "unknown"
+            ]
+          },
+          "pendingVerification": {
+            "type": [
+              "string",
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

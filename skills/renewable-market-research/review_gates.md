@@ -6,9 +6,10 @@ Final outputs must pass these gates before release.
 
 Rules:
 
-- Final summaries, conclusions, project counts, capacity totals, procurement-window statements, and any separate recommendations must trace to the latest canonical project ledger or reviewed synthesis.
-- The executive summary must be written or refreshed after all downstream chapters and project ledger changes are complete.
-- No chapter may maintain a separate project pipeline table that diverges from `{slug}-pipeline-ledger.json` or the master JSON.
+- Final summaries, conclusions, project counts, capacity totals, procurement-window statements, and any separate recommendations must trace to the latest canonical facts, core ledgers, or reviewed synthesis.
+- The executive summary must be written or refreshed after all downstream chapters, cross-chapter audit, canonical facts, and project ledger changes are complete.
+- No chapter may maintain a separate project pipeline table that diverges from `{slug}-pipeline-ledger.json`, `{slug}-project_ledger.json`, canonical facts, or the master JSON.
+- No chapter may use facts outside its `chapter-input-manifest.json`.
 - Every final project claim must include a source trace from depth record -> canonical ledger -> synthesis/report section.
 - The master JSON, not the compact ledger, is the rich report data source. Depth records must be cross-read before project cards and deep-dive chapters are finalized.
 - If a depth record contains a richer project-card field than the master JSON, update the master JSON first, then rebuild/refresh the ledger and synthesis.
@@ -19,7 +20,7 @@ Pass criteria:
 - The report's executive summary, project cards or compact project index, procurement-window section, risk section, and source-confidence appendix use the same project count, capacity totals, status buckets, and key caveats.
 - Any changed downstream chapter has either updated the summary or recorded why the summary is unaffected.
 - `scripts/validate_market_integrity.py --depth-dir ...` returns no `depthPropagationGaps` or `reportCardFieldGaps`.
-- `scripts/validate_market_integrity.py --project-ledger ... --project-cards ... --evidence-table ... --full-report ...` returns a `v4GateSummary` with zero gaps for project ledger fields, project-card completeness, capacity reconciliation, evidence boundary, strategy leakage, and baseline inheritance.
+- `scripts/validate_market_integrity.py --phase-state ... --artifact-manifest ... --project-ledger ... --metric-ledger ... --capacity-reconciliation ... --oem-allocation-ledger ... --project-cards ... --evidence-table ... --canonical-facts ... --fact-freeze ... --chapter-input-dir ... --chapter-drafts-dir ... --audits-dir ... --full-report ...` returns a `gateSummary` with zero gaps for phase order, artifact ownership, canonical facts, chapter input manifests, metric consistency, scope disclosure, capacity arithmetic, OEM share, project status conflicts, parent/phase rollup, unit arithmetic, release cleanliness, deprecated values in drafts, release gates, project ledger fields, project-card completeness, capacity reconciliation, evidence boundary, strategy leakage, and baseline inheritance.
 
 Remediation:
 
@@ -90,6 +91,8 @@ Pass criteria:
 - Duplicate candidates are either merged into one canonical ledger record or explicitly marked as watchlist/rejected with a reason.
 - Conflicting dates, statuses, or capacities are either resolved or explicitly disclosed.
 - Confirmed pipeline excludes ambiguous duplicated or renamed project records.
+- Parent zones, developer portfolios, parent projects, project phases, and concrete project rows have explicit rollup treatment before any capacity sum.
+- A project has only one current status across ledgers and chapter/current-status tables.
 
 Remediation:
 
@@ -107,12 +110,12 @@ Rules:
 - A fact is not important merely because it is interesting; it must affect market judgment, pipeline conversion, product fit, risk, timing, or account strategy.
 - Market participants must be tied to projects, MW exposure, role, procurement influence, relationship strength, factual relevance, or pending verification. Generic company profiles do not pass.
 - Adjacent opportunities such as storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake pass only when they change wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, bankability, or procurement-window facts.
-- In the V4 full report, do not write recommended actions. Use procurement-window, decision-chain, Mingyang/MySE relevance, risk, and pending-verification tables. If the user requested a separate action brief, sales recommendations must name actor, project or portfolio, MW scale, decision timing, current OEM status, procurement route, confidence, and next action.
+- In the full report, do not write recommended actions. Use procurement-window, decision-chain, Mingyang/MySE relevance, risk, and pending-verification tables. If the user requested a separate action brief, sales recommendations must name actor, project or portfolio, MW scale, decision timing, `developmentStage`, `activityStatus`, `oemRelationshipType`, `oemRelationshipStatus`, procurement route, confidence, and next action.
 
 Pass criteria:
 
 - Each key finding has at least one implication category: `capacity_treatment`, `procurement_window`, `factual_relevance`, `product_fit`, `risk_judgment`, `pending_verification`, `executive_decision`, or `appendix_only`.
-- The V4 full report contains procurement-window and pending-verification tables instead of a recommended-action list.
+- The full report contains procurement-window and pending-verification tables instead of a recommended-action list.
 - The final report includes a participant-role matrix or equivalent structured section for owners/developers, OEMs, EPC/finance actors, financiers, O&M actors, and material decision-chain participants.
 
 Remediation:
@@ -127,12 +130,12 @@ Remediation:
 Rules:
 
 - The reflection/reviewer agent must review independently from the worker that produced the artifact.
-- Reflection applies after four stages in Heavy Workflow: search plan, evidence/depth collection, ledger aggregation, and report drafting.
+- Reflection applies after Heavy Workflow phases: plan, recall/evidence, ledger/fact-freeze, chapter drafting, cross-chapter audit, and release.
 - Score improvement alone is not enough to advance. A stage must meet its threshold and have zero critical blockers.
-- Critical blockers include: missing mandatory search lane, confirmed critical fields supported only by discovery snippets, unreconciled duplicate projects, confirmed/watchlist leakage, missing source-to-final trace, stale executive summary, missing V4 0-16 full-report structure, missing full project ledger, missing project-card fields without gap notes, recommendation leakage inside the full report, generic participant profiles, or benchmark sections included without explicit request.
+- Critical blockers include: missing mandatory search lane, confirmed critical fields supported only by discovery snippets, unreconciled duplicate projects, confirmed/watchlist leakage, missing source-to-final trace, stale executive summary, missing 0-16 full-report structure, missing full project ledger, missing project-card fields without gap notes, recommendation leakage inside the full report, generic participant profiles, missing chapter input manifests, chapter facts outside frozen inputs, metricId value conflicts, scope-less aggregate capacity metrics, failed capacity arithmetic, OEM share totals above 100%, Influenced MW mixed into Firm MW denominator, project current-status conflicts, unresolved parent/phase rollup, unit arithmetic errors, release-forbidden markup/artifacts, stale chapter drafts after canonical-facts refresh, or benchmark sections included without explicit request.
 - Search/tool blockers include: treating Exa boundary as completion before Chrome verification, missing `chrome-verification` for required lanes, or failing to record `tool_unavailable=chrome-mcp` with affected fields when Chrome is unavailable.
-- V4 agent blockers include: using the 10-agent Standard profile for a V4 full report without explicit user reduction, fewer than 15 logical roles without a recorded collapsed-sequential reason, missing chapter owner for any Chapter 0-16 section, or missing independent verification artifacts for Chapters 1, 3, 4, 5, 6, 9, 13, 14, or 16.
-- V4 gate blockers include nonzero `projectLedgerFieldGaps`, `projectCardCompletenessGaps`, `capacityReconciliationGaps`, `evidenceBoundaryGaps`, `strategyRecommendationGaps`, or `baselineInheritanceGaps` in `{slug}-integrity.json`.
+- Agent blockers include: using the 10-agent Standard profile for a full report without explicit user reduction, fewer than 15 logical roles without a recorded collapsed-sequential reason, missing chapter owner for any Chapter 0-16 section, or missing independent verification artifacts for Chapters 1, 3, 4, 5, 6, 9, 13, 14, or 16.
+- Gate blockers include nonzero `phaseOrderGaps`, `artifactOwnershipGaps`, `canonicalFactsGaps`, `chapterInputManifestGaps`, `chapterExternalFactGaps`, `metricConsistencyGaps`, `scopeDisclosureGaps`, `capacityArithmeticGaps`, `oemShareGaps`, `projectStatusConflictGaps`, `parentPhaseRollupGaps`, `unitArithmeticGaps`, `releaseCleanlinessGaps`, `releaseGaps`, `projectLedgerFieldGaps`, `projectCardCompletenessGaps`, `capacityReconciliationGaps`, `evidenceBoundaryGaps`, `strategyRecommendationGaps`, or `baselineInheritanceGaps` in `{slug}-integrity.json`.
 - If a stage fails, the reviewer must write executable gap tasks with owner lane, missing artifact, required evidence method, and acceptance criterion.
 
 Default score thresholds:
@@ -196,3 +199,24 @@ Remediation:
 - Merge overlapping judgments.
 - Replace vague growth language with quantified, sourced, and qualified statements.
 - Add missing evidence or downgrade the judgment.
+
+## 7. Release Audit Gate
+
+Rules:
+
+- Cross-chapter metric consistency: the same `metricId` must not have different normalized numeric values.
+- Scope disclosure: aggregate metrics must state scope, time, and basis. `全国海风装机：230MW，截至2024年底` and `重点商业项目账本运营容量：96MW` are acceptable; `韩国运营海风：96MW` is not.
+- Capacity aggregation: project subtotals equal ledger aggregates; official auction/award total minus identifiable project capacity equals unresolved gap; active pipeline excludes paused, withdrawn, cancelled, and superseded projects.
+- OEM share: within one statistical layer, OEM shares total no more than 100%; Influenced MW cannot be mixed into the Firm MW denominator.
+- Project status uniqueness: one project cannot be active, paused, cancelled, and watchlist across different current-status sections.
+- Parent/phase rollup: government zones, developer portfolios, parent projects, phases, and concrete projects require explicit relationship treatment before any capacity sum.
+- Unit arithmetic: visible calculations across MW/GW, percentages, KRW 亿/万亿, USD/KRW, project counts, and subtotals must reconcile.
+- Release cleanliness: final reports cannot contain internal version labels, repairs-applied notes, `<del>`, markdown deletion, TODO/FIXME, internal iteration labels, unconverted footnotes, or raw JSON.
+
+Pass criteria:
+
+- `gateSummary` has zero gaps for `metricConsistencyGaps`, `scopeDisclosureGaps`, `capacityArithmeticGaps`, `oemShareGaps`, `projectStatusConflictGaps`, `parentPhaseRollupGaps`, `unitArithmeticGaps`, and `releaseCleanlinessGaps`.
+
+Remediation:
+
+- Repair the ledger, canonical facts, chapter input manifests, affected chapter drafts, or final report text, then rerun the validator before release.

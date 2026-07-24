@@ -18,7 +18,102 @@
       "type": "string"
     },
     "capacityReconciliation": {
-      "type": "object"
+      "type": "object",
+      "required": [
+        "confirmedCapacityMW",
+        "opportunityCapacityMW",
+        "watchlistCapacityMW",
+        "excludedInactiveMW",
+        "firmMW",
+        "committedMW",
+        "influencedMW",
+        "unallocatedMW"
+      ],
+      "properties": {
+        "officialAuctionTotalMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "identifiableProjectCapacityMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "confirmedCapacityMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "opportunityCapacityMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "watchlistCapacityMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "suspendedOrPausedMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "excludedInactiveMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "firmMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "committedMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "influencedMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "unallocatedMW": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "calculationBasis": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
     },
     "projects": {
       "type": "array",
@@ -30,7 +125,11 @@
           "canonicalProjectName",
           "capacityMW",
           "opportunityMW",
-          "projectStage",
+          "developmentStage",
+          "activityStatus",
+          "ledgerTreatment",
+          "capacityTreatment",
+          "capacityScope",
           "statusBasis",
           "countedInConfirmedCapacity",
           "countedInOpportunityCapacity",
@@ -38,6 +137,8 @@
           "spv",
           "equityStructure",
           "oem",
+          "oemRelationshipType",
+          "oemRelationshipStatus",
           "procurementStatus",
           "turbineModel",
           "epc",
@@ -92,10 +193,19 @@
             ]
           },
           "projectStage": {
+            "description": "Legacy compatibility field only. New records must use developmentStage plus activityStatus.",
             "enum": [
               "operational",
+              "partial_operation",
               "under_construction",
+              "construction_ready",
               "financing_closed",
+              "financial_close",
+              "contracted",
+              "auction_awarded",
+              "permitted",
+              "pre_auction",
+              "early_development",
               "ppa_signed",
               "decree_backed",
               "tendering",
@@ -105,6 +215,67 @@
               "rejected",
               "unresolved",
               "unavailable"
+            ]
+          },
+          "developmentStage": {
+            "enum": [
+              "operational",
+              "partial_operation",
+              "under_construction",
+              "construction_ready",
+              "financial_close",
+              "contracted",
+              "auction_awarded",
+              "permitted",
+              "pre_auction",
+              "early_development",
+              "watchlist",
+              "unverified"
+            ]
+          },
+          "activityStatus": {
+            "enum": [
+              "active",
+              "delayed",
+              "paused",
+              "withdrawn",
+              "cancelled",
+              "superseded",
+              "unknown"
+            ]
+          },
+          "ledgerTreatment": {
+            "enum": [
+              "confirmed",
+              "watchlist",
+              "duplicate",
+              "rejected",
+              "unresolved"
+            ]
+          },
+          "capacityTreatment": {
+            "enum": [
+              "confirmed_capacity",
+              "opportunity_capacity",
+              "watchlist_capacity",
+              "excluded_inactive",
+              "excluded_duplicate",
+              "excluded_unverified",
+              "policy_target_only",
+              "auction_total_only"
+            ]
+          },
+          "capacityScope": {
+            "enum": [
+              "official_auction_total",
+              "identifiable_project_capacity",
+              "confirmed_project_capacity",
+              "opportunity_capacity",
+              "watchlist_capacity",
+              "suspended_or_paused_capacity",
+              "national_policy_target",
+              "draft_or_political_target",
+              "unknown"
             ]
           },
           "statusBasis": {
@@ -139,6 +310,38 @@
           },
           "oem": {
             "type": "string"
+          },
+          "oemRelationshipType": {
+            "enum": [
+              "firm_supply_contract",
+              "preferred_supplier",
+              "conditional_reservation_or_cra",
+              "framework_agreement",
+              "technology_partnership",
+              "reported_preference",
+              "unallocated",
+              "unknown"
+            ]
+          },
+          "oemRelationshipStatus": {
+            "enum": [
+              "active",
+              "conditional",
+              "expired",
+              "terminated",
+              "superseded",
+              "disputed",
+              "unknown"
+            ]
+          },
+          "oemCapacityBucket": {
+            "enum": [
+              "firm_mw",
+              "committed_mw",
+              "influenced_mw",
+              "unallocated_mw",
+              "excluded_inactive_mw"
+            ]
           },
           "procurementStatus": {
             "enum": [

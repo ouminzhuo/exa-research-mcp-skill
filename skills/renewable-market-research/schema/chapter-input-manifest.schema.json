@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Chapter Input Manifest",
+  "type": "object",
+  "required": [
+    "chapterId",
+    "inputFreezeId",
+    "allowedFactIds",
+    "allowedMetricIds",
+    "allowedProjectIds",
+    "allowedPolicyTargetIds",
+    "allowedAuctionIds",
+    "allowedOemAllocationIds",
+    "prohibitedDeprecatedValues",
+    "requiredDisclosures",
+    "mustNotInferBeyondManifest",
+    "repairIfContradictionFound"
+  ],
+  "properties": {
+    "chapterId": {
+      "type": "string"
+    },
+    "chapterTitle": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "inputFreezeId": {
+      "type": "string"
+    },
+    "allowedFactIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedMetricIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedProjectIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedPolicyTargetIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedAuctionIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedOemAllocationIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prohibitedDeprecatedValues": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "requiredDisclosures": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedSourceArtifacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mustNotInferBeyondManifest": {
+      "type": "boolean"
+    },
+    "repairIfContradictionFound": {
+      "enum": [
+        "return_to_phase_3",
+        "return_to_phase_4",
+        "return_to_phase_5",
+        "return_to_phase_6",
+        "block_release"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 interface:
   display_name: "Renewable Market Research"
-  short_description: "Two-stage renewable market workflow with dynamic-frontier recall, ledger verification, and V4 full country wind-market status reports"
-  default_prompt: "Use $renewable-market-research to run a V4 renewable market workflow: generate the search plan, use the v4-heavy-chapter-agent profile for full reports, run bounded high-recall search-frontier rounds, verify/dedupe/reconcile the project ledger, write chapter-owned full report artifacts with required chapter verification, then produce the full report plus lite or executive outputs when needed."
+  short_description: "Renewable market workflow with dynamic-frontier recall, strict ledgers, canonical fact freeze, controlled chapter inputs, release audits, and full country wind-market status reports"
+  default_prompt: "Use $renewable-market-research to run a renewable market workflow: generate the search plan, run bounded high-recall search-frontier rounds, build source trace and evidence table, verify/dedupe/reconcile the rich master JSON and core ledgers, freeze canonical facts, write chapter drafts only from chapter input manifests with required chapter verification, run the eight release audit checks, then produce the full report plus lite or executive outputs when needed."
 dependencies:
   tools:
     - type: "mcp"

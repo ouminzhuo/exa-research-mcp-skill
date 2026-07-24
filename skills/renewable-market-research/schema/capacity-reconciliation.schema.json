@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Capacity Reconciliation",
+  "type": "object",
+  "required": [
+    "version",
+    "slug",
+    "confirmedCapacityMW",
+    "opportunityCapacityMW",
+    "watchlistCapacityMW",
+    "excludedInactiveMW",
+    "firmMW",
+    "committedMW",
+    "influencedMW",
+    "unallocatedMW",
+    "calculationBasis"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "officialAuctionTotalMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "identifiableProjectCapacityMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "unresolvedGapMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "confirmedCapacityMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "opportunityCapacityMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "watchlistCapacityMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "excludedInactiveMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "firmMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "committedMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "influencedMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "unallocatedMW": {
+      "type": [
+        "number",
+        "string",
+        "null"
+      ]
+    },
+    "calculationBasis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "metric",
+          "formula",
+          "includedProjectIds",
+          "excludedProjectIds"
+        ],
+        "properties": {
+          "metric": {
+            "type": "string"
+          },
+          "formula": {
+            "type": "string"
+          },
+          "includedProjectIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludedProjectIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "basis": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

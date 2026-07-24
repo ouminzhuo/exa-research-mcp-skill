@@ -58,6 +58,18 @@
         "null"
       ]
     },
+    "opportunityMW": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "opportunity_mw": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
     "owner_developer": {
       "type": [
         "string",
@@ -216,6 +228,52 @@
         "null"
       ]
     },
+    "oemRelationshipType": {
+      "enum": [
+        "firm_supply_contract",
+        "preferred_supplier",
+        "conditional_reservation_or_cra",
+        "framework_agreement",
+        "technology_partnership",
+        "reported_preference",
+        "unallocated",
+        "unknown"
+      ]
+    },
+    "oem_relationship_type": {
+      "enum": [
+        "firm_supply_contract",
+        "preferred_supplier",
+        "conditional_reservation_or_cra",
+        "framework_agreement",
+        "technology_partnership",
+        "reported_preference",
+        "unallocated",
+        "unknown"
+      ]
+    },
+    "oemRelationshipStatus": {
+      "enum": [
+        "active",
+        "conditional",
+        "expired",
+        "terminated",
+        "superseded",
+        "disputed",
+        "unknown"
+      ]
+    },
+    "oem_relationship_status": {
+      "enum": [
+        "active",
+        "conditional",
+        "expired",
+        "terminated",
+        "superseded",
+        "disputed",
+        "unknown"
+      ]
+    },
     "oemShortlist": {
       "type": [
         "array",
@@ -342,6 +400,128 @@
         "early_stage",
         "watchlist_unverified",
         "rejected_or_duplicate"
+      ]
+    },
+    "developmentStage": {
+      "enum": [
+        "operational",
+        "partial_operation",
+        "under_construction",
+        "construction_ready",
+        "financial_close",
+        "contracted",
+        "auction_awarded",
+        "permitted",
+        "pre_auction",
+        "early_development",
+        "watchlist",
+        "unverified"
+      ]
+    },
+    "development_stage": {
+      "enum": [
+        "operational",
+        "partial_operation",
+        "under_construction",
+        "construction_ready",
+        "financial_close",
+        "contracted",
+        "auction_awarded",
+        "permitted",
+        "pre_auction",
+        "early_development",
+        "watchlist",
+        "unverified"
+      ]
+    },
+    "activityStatus": {
+      "enum": [
+        "active",
+        "delayed",
+        "paused",
+        "withdrawn",
+        "cancelled",
+        "superseded",
+        "unknown"
+      ]
+    },
+    "activity_status": {
+      "enum": [
+        "active",
+        "delayed",
+        "paused",
+        "withdrawn",
+        "cancelled",
+        "superseded",
+        "unknown"
+      ]
+    },
+    "ledgerTreatment": {
+      "enum": [
+        "confirmed",
+        "watchlist",
+        "duplicate",
+        "rejected",
+        "unresolved"
+      ]
+    },
+    "ledger_treatment": {
+      "enum": [
+        "confirmed",
+        "watchlist",
+        "duplicate",
+        "rejected",
+        "unresolved"
+      ]
+    },
+    "capacityTreatment": {
+      "enum": [
+        "confirmed_capacity",
+        "opportunity_capacity",
+        "watchlist_capacity",
+        "excluded_inactive",
+        "excluded_duplicate",
+        "excluded_unverified",
+        "policy_target_only",
+        "auction_total_only"
+      ]
+    },
+    "capacity_treatment": {
+      "enum": [
+        "confirmed_capacity",
+        "opportunity_capacity",
+        "watchlist_capacity",
+        "excluded_inactive",
+        "excluded_duplicate",
+        "excluded_unverified",
+        "policy_target_only",
+        "auction_total_only"
+      ]
+    },
+    "capacityScope": {
+      "enum": [
+        "official_auction_total",
+        "identifiable_project_capacity",
+        "confirmed_project_capacity",
+        "opportunity_capacity",
+        "watchlist_capacity",
+        "suspended_or_paused_capacity",
+        "national_policy_target",
+        "draft_or_political_target",
+        "unknown"
+      ]
+    },
+    "capacity_scope": {
+      "enum": [
+        "official_auction_total",
+        "identifiable_project_capacity",
+        "confirmed_project_capacity",
+        "opportunity_capacity",
+        "watchlist_capacity",
+        "suspended_or_paused_capacity",
+        "national_policy_target",
+        "draft_or_political_target",
+        "unknown"
       ]
     },
     "evidence_level": {

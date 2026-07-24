@@ -86,11 +86,35 @@
 采用文件模式，先生成 search plan，再做高召回动态 frontier，最后输出 project ledger、full report、lite report 和销售机会表。
 ```
 
-当前版本的风电市场研究默认使用两段式：
+当前版本的风电市场研究默认使用“先有账本，再写正文；先有原版，再抽 lite；先有证据，再下判断”的生产线，并且这次围绕三个批次完成了升级：
+
+#### 三步升级摘要
+
+1. **数据契约与 Fact Freeze**
+   - 报告产品形态收敛为“国别风电市场现状描述母版”，不是策略建议书，也不是 lite 版。
+   - 新增/固化核心账本：`project_ledger`、`metric_ledger`、`policy_target_ledger`、`auction_ledger`、`oem_allocation_ledger`、`capacity_reconciliation`、`canonical_facts`、`fact_freeze`、`project_cards`、`evidence_table`。
+   - 项目状态拆成 `developmentStage` + `activityStatus`，避免把“已中标但暂停”“观察名单但仍有线索”等情况压成一个模糊状态。
+   - OEM 关系拆成 `oemRelationshipType` + `oemRelationshipStatus`，只允许分别统计 Firm MW、Committed MW、Influenced MW、Unallocated MW、Excluded inactive MW，不再使用含义模糊的“锁定 MW”。
+   - 新增 `metric-ledger.schema.json`、`capacity-reconciliation.schema.json`、`oem-allocation-ledger.schema.json`，让跨章指标、容量反算和 OEM 分母有机器可检查的结构。
+
+2. **工作流与 Agent 依赖**
+   - Heavy Workflow 改为 8 阶段状态机：Plan -> Recall -> Verification and Evidence -> Rich Master and Core Ledgers -> Canonical Reconciliation and Fact Freeze -> Chapter Input Manifest and Chapter Writing -> Cross-Chapter Audit and Repair -> Release。
+   - 同阶段可以并发，跨阶段必须串行；OpenClaw 如果不能真正启动 20 个子 agent，也要用 `agentMode=collapsed-sequential` 记录为“同角色顺序执行”。
+   - 主 agent 是核心账本和最终报告的唯一写入者；worker 只能写 `depth/`、`verification/`、`chapter_inputs/`、`chapter_drafts/`、`audits/`。
+   - 章节 writer 只能读取 `canonical_facts.json` 和自己的 `chapter-input-manifest.json`，不得自行搜索、重算容量、选择政策目标、改变项目状态、解释拍卖差额或复制旧报告数字。
+   - 完整报告默认至少 15 个逻辑 agent、目标 20 个角色；第 1、3、4、5、6、9、13、14、16 章要求写作和独立验证分离；执行摘要最后生成，lite 必须从已验证 full report 抽取。
+
+3. **跨章自动审计与发布 Gate**
+   - 新增 8 类发布前检查：跨章 `metricId` 一致性、Scope 缺失、容量加总、OEM 份额/分母、项目当前状态唯一性、母项目/分期去重、单位与算术、发布清洁。
+   - `validate_market_integrity.py` 和 PowerShell wrapper 已接入这些 gate；`search_orchestration.py plan` 会输出 `report_audit_gate`、8 个 audit check、`capacityReconciliationJson` 等路径。
+   - 韩国报告中的典型问题可以被自动发现，例如 `230MW/326MW/340MW/96MW` 统计口径混用、`韩国运营海风：96MW` 这类缺 scope 表述、官方拍卖总量与可识别项目容量混算、Firm/Influenced MW 混分母、暂停项目进入 active pipeline、父项目与分期重复相加、`KRW 750亿 = KRW 7000亿 + KRW 500亿` 这类算术错误，以及 `v2.0`、`repairs applied`、`<del>`、`TODO/FIXME`、未转换脚注、raw JSON 等发布残留。
+   - 搜索策略没有继续无限扩展：仍然是高召回，但用 frontier priority 和 Exa -> Chrome verification handoff 控制边界。现在重点从“搜更多”转为“搜到的信息如何入账、冻结、给章节使用、被跨章审计”。
+
+默认运行逻辑：
 
 1. **Recall Mode**：先高召回，不假设项目名、开发商、SPV、OEM、EPC、融资方、法令和地区入口已经完整。搜索过程按 `seed -> search -> extract entities -> enqueue -> search again` 扩展 `search_frontier.json`，至少运行 5 轮。
 2. **Bounded Frontier**：高召回不是无限扩展。P0/P1 自动追踪并阻止过早进入 Verification；P2 只做 one-hop；P3 只有影响风电机会才展开；P4 泛能源宏观信息默认 deferred，不进正文。
-3. **Verification Mode**：只从 `candidate_project_pool.json` 和去重后的 `{slug}-pipeline-ledger.json` 入账，分类为 operational / financing_closed / under_construction / ppa_signed / decree_backed / mou_or_early_stage / watchlist / duplicate / rejected / unresolved。
+3. **Verification Mode**：从 `candidate_project_pool.json`、`source_trace/evidence_table` 和去重后的 ledgers 入账。每个候选都必须进入 confirmed / watchlist / duplicate / rejected / unresolved，并带有 `developmentStage`、`activityStatus`、`capacityTreatment`、`capacityScope` 和证据边界。
 
 如果只想先生成调度契约，可以运行：
 
@@ -112,13 +136,30 @@ python .\skills\renewable-market-research\scripts\search_orchestration.py plan `
 - `data/renewable-market/{slug}-discovered_entries.json`
 - `data/renewable-market/{slug}-candidate_project_pool.json`
 - `data/renewable-market/{slug}-pipeline-ledger.json`
+- `data/renewable-market/{slug}-project_ledger.json`
+- `data/renewable-market/{slug}-metric_ledger.json`
+- `data/renewable-market/{slug}-policy_target_ledger.json`
+- `data/renewable-market/{slug}-auction_ledger.json`
+- `data/renewable-market/{slug}-oem_allocation_ledger.json`
+- `data/renewable-market/{slug}-capacity_reconciliation.json`
+- `data/renewable-market/{slug}-canonical_facts.json`
+- `data/renewable-market/{slug}-fact_freeze.json`
+- `data/renewable-market/{slug}-project_cards.json`
+- `data/renewable-market/{slug}-evidence_table.json`
 - `data/renewable-market/{slug}-frontier_execution_review.json`
+- `data/renewable-market/{slug}-phase_state.json`
+- `data/renewable-market/{slug}-artifact_manifest.json`
+- `data/renewable-market/{slug}-agent_plan.json`
+- `data/renewable-market/chapter_inputs/{slug}-chapter-*-input-manifest.json`
+- `data/renewable-market/chapter_drafts/{slug}-chapter-*.md`
+- `data/renewable-market/audits/{slug}-cross_chapter_audit.json`
 - `data/renewable-market/{slug}-search_coverage_matrix.md`
 - `data/renewable-market/{slug}-frontier_convergence.json`
+- `data/renewable-market/{slug}-integrity.json`
 - `data/renewable-market/{slug}-report.md`
 - `data/renewable-market/{slug}-lite.md`
 
-进入正式报告前，必须确认：Recall 已完成至少 5 轮；所有 P0/P1 frontier 已搜索、分类或明确 deferred；P0/P1 已有执行/评估分离的 artifact 且 `evaluation_status` 允许入账；历史 baseline seed 没有静默消失；政府/法令、IFI、开发商、OEM/EPC、中文、本地语言权威来源都已尝试；连续两轮没有新增 P0/P1 高价值入口；容量汇总来自 ledger，而不是叙述笔记。
+进入正式报告前，必须确认：Recall 已完成至少 5 轮；所有 P0/P1 frontier 已搜索、分类或明确 deferred；P0/P1 已有执行/评估分离的 artifact 且 `evaluation_status` 允许入账；历史 baseline seed 没有静默消失；政府/法令、IFI、开发商、OEM/EPC、中文、本地语言权威来源都已尝试；连续两轮没有新增 P0/P1 高价值入口；容量汇总来自 ledger，而不是叙述笔记；`gateSummary` 中八类发布审计 gap 均为 0。
 
 ### `effective-harnesses`
 

@@ -1,4 +1,4 @@
-# V4 Full Report Architecture
+# Full Report Architecture
 
 Use this reference whenever generating the **full** country wind-market report. It is the report contract; `references/pdf-pipeline.md` only covers authoring and PDF layout mechanics.
 
@@ -27,6 +27,8 @@ The full report must not make final go/no-go, factory-build, pricing, or bid-str
 
 Hard rule: key project-card fields must not be deleted because the body text is compressed. The main body may summarize; the project-card appendix or card block must preserve complete fields, with `not found`, `unavailable`, or `not applicable` when evidence is absent.
 
+Before any chapter draft, generate `canonical_facts.json` and `fact_freeze.json` after source trace, evidence table, rich master JSON, project ledger, metric ledger, policy target ledger, auction ledger, OEM allocation ledger, and capacity reconciliation are current. Chapters must cite frozen IDs for contested capacity, policy, project-status, auction/project-delta, and OEM-relationship claims. A chapter may summarize the frozen fact, but it must not recalculate capacity scopes, upgrade draft targets into enacted policy, treat political statements as policy targets, explain auction differences outside frozen facts, or turn strategic OEM preference into firm orders.
+
 ## Chapter Contract
 
 | Chapter | Name | Question Answered | Main Output |
@@ -40,7 +42,7 @@ Hard rule: key project-card fields must not be deleted because the body text is 
 | 6 | Key project cards | What the complete facts are for material projects | complete project cards |
 | 7 | Developers, owners, and decision-right structure | Who controls projects and who influences procurement | developer matrix, equity structure, decision-right map |
 | 8 | Wind resource, geography, and turbine-fit inference | How known turbine choices bound technical assumptions when resource reports are incomplete | turbine parameter table, inference table, regional mapping, competitor platform table |
-| 9 | OEM competition landscape | Who is locked, shortlisted, unknown, or absent | OEM share, locked MW, turbine distribution, competition status |
+| 9 | OEM competition landscape | Which OEM relationships are firm, committed, influenced, unallocated, or excluded | Firm/Committed/Influenced/Unallocated/Excluded inactive MW, turbine distribution, competition status |
 | 10 | EPC, financiers, O&M, and supply-chain network | Who builds, finances, operates, and supplies | EPC, financier, O&M, and supply-chain tables |
 | 11 | Localization and industrial policy status | What localization requirements and local footprints exist | localization policy, factory/service footprint, supply-chain status |
 | 12 | Grid, storage, interconnection, and curtailment constraints | What system constraints affect project execution | grid bottlenecks, BESS requirements, transmission routes, curtailment risk |
@@ -51,7 +53,9 @@ Hard rule: key project-card fields must not be deleted because the body text is 
 
 ## Chapter-Agent Ownership
 
-V4 full reports default to `v4-heavy-chapter-agent`, not the 10-agent Standard profile. Use at least 15 logical agents and target 20 roles: main integrator, chapter workers, delayed Chapter 1 summary worker, independent verification agent, and independent reflection reviewer. If real subagents are unavailable, run the same roles sequentially and record `agentMode=collapsed-sequential`.
+Full reports default to the heavy state-machine profile, not the 10-agent Standard profile. Use at least 15 logical agents and target 20 roles: main integrator, chapter workers, delayed Chapter 1 summary worker, independent verification agent, and independent reflection reviewer. If real subagents are unavailable, run the same roles sequentially and record `agentMode=collapsed-sequential`.
+
+The main integrator is the single writer for `{slug}.json`, project/metric/policy/auction/OEM ledgers, `canonical_facts.json`, `fact_freeze.json`, `phase_state.json`, `artifact_manifest.json`, chapter input manifests, and released reports. Chapter writers write only `chapter_drafts/*.md` from their manifests.
 
 | Chapter | Writer Role | Verification |
 |---|---|---|
@@ -75,6 +79,10 @@ V4 full reports default to `v4-heavy-chapter-agent`, not the 10-agent Standard p
 
 Critical chapter verification means the chapter writer cannot self-release the chapter. The verifier must check source-to-field continuity, capacity treatment, evidence confidence, pending-verification notes, and contradiction status before the main integrator assembles the full report.
 
+Every chapter must have a `chapter_inputs/{slug}-chapter-*-input-manifest.json` with allowed fact IDs, metric IDs, project IDs, policy target IDs, auction IDs, OEM allocation IDs, prohibited deprecated values, and required disclosures. Chapter agents must not search, calculate capacity, choose policy targets, change project status, explain auction deltas beyond frozen facts, or copy old deprecated numbers. Missing facts become gap tasks.
+
+Before full-report release, run the eight release audit checks across chapter drafts and assembled prose: metricId consistency, scope disclosure, capacity aggregation, OEM share, project current-status uniqueness, parent/phase rollup deduplication, unit arithmetic, and release cleanliness. Any nonzero gap blocks release and lite extraction.
+
 ## Chapter Requirements
 
 ### 0. Report Scope And Evidence Rules
@@ -83,10 +91,20 @@ Purpose: prevent drift in later capacity, project-stage, opportunity, and confid
 
 Required tables:
 
-- Capacity definition table: operational, under construction, financing closed, PPA signed, decree-backed, tendering, MOU/JDA, watchlist, national long-term target.
-- Project-stage definition table: evidence required before each stage can be counted.
+- Fact Freeze table: Fact ID, frozen statement, scope, value, included project IDs, excluded project IDs, evidence IDs, confidence.
+- Capacity definition table: official auction total, identifiable project capacity, confirmed project capacity, Opportunity MW, watchlist MW, suspended/paused MW, national long-term target.
+- Project-status definition table: `developmentStage` and `activityStatus` are separate. Development stage captures the legal/commercial milestone; activity status captures whether the project is active, delayed, paused, withdrawn, cancelled, or superseded.
 - Opportunity capacity definition table: separate project MW, unallocated-OEM MW, and `Opportunity MW`.
 - Conclusion-evidence rule table: source tier, whether it directly proves the claim, confidence, and pending verification.
+
+Required project status fields:
+
+| Field | Allowed Values | Meaning |
+|---|---|---|
+| `developmentStage` | operational, partial_operation, under_construction, construction_ready, financial_close, contracted, auction_awarded, permitted, pre_auction, early_development, watchlist, unverified | Evidence-backed development milestone |
+| `activityStatus` | active, delayed, paused, withdrawn, cancelled, superseded, unknown | Current activity condition |
+| `ledgerTreatment` | confirmed, watchlist, duplicate, rejected, unresolved | How the candidate is carried in the ledger |
+| `capacityTreatment` | confirmed_capacity, opportunity_capacity, watchlist_capacity, excluded_inactive, excluded_duplicate, excluded_unverified, policy_target_only, auction_total_only | How the MW is allowed to enter reconciliation |
 
 ### 1. Executive Summary
 
@@ -99,7 +117,7 @@ Required content:
 - 3-5 market core facts;
 - key-number dashboard;
 - project segmentation summary;
-- locked OEM versus undisclosed/unallocated OEM summary;
+- Firm/Committed/Influenced/Unallocated/Excluded inactive OEM MW summary;
 - major constraint summary;
 - report date, data cutoff, and latest major update anchor.
 
@@ -136,14 +154,16 @@ Use this segmentation baseline:
 | Layer | Count In Confirmed Capacity | Count In Opportunity Capacity | Notes |
 |---|---|---|---|
 | Operational | yes | no |  |
-| Under construction | yes | depends on OEM status |  |
-| Financing closed | yes | depends on OEM status |  |
+| Under construction | yes | depends on OEM relationship type/status |  |
+| Financing closed | yes | depends on OEM relationship type/status |  |
 | PPA/decree-backed | cautious | yes |  |
 | Tendering | no/cautious | yes |  |
 | MOU/JDA | no | watchlist |  |
 | National target | no | upper-bound only |  |
 
 Always provide confirmed capacity, opportunity capacity, watchlist capacity, and national long-term target capacity separately.
+
+Suspended, paused, withdrawn, cancelled, or superseded projects must be shown explicitly. They may remain in the project universe, but their MW must flow to Excluded inactive MW, not active confirmed/opportunity/unallocated MW.
 
 ### 5. Full Project Ledger
 
@@ -160,7 +180,11 @@ Required fields:
 | Capacity MW | total project capacity |
 | Opportunity MW | addressable/unallocated capacity |
 | BESS | MW/MWh |
-| Project stage | operational, under construction, financing closed, PPA, decree, tender, MOU, watchlist |
+| Development stage | operational, partial operation, under construction, construction ready, financial close, contracted, auction awarded, permitted, pre-auction, early development, watchlist, unverified |
+| Activity status | active, delayed, paused, withdrawn, cancelled, superseded, unknown |
+| Ledger treatment | confirmed, watchlist, duplicate, rejected, unresolved |
+| Capacity treatment | confirmed capacity, opportunity capacity, watchlist capacity, excluded inactive, excluded duplicate, excluded unverified, policy target only, auction total only |
+| Capacity scope | official auction total, identifiable project capacity, confirmed project capacity, opportunity capacity, watchlist capacity, suspended/paused capacity, national policy target, draft/political target |
 | Status Basis | stage evidence |
 | Counted in confirmed capacity | yes/no |
 | Counted in opportunity capacity | yes/no |
@@ -170,6 +194,8 @@ Required fields:
 | Equity structure | shareholding |
 | Acquisition route | auction, direct negotiation, decree, JDA, MoU |
 | OEM | awarded, pending, shortlisted, undisclosed |
+| OEM relationship type | firm supply contract, preferred supplier, conditional reservation/CRA, framework agreement, technology partnership, reported preference, unallocated, unknown |
+| OEM relationship status | active, conditional, expired, terminated, superseded, disputed, unknown |
 | Procurement Status | not tendered, RFQ, shortlisted, awarded, framework, undisclosed |
 | Turbine model | known model |
 | EPC | EPC or installer |
@@ -186,7 +212,7 @@ Required fields:
 | Last Checked Date | most recent verification date |
 | Pending Verification | next fact to verify |
 | Mingyang Relevance | high, medium, low, none; fact-based only |
-| Relevance Rationale | unallocated OEM, framework tie, project stage, technical fit, etc. |
+| Relevance Rationale | unallocated OEM, framework tie, developmentStage/activityStatus, technical fit, etc. |
 | Main Risks | grid, finance, competition, land, policy, ESG |
 
 ### 6. Key Project Cards
@@ -199,9 +225,9 @@ Required modules:
 
 | Module | Fields |
 |---|---|
-| Basic information | project name, capacity, location, stage, COD |
+| Basic information | project name, capacity, location, stage, developmentStage, activityStatus, ledgerTreatment, capacityTreatment, COD |
 | Owner structure | developer, SPV, equity, government counterpart |
-| Technical plan | OEM, turbine model, turbine count, BESS, transmission line |
+| Technical plan | OEM, oemRelationshipType, oemRelationshipStatus, turbine model, turbine count, BESS, transmission line |
 | Commercial structure | PPA, offtaker, tariff, tenor, guarantee |
 | Financing structure | total investment, lenders, financial-close status |
 | Development flow | land, ESIA, interconnection, construction permit, electricity license |
@@ -224,11 +250,11 @@ Required tables:
 
 ### 8. Wind Resource, Geography, And Turbine-Fit Inference
 
-Do not pretend to know exact wind-resource data when it is not sourced. Use locked turbine models to infer technical boundaries, and state what cannot be inferred.
+Do not pretend to know exact wind-resource data when it is not sourced. Use verified awarded or operational turbine models to infer technical boundaries, and state what cannot be inferred.
 
 Required tables:
 
-- Known operational/locked turbine parameter table: project, region, status, OEM, model, unit MW, rotor diameter, hub height, turbine count, technical route, known capacity factor/annual generation, evidence level.
+- Known operational/awarded turbine parameter table: project, region, status, OEM, model, unit MW, rotor diameter, hub height, turbine count, technical route, known capacity factor/annual generation, evidence level.
 - Turbine-choice inference table: observed fact, reasonable inference, cannot infer.
 - Region-project-model mapping table: region, known project, known model, inferred resource/constraint characteristics, note.
 - Competitor platform positioning table: OEM, model/platform, known project, key parameters, technical positioning, fit scenario, risk/pending verification.
@@ -237,10 +263,14 @@ Required tables:
 
 Required tables:
 
-- OEM locked-capacity table: OEM, project, capacity, turbine model, status.
-- OEM share table: operational, locked, shortlisted, undisclosed.
-- Unallocated OEM capacity table: project, capacity, stage, procurement status.
+- Firm MW table: OEM, project, capacity, turbine model, relationship evidence, status.
+- Committed MW table: preferred supplier or conditional reservation/CRA, project, capacity, condition, evidence boundary.
+- Influenced MW table: framework agreement, technology partnership, or reported preference, project, capacity, influence basis, confidence.
+- Unallocated MW table: active or delayed projects with unallocated/unknown OEM relationship, capacity, procurement status.
+- Excluded inactive MW table: paused, withdrawn, cancelled, superseded, expired, or terminated cases and the reason they are excluded.
 - OEM competition status table: existing record, developer relationship, financing precedent, risk.
+
+Do not use ambiguous `locked MW`. It must be decomposed into Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW.
 
 ### 10. EPC, Financiers, O&M, And Supply-Chain Network
 
@@ -298,7 +328,7 @@ Required subsections:
 - 14.4 Project relevance matrix.
 - 14.5 Pending-verification table.
 
-Procurement-window table fields: project, capacity, Opportunity MW, current stage, OEM status, RFQ/tender/NTP timing, decision maker, influencer, pending verification.
+Procurement-window table fields: project, capacity, Opportunity MW, developmentStage, activityStatus, OEM relationship type/status, RFQ/tender/NTP timing, decision maker, influencer, pending verification.
 
 Do not write Mingyang actions here. Use pending verification and relevance.
 
@@ -337,11 +367,17 @@ Evidence requirements by conclusion type:
 | O&M arrangement | contract, developer announcement, or project document is stronger |
 | Mingyang relevance | usually inference; must mark basis and confidence |
 
+Capacity and OEM conclusion evidence must cite frozen IDs from `canonical_facts.json`/`fact_freeze.json` when the claim uses a contested scope or status. For example, 230MW, 326MW, 340MW, and 96MW may all appear only if each number has a distinct frozen scope, included/excluded project list, and evidence boundary.
+
 ## Writer Flow
 
-1. Start from the validated rich master JSON, canonical project ledger, source trace, and depth records.
-2. Write Chapter 0 before drafting conclusions so capacity and confidence rules are fixed.
-3. Build Chapters 5 and 6 directly from the master JSON and cross-read matching depth records. If depth records contain richer fields, update the master JSON or mark the field as unavailable before drafting.
-4. Write Chapters 7-14 from project-linked participant, technology, grid, tariff, localization, and procurement-window records. Avoid generic company profiles.
-5. Write Chapter 1 only after Chapters 2-16 are current, then back-check every summary number against the ledger.
-6. Keep recommendations out of the full report. If the user asks for strategy or sales actions, produce a separate executive brief, action memo, or lite addendum.
+1. Start from source trace, evidence table, validated rich master JSON, core ledgers, and depth records.
+2. Generate `canonical_facts.json` and `fact_freeze.json` after core ledgers and capacity reconciliation are current.
+3. Generate a `chapter-input-manifest.json` for every chapter from frozen fact, metric, project, policy, auction, and OEM allocation IDs.
+4. Write Chapter 0 from the frozen facts so capacity, status, OEM, and confidence rules are fixed.
+5. Build Chapters 5 and 6 from the manifest-listed master JSON, project ledger, project-card JSON, and matching depth records. If depth records contain richer fields, update the master JSON, rebuild the affected ledger/freeze/manifest, or mark the field as unavailable before drafting.
+6. Write Chapters 7-14 from manifest-listed participant, technology, grid, tariff, localization, and procurement-window records. Avoid generic company profiles.
+7. Run cross-chapter audit and repair before final assembly.
+8. Write Chapter 1 only after Chapters 2-16 pass audit and repairs are current, then back-check every summary number against the ledger, canonical facts, and fact freeze.
+9. Run the release audit before finalizing: no metricId conflicts, no scope-less aggregate values, no capacity/OEM denominator drift, no project status conflicts, no parent/phase overcounting, no unit arithmetic errors, and no internal artifacts.
+10. Keep recommendations out of the full report. If the user asks for strategy or sales actions, produce a separate executive brief, action memo, or lite addendum.

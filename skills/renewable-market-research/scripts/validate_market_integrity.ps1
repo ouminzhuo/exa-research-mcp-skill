@@ -6,9 +6,31 @@ param(
 
     [string]$ProjectLedger,
 
+    [string]$MetricLedger,
+
+    [string]$CapacityReconciliation,
+
+    [string]$OemAllocationLedger,
+
     [string]$ProjectCards,
 
     [string]$EvidenceTable,
+
+    [string]$FactFreeze,
+
+    [string]$CanonicalFacts,
+
+    [string]$PhaseState,
+
+    [string]$ArtifactManifest,
+
+    [string[]]$ChapterInputManifest,
+
+    [string]$ChapterInputDir,
+
+    [string]$ChapterDraftsDir,
+
+    [string]$AuditsDir,
 
     [string]$CandidatePool,
 
@@ -30,11 +52,46 @@ if ($DepthDir) {
 if ($ProjectLedger) {
     $argsForPython += @("--project-ledger", $ProjectLedger)
 }
+if ($MetricLedger) {
+    $argsForPython += @("--metric-ledger", $MetricLedger)
+}
+if ($CapacityReconciliation) {
+    $argsForPython += @("--capacity-reconciliation", $CapacityReconciliation)
+}
+if ($OemAllocationLedger) {
+    $argsForPython += @("--oem-allocation-ledger", $OemAllocationLedger)
+}
 if ($ProjectCards) {
     $argsForPython += @("--project-cards", $ProjectCards)
 }
 if ($EvidenceTable) {
     $argsForPython += @("--evidence-table", $EvidenceTable)
+}
+if ($FactFreeze) {
+    $argsForPython += @("--fact-freeze", $FactFreeze)
+}
+if ($CanonicalFacts) {
+    $argsForPython += @("--canonical-facts", $CanonicalFacts)
+}
+if ($PhaseState) {
+    $argsForPython += @("--phase-state", $PhaseState)
+}
+if ($ArtifactManifest) {
+    $argsForPython += @("--artifact-manifest", $ArtifactManifest)
+}
+if ($ChapterInputManifest) {
+    foreach ($manifest in $ChapterInputManifest) {
+        $argsForPython += @("--chapter-input-manifest", $manifest)
+    }
+}
+if ($ChapterInputDir) {
+    $argsForPython += @("--chapter-input-dir", $ChapterInputDir)
+}
+if ($ChapterDraftsDir) {
+    $argsForPython += @("--chapter-drafts-dir", $ChapterDraftsDir)
+}
+if ($AuditsDir) {
+    $argsForPython += @("--audits-dir", $AuditsDir)
 }
 if ($CandidatePool) {
     $argsForPython += @("--candidate-pool", $CandidatePool)

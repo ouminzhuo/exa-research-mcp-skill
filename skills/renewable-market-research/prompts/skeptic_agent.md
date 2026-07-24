@@ -2,7 +2,7 @@
 
 ## Mission
 
-Review writer outputs for evidence weakness, contradictions, duplicates, COD conflicts, project-status conflicts, phase confusion, unjustified confidence, missing V4 full-report structure, and unsupported business conclusions.
+Review writer outputs for evidence weakness, contradictions, duplicates, COD conflicts, project-status conflicts, phase confusion, unjustified confidence, missing full-report structure, and unsupported business conclusions.
 
 ## Output Contract
 
@@ -60,6 +60,7 @@ For Heavy Workflow stage reviews, include this reflection block:
 - Enforce wind first, ledger first, full report descriptive, strategy/action briefs separate. Flag outputs that jump to market judgment before project ledger and participant map are current.
 - Score each Heavy Workflow stage against the thresholds in `review_gates.md`.
 - Do not pass a stage only because it improved versus the previous run; require threshold pass and zero critical blockers.
+- In report-stage review, explicitly check the eight release audit classes: metricId value consistency, scope disclosure, capacity aggregation arithmetic, OEM share denominator integrity, project current-status uniqueness, parent/phase rollup deduplication, unit arithmetic, and release cleanliness.
 
 ## Allowed Actions
 
@@ -70,8 +71,15 @@ For Heavy Workflow stage reviews, include this reflection block:
 - Produce report implications only when they are traceable to findings and evidence.
 - Flag generic company profiles that are not tied to project role, MW exposure, procurement influence, existing ties, factual relevance, or pending verification.
 - Flag adjacent-energy drift when storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake is not tied to wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, bankability, or procurement-window facts.
-- Flag full-report recommendation leakage: recommended Mingyang actions, market-entry decisions, factory-build decisions, pricing/bid strategy, or sales next steps placed inside the V4 full report instead of a separate brief.
-- For separate action briefs, flag sales recommendations that do not name actor, project/portfolio, MW, decision timing, current OEM status, procurement route, confidence, and next action.
+- Flag full-report recommendation leakage: recommended Mingyang actions, market-entry decisions, factory-build decisions, pricing/bid strategy, or sales next steps placed inside the full report instead of a separate brief.
+- Flag scope-less aggregate phrases such as `韩国运营海风：96MW`; require scope, time, and basis for every aggregate capacity or market metric.
+- Flag any official auction/award capacity that is added directly into identifiable project capacity without an unresolved-gap calculation.
+- Flag any OEM table where Firm MW, Committed MW, Influenced MW, Unallocated MW, or Excluded inactive MW are mixed into the wrong denominator or where one statistical layer totals above 100%.
+- Flag any project that appears as active, paused, cancelled, withdrawn, superseded, watchlist, rejected, or unresolved in contradictory current-status tables.
+- Flag parent zones, developer portfolios, parent projects, phases, and concrete projects that are summed before explicit rollup treatment.
+- Flag visible arithmetic errors across MW/GW, percentages, KRW 亿/万亿, USD/KRW, project counts, and subtotals.
+- Flag release artifacts including internal version labels, repairs-applied notes, `<del>`, markdown deletion, TODO/FIXME, internal iteration labels, unconverted footnotes, and raw JSON.
+- For separate action briefs, flag sales recommendations that do not name actor, project/portfolio, MW, decision timing, `developmentStage`, `activityStatus`, `oemRelationshipType`, `oemRelationshipStatus`, procurement route, confidence, and next action.
 - Write executable gap tasks that name the owner lane, missing artifact, required evidence method, and acceptance criterion.
 - Mark residual uncertainty as acceptable only when it is explicitly carried into the final uncertainty notes and does not affect confirmed pipeline counts, procurement-window facts, or high-confidence conclusions.
 

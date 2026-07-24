@@ -35,13 +35,14 @@ Return or write machine-readable JSON with this shape:
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into report implications: project status, capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
 - Check that project counts, capacity totals, and status buckets match the latest canonical ledger.
+- Use `metricId`, scope, unit, and time basis from `metric_ledger` for every cross-chapter number. Do not reuse the same `metricId` with a different value; create a separate scoped metric when the number has a different denominator or time basis.
 - Preserve the distinction between discovered breadth and verified final counts: identified universe, confirmed pipeline, watchlist, duplicate/merged, and rejected records must not be collapsed.
 - Downgrade or isolate any policy target that lacks original law/decree/order/regulator backtrace.
 - Downgrade or isolate any confirmed-pipeline critical field that lacks `chrome-mcp`, `exa-fetch`, or `manual-file` verification.
 - Before report-ready synthesis, confirm rich project-card fields from relevant depth records have been propagated into the master JSON or explicitly marked unavailable/not applicable. If a depth record has richer data than the master JSON, request a master JSON update before final synthesis.
 - Tie each material market participant to project role, MW exposure, procurement influence, existing ties, factual relevance, and evidence confidence before drawing competitive conclusions.
 - Include storage, solar PV, hydrogen, ammonia, methanol, I-REC, CBAM, or industrial offtake only when they alter wind project value, PPA/tariff economics, interconnection, procurement route, OEM opportunity, or sales entry.
-- For full reports, synthesize against the V4 0-16 chapter structure in `references/full-report-v4.md`; do not collapse report scope/evidence rules, capacity definitions, full project ledger, project cards, developer/decision-right structure, turbine-fit inference, OEM panorama, logistics, tariff/bankability, procurement-window status, risk matrix, or source-confidence appendix into a short generic narrative.
+- For full reports, synthesize against the 0-16 chapter structure in `references/full-report-v4.md`; do not collapse report scope/evidence rules, capacity definitions, full project ledger, project cards, developer/decision-right structure, turbine-fit inference, OEM panorama, logistics, tariff/bankability, procurement-window status, risk matrix, or source-confidence appendix into a short generic narrative.
 
 ## Allowed Actions
 
@@ -52,8 +53,9 @@ Return or write machine-readable JSON with this shape:
 - Produce report implications only when they are traceable to findings and evidence.
 - Record which ledger version or update timestamp the synthesis used.
 - Record which master JSON update timestamp and integrity validation result the synthesis used.
-- Produce generic market-status conclusions plus Mingyang/MySE factual relevance when both are needed; do not replace the V4 full report with vendor-specific tactics.
-- Produce a procurement-window matrix naming project/portfolio, MW, timing, current OEM status, procurement path, decision maker/influencer, confidence, and pending verification.
+- Produce generic market-status conclusions plus Mingyang/MySE factual relevance when both are needed; do not replace the full report with vendor-specific tactics.
+- Produce a procurement-window matrix naming project/portfolio, MW, timing, `developmentStage`, `activityStatus`, `oemRelationshipType`, `oemRelationshipStatus`, procurement path, decision maker/influencer, confidence, and pending verification.
+- Produce capacity and OEM summaries only from `capacity_reconciliation` and `oem_allocation_ledger`: Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW remain separate denominators.
 - Produce a sales-action matrix only for a separate executive/action brief when explicitly requested.
 - Do not produce report-ready prose until the project ledger, detailed project cards, capacity reconciliation, and conclusion-level evidence table exist or their gaps are explicitly blocking.
 
@@ -68,3 +70,4 @@ Return or write machine-readable JSON with this shape:
 - Do not reuse an earlier summary if the ledger, policy backtrace, or risk chapter changed.
 - Do not turn discovery-only `exa-search` evidence into a final confirmed project field.
 - Do not write generic "market is attractive" conclusions without project, actor, MW, timing, procurement-window, evidence confidence, and pending verification.
+- Do not write scope-less aggregate metrics, re-sum project rows in prose, mix official auction totals with identified project capacity, or mix Influenced MW into Firm MW.

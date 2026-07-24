@@ -2,13 +2,13 @@
 
 ## Full Report
 
-Default target: the V4 0-16 chapter structure in `references/full-report-v4.md`. Use the Lite Report for short delivery summaries; the Full Report is the country wind-market status master report.
+Default target: the 0-16 chapter structure in `references/full-report-v4.md`. Use the Lite Report for short delivery summaries; the Full Report is the country wind-market status master report.
 
 Quality target: retain benchmark-style breadth while using the verified ledger to prevent overcounting. A stronger report is not the one with the most project names; it is the one that preserves discovered breadth, assigns every project candidate to confirmed/watchlist/duplicate/rejected/unresolved, ties participants to project roles, and clearly separates verified facts, assumptions, and pending verification.
 
-The full report is not a strategy recommendation memo. Do not use it to decide whether to enter a market, build a factory, price a bid, or prescribe Mingyang/MySE actions. When Mingyang/MySE is in scope, express only factual relevance: Opportunity MW, unallocated OEM status, procurement window, decision maker, influencers, technical fit, relationship evidence, risk, and pending verification.
+The full report is not a strategy recommendation memo. Do not use it to decide whether to enter a market, build a factory, price a bid, or prescribe Mingyang/MySE actions. When Mingyang/MySE is in scope, express only factual relevance: Opportunity MW, `oemRelationshipType`, `oemRelationshipStatus`, procurement window, decision maker, influencers, technical fit, relationship evidence, risk, and pending verification.
 
-Required V4 sections:
+Required full-report sections:
 
 0. Report scope and evidence rules
 1. Executive summary
@@ -104,7 +104,7 @@ Each project card should include:
 - Opportunity MW, Mingyang/MySE factual relevance, relevance rationale, and pending verification when in scope;
 - confidence, uncertainty, and critical-field verification note;
 - source references or evidence IDs.
-- procurement window, likely decision maker, influencers, tender route, current OEM status, shortlist clues, and bankability constraint when evidence supports them.
+- procurement window, likely decision maker, influencers, tender route, `oemRelationshipType`, `oemRelationshipStatus`, shortlist clues, and bankability constraint when evidence supports them.
 
 Use compact grouping before cards:
 
@@ -131,13 +131,13 @@ Anchor developer deep dives should include:
 
 Chinese developer/entrant deep dives should include listed code, revenue/profit/margin when public, team/local presence, financing or Sinosure/policy-bank structures, and project-level role.
 
-Equipment supplier panorama should include as complete an OEM/supplier list as feasible for the market, not just a top-five table. Segment OEMs into awarded/supplied, framework-agreement, shortlisted or likely entrant, absent/displaced, and unknown. Include tied project MW, turbine/platform specifications, hub height, rotor diameter, power class, climate/logistics suitability, product roadmap, relationship strength, and market-share trend from BNEF or other credible sources when available.
+Equipment supplier panorama should include as complete an OEM/supplier list as feasible for the market, not just a top-five table. Segment OEMs by `oemRelationshipType` and `oemRelationshipStatus`, then report Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW. Include tied project MW, turbine/platform specifications, hub height, rotor diameter, power class, climate/logistics suitability, product roadmap, relationship strength, and market-share trend from BNEF or other credible sources when available.
 
 Logistics and installation should include route length, transit time, ports/rail/road/border crossings, component dimensions/weights, heavy-lift and crane suppliers, seasonal/weather limits, abnormal-load permits, and installation risks.
 
 Auction/PPA tariff comparison belongs in Chapter 13 when auctions or PPAs are material. Compare project names, award dates, tariff currency and units, PPA tenor, sponsor, capacity, indexation/FX risk if known, and confidence/source notes.
 
-Chapter 14 must include a procurement-window and decision-chain table with: project, capacity, Opportunity MW, current stage, OEM status, RFQ/tender/NTP timing, decision maker, influencer, and pending verification. Avoid generic market-potential summaries and do not insert recommended sales actions into the full report. Put recommendations into a separate executive brief or action memo only when requested.
+Chapter 14 must include a procurement-window and decision-chain table with: project, capacity, Opportunity MW, `developmentStage`, `activityStatus`, `oemRelationshipType`, `oemRelationshipStatus`, RFQ/tender/NTP timing, decision maker, influencer, and pending verification. Avoid generic market-potential summaries and do not insert recommended sales actions into the full report. Put recommendations into a separate executive brief or action memo only when requested.
 
 ## Report Format Requirements
 
@@ -263,6 +263,8 @@ On Linux/macOS, detect available CJK fonts and update the renderer tokens accord
 ## Validation
 
 - Confirm full and lite MD files exist and are non-empty.
+- Run the integrity validator before layout export and confirm the eight release audit checks have zero gaps: metric consistency, scope disclosure, capacity arithmetic, OEM share, project status conflicts, parent/phase rollup, unit arithmetic, and release cleanliness.
+- Do not render or hand off final PDF/HTML when the report still contains internal version labels, repairs-applied notes, deletion markup, TODO/FIXME, unconverted footnotes, raw JSON, or unrepaired arithmetic/scope gaps.
 - Confirm PDFs exist only if rendering was requested and the PDF stack is available. On Windows, also confirm the renderer can access configured CJK fonts.
 - Open or inspect PDF metadata/size when possible.
 - Record skipped PDF rendering in `index.json` with the environment reason.

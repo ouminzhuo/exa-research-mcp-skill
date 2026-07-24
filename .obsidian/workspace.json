@@ -35,8 +35,7 @@
               "title": "注意力规划"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -93,8 +92,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "e4adae9432fd6207",
@@ -199,17 +197,21 @@
       "bases:新建数据库": false
     }
   },
-  "active": "c687c7ef0236e005",
+  "active": "e8e1a12bcb88031c",
   "lastOpenFiles": [
-    "full_report_frame.md",
-    "注意力规划.md",
     "skills/renewable-market-research/scripts/__pycache__/validate_market_integrity.cpython-312.pyc",
     "skills/renewable-market-research/scripts/__pycache__/search_orchestration.cpython-312.pyc",
     "skills/renewable-market-research/scripts/__pycache__",
-    "skills/renewable-market-research/scripts/__pycache__/validate_market_integrity.cpython-312.pyc.2191739450208",
-    "skills/renewable-market-research/schema/evidence-table.schema.json",
-    "skills/renewable-market-research/schema/project-card.schema.json",
-    "skills/renewable-market-research/schema/project-ledger.schema.json",
+    "skills/renewable-market-research/schema/oem-allocation-ledger.schema.json",
+    "skills/renewable-market-research/schema/capacity-reconciliation.schema.json",
+    "skills/renewable-market-research/schema/metric-ledger.schema.json",
+    "skills/renewable-market-research/schema/canonical-facts.schema.json",
+    "skills/renewable-market-research/schema/chapter-input-manifest.schema.json",
+    "skills/renewable-market-research/schema/artifact-manifest.schema.json",
+    "skills/renewable-market-research/schema/phase-state.schema.json",
+    "skills/renewable-market-research/schema/fact-freeze.schema.json",
+    "注意力规划.md",
+    "full_report_frame.md",
     "skills/renewable-market-research/references/full-report-v4.md"
   ]
 }

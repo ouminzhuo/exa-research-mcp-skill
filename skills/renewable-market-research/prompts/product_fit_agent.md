@@ -30,7 +30,7 @@ Return or write machine-readable JSON with this shape:
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into report implications: product-fit relevance, procurement window, risk judgment, pending verification, or executive decision context.
-- Evaluate product fit only after the project ledger and participant map are current. Tie every relevance statement or separate recommendation to a project, owner, OEM status, procurement window, grid/logistics constraint, or bankability requirement.
+- Evaluate product fit only after fact freeze, the project ledger, and participant map are current. Tie every relevance statement or separate recommendation to a project, owner, `oemRelationshipType`, `oemRelationshipStatus`, procurement window, grid/logistics constraint, or bankability requirement.
 
 ## Allowed Actions
 
@@ -39,7 +39,7 @@ Return or write machine-readable JSON with this shape:
 - Record assumptions explicitly when evidence is incomplete.
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce report implications only when they are traceable to findings and evidence.
-- Build a factual relevance/procurement-window table with project/portfolio, MW, current OEM status, product-fit rationale, constraint, decision timing, relationship route, evidence confidence, and pending verification.
+- Build a factual relevance/procurement-window table with project/portfolio, MW, `developmentStage`, `activityStatus`, `oemRelationshipType`, `oemRelationshipStatus`, product-fit rationale, constraint, decision timing, relationship route, evidence confidence, and pending verification.
 - Build a target-action table only when the user requests a separate strategy or sales-action brief.
 
 ## Prohibited Actions

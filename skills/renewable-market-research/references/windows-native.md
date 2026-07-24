@@ -56,10 +56,25 @@ After the master JSON and canonical ledger are built, run the source-to-final in
 .\skills\renewable-market-research\scripts\validate_market_integrity.ps1 `
   -MarketJson .\data\renewable-market\uzbekistan-wind.json `
   -DepthDir .\data\renewable-market\depth `
+  -PhaseState .\data\renewable-market\uzbekistan-wind-phase_state.json `
+  -ArtifactManifest .\data\renewable-market\uzbekistan-wind-artifact_manifest.json `
+  -CandidatePool .\data\renewable-market\uzbekistan-wind-candidate_project_pool.json `
+  -ProjectLedger .\data\renewable-market\uzbekistan-wind-project_ledger.json `
+  -MetricLedger .\data\renewable-market\uzbekistan-wind-metric_ledger.json `
+  -CapacityReconciliation .\data\renewable-market\uzbekistan-wind-capacity_reconciliation.json `
+  -OemAllocationLedger .\data\renewable-market\uzbekistan-wind-oem_allocation_ledger.json `
+  -ProjectCards .\data\renewable-market\uzbekistan-wind-project_cards.json `
+  -EvidenceTable .\data\renewable-market\uzbekistan-wind-evidence_table.json `
+  -CanonicalFacts .\data\renewable-market\uzbekistan-wind-canonical_facts.json `
+  -FactFreeze .\data\renewable-market\uzbekistan-wind-fact_freeze.json `
+  -ChapterInputDir .\data\renewable-market\chapter_inputs `
+  -ChapterDraftsDir .\data\renewable-market\chapter_drafts `
+  -AuditsDir .\data\renewable-market\audits `
+  -FullReport .\data\renewable-market\uzbekistan-wind-report.md `
   -Output .\data\renewable-market\uzbekistan-wind-integrity.json
 ```
 
-Use `-Strict` only when warnings should fail the run. Duplicate candidates, critical-field verification gaps, report-card field gaps, and depth-to-master propagation gaps always require review because they can indicate unmerged records, confirmed-project fields that still lack Chrome MCP/original-file verification, or rich depth data that was lost before reporting.
+Use `-Strict` only when warnings should fail the run. Duplicate candidates, phase-order gaps, artifact ownership gaps, canonical-fact gaps, chapter input-manifest gaps, metric consistency gaps, scope disclosure gaps, capacity arithmetic gaps, OEM share gaps, project status conflicts, parent/phase rollup gaps, unit arithmetic gaps, release cleanliness gaps, deprecated values in chapter drafts, release-gate gaps, critical-field verification gaps, report-card field gaps, and depth-to-master propagation gaps always require review.
 
 ## PDF Rendering on Windows
 

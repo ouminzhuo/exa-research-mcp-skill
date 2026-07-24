@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Heavy Workflow Phase State",
+  "type": "object",
+  "required": [
+    "version",
+    "slug",
+    "currentPhase",
+    "completedPhases",
+    "agentMode",
+    "phaseHistory"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "currentPhase": {
+      "enum": [
+        "phase_1_plan",
+        "phase_2_recall",
+        "phase_3_verification_and_evidence",
+        "phase_4_rich_master_and_core_ledgers",
+        "phase_5_canonical_reconciliation_and_fact_freeze",
+        "phase_6_chapter_input_manifest_and_writing",
+        "phase_7_cross_chapter_audit_and_repair",
+        "phase_8_release"
+      ]
+    },
+    "completedPhases": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "phase_1_plan",
+          "phase_2_recall",
+          "phase_3_verification_and_evidence",
+          "phase_4_rich_master_and_core_ledgers",
+          "phase_5_canonical_reconciliation_and_fact_freeze",
+          "phase_6_chapter_input_manifest_and_writing",
+          "phase_7_cross_chapter_audit_and_repair",
+          "phase_8_release"
+        ]
+      }
+    },
+    "agentMode": {
+      "enum": [
+        "real-subagents",
+        "collapsed-sequential",
+        "unknown"
+      ]
+    },
+    "blockedBy": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "phaseHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "phase",
+          "status",
+          "allowedParallel",
+          "startedAt"
+        ],
+        "properties": {
+          "phase": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "in_progress",
+              "passed",
+              "failed",
+              "repaired",
+              "blocked"
+            ]
+          },
+          "allowedParallel": {
+            "type": "boolean"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "completedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "entryGate": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exitGate": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

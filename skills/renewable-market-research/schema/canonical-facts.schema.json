@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Canonical Facts",
+  "type": "object",
+  "required": [
+    "version",
+    "slug",
+    "freezeId",
+    "frozenAt",
+    "basedOnLedgers",
+    "facts"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "freezeId": {
+      "type": "string"
+    },
+    "supersedes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "frozenAt": {
+      "type": "string"
+    },
+    "dataCutoff": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "basedOnLedgers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "factId",
+          "factType",
+          "statement",
+          "value",
+          "scope",
+          "evidenceIds",
+          "confidence",
+          "frozenAt"
+        ],
+        "properties": {
+          "factId": {
+            "type": "string"
+          },
+          "factType": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "value": {
+            "type": [
+              "number",
+              "string",
+              "boolean",
+              "object",
+              "array",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scope": {
+            "type": "string"
+          },
+          "includedIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludedIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low",
+              "unknown"
+            ]
+          },
+          "frozenAt": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "deprecatedValues": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "repairRouting": {
+      "type": "object"
+    }
+  }
+}

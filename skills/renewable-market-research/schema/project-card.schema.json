@@ -29,6 +29,10 @@
         "capacityMW",
         "location",
         "stage",
+        "developmentStage",
+        "activityStatus",
+        "ledgerTreatment",
+        "capacityTreatment",
         "cod"
       ]
     },
@@ -45,6 +49,8 @@
       "type": "object",
       "required": [
         "oem",
+        "oemRelationshipType",
+        "oemRelationshipStatus",
         "turbineModel",
         "turbineCount",
         "bess",
