@@ -110,11 +110,21 @@
    - 韩国报告中的典型问题可以被自动发现，例如 `230MW/326MW/340MW/96MW` 统计口径混用、`韩国运营海风：96MW` 这类缺 scope 表述、官方拍卖总量与可识别项目容量混算、Firm/Influenced MW 混分母、暂停项目进入 active pipeline、父项目与分期重复相加、`KRW 750亿 = KRW 7000亿 + KRW 500亿` 这类算术错误，以及 `v2.0`、`repairs applied`、`<del>`、`TODO/FIXME`、未转换脚注、raw JSON 等发布残留。
    - 搜索策略没有继续无限扩展：仍然是高召回，但用 frontier priority 和 Exa -> Chrome verification handoff 控制边界。现在重点从“搜更多”转为“搜到的信息如何入账、冻结、给章节使用、被跨章审计”。
 
+#### 稳定版硬化补丁
+
+- `canonical_facts.json` 被定义为唯一事实源；`fact_freeze.json` 只是兼容投影，必须包含 `generatedFrom`、`canonicalFreezeId`、`canonicalFactsHash`，验证器会比较 freeze ID、hash、Fact ID、事实值、`deprecatedValues` 和 `repairRouting`。
+- Fact Freeze 改为运行配置驱动：`factProfile`、`requiredFactTypes`、`conditionalFactTypes`、`notApplicableFactTypes` 决定本次市场必须冻结哪些事实。没有拍卖、暂停项目、公开 OEM 关系、草案目标或政治目标的市场，不需要伪造 0 值事实。
+- 项目容量与 OEM 容量拆分为 `projectCapacityTreatment` 和 `oemCapacityTreatment`。OEM 协议过期、终止或被替代，不再自动等同项目暂停/取消；活跃项目的过期 OEM 曝光通常进入 Unallocated MW。
+- 章节源 Markdown 必须保留 `{{fact:...}}`、`{{metric:...|value=...|unit=...}}`、`{{project:...}}`、`{{policy:...}}`、`{{auction:...}}`、`{{oem:...}}` 标记；验证器会把章节使用的 ID 与 `chapter-input-manifest.json` 做集合差。
+- Release Gate 现在读取 `cross_chapter_audit.json` 内容，而不是只看文件是否存在：必须 `status=passed`、当前 `freezeId`、critical/high 为 0、checked IDs 完整、没有未关闭 repair task。
+- 新增 `policy-target-ledger.schema.json`、`auction-ledger.schema.json`、`cross-chapter-audit.schema.json`；核心数值字段改为 `number | null`，缺值用 `valueStatus/displayValue` 表达。
+- 韩国回归夹具和具名测试已覆盖 `test_scope_split_230_vs_96`、`test_reject_340_as_end_2024`、`test_oem_share_above_100`、`test_expired_oem_active_project`、`test_auction_1786_vs_identified_1626`、`test_geumodo_status_conflict`、`test_krw_750_vs_7500`、`test_release_deletion_markup`、`test_chapter_external_fact`、`test_stale_freeze_id`。运行 `python tests/run_regression_fixtures.py` 或 `python -m unittest discover -s tests -p 'test_*.py'` 验证。
+
 默认运行逻辑：
 
 1. **Recall Mode**：先高召回，不假设项目名、开发商、SPV、OEM、EPC、融资方、法令和地区入口已经完整。搜索过程按 `seed -> search -> extract entities -> enqueue -> search again` 扩展 `search_frontier.json`，至少运行 5 轮。
 2. **Bounded Frontier**：高召回不是无限扩展。P0/P1 自动追踪并阻止过早进入 Verification；P2 只做 one-hop；P3 只有影响风电机会才展开；P4 泛能源宏观信息默认 deferred，不进正文。
-3. **Verification Mode**：从 `candidate_project_pool.json`、`source_trace/evidence_table` 和去重后的 ledgers 入账。每个候选都必须进入 confirmed / watchlist / duplicate / rejected / unresolved，并带有 `developmentStage`、`activityStatus`、`capacityTreatment`、`capacityScope` 和证据边界。
+3. **Verification Mode**：从 `candidate_project_pool.json`、`source_trace/evidence_table` 和去重后的 ledgers 入账。每个候选都必须进入 confirmed / watchlist / duplicate / rejected / unresolved，并带有 `developmentStage`、`activityStatus`、`projectCapacityTreatment`、`oemCapacityTreatment`、`capacityScope` 和证据边界。
 
 如果只想先生成调度契约，可以运行：
 

@@ -801,10 +801,11 @@ LEDGER_STATUSES = [
 ]
 
 FACT_FREEZE_CONTRACT = {
-    "artifact": "canonical_facts.json or fact_freeze.json",
+    "artifact": "canonical_facts.json plus fact_freeze.json projection",
     "purpose": (
         "Freeze contested capacity, policy-status, project-status, and OEM-relationship facts "
-        "after the rich master JSON and core ledgers are built. Chapters must cite Fact IDs "
+        "once in canonical_facts.json after the rich master JSON and core ledgers are built. "
+        "fact_freeze.json is only a generated compatibility projection with freeze/hash checks. Chapters must cite Fact IDs "
         "instead of recalculating or redefining scopes."
     ),
     "freezeRequiredAfter": [
@@ -816,21 +817,21 @@ FACT_FREEZE_CONTRACT = {
         "oem_allocation_ledger",
         "capacity_reconciliation",
     ],
-    "requiredCapacityScopes": [
-        "official_auction_total_mw",
-        "identifiable_project_capacity_mw",
-        "confirmed_project_capacity_mw",
-        "opportunity_mw",
-        "watchlist_mw",
-        "suspended_or_paused_mw",
+    "factProfile": {
+        "profile": "wind_full_report",
+        "requiredFactTypes": "run-specific; do not require auction/OEM/pause facts for markets where they are not applicable",
+        "conditionalFactTypes": "auction, policy-target, OEM-relation, and paused-project facts become required only when the run config makes them applicable",
+        "notApplicableFactTypes": "explicitly list non-applicable fact types rather than fabricating zero facts",
+    },
+    "projectionFields": ["generatedFrom", "canonicalFreezeId", "canonicalFactsHash"],
+    "requiredProjectStatusFields": [
+        "developmentStage",
+        "activityStatus",
+        "ledgerTreatment",
+        "projectCapacityTreatment",
+        "oemCapacityTreatment",
+        "capacityScope",
     ],
-    "requiredPolicyScopes": [
-        "enacted_policy_target",
-        "draft_target",
-        "political_statement_target",
-        "auction_allocation",
-    ],
-    "requiredProjectStatusFields": ["developmentStage", "activityStatus", "ledgerTreatment", "capacityTreatment"],
     "developmentStageValues": [
         "operational",
         "partial_operation",
@@ -863,6 +864,7 @@ FACT_FREEZE_CONTRACT = {
         "official auction total is not identifiable project capacity",
         "policy target is not draft target or political statement",
         "firm OEM order is not strategic preference",
+        "expired/terminated/superseded OEM contracts do not make an active project inactive; they flow to unallocated OEM MW",
         "paused/withdrawn/cancelled/superseded projects cannot enter active opportunity totals",
         "do not use ambiguous locked MW; use Firm/Committed/Influenced/Unallocated/Excluded inactive MW",
         "if canonical facts are refreshed, dependent chapter drafts become stale until regenerated or repaired",
@@ -1003,7 +1005,15 @@ CHAPTER_INPUT_MANIFEST_CONTRACT = {
         "mustNotInferBeyondManifest",
         "repairIfContradictionFound",
     ],
-    "rule": "Chapter agents read only the manifest and frozen inputs. Missing inputs become chapter_gap_tasks, not ad hoc search or recalculation.",
+    "referenceSyntax": [
+        "{{fact:FACT-ID}}",
+        "{{metric:METRIC-ID|value=123|unit=MW}}",
+        "{{project:PROJECT-ID}}",
+        "{{policy:POLICY-TARGET-ID}}",
+        "{{auction:AUCTION-ID}}",
+        "{{oem:OEM-ALLOCATION-ID}}",
+    ],
+    "rule": "Chapter agents read only the manifest and frozen inputs. Every key numeric/project/policy/auction/OEM claim in source Markdown must carry a machine-readable marker whose ID is allowed by the manifest. Missing inputs become chapter_gap_tasks, not ad hoc search or recalculation.",
 }
 
 REPORT_AUDIT_CHECKS = [
@@ -1410,13 +1420,13 @@ V4_REPORT_GENERATION_PIPELINE = [
         "order": 5,
         "id": "core_ledgers",
         "output": "project_ledger.json + metric_ledger.json + policy_target_ledger.json + auction_ledger.json + oem_allocation_ledger.json + capacity_reconciliation.json/md",
-        "gate": "project_ledger_schema_gate + capacity_reconciliation_gate + single_writer_core_ledger_gate",
+        "gate": "project_ledger_schema_gate + numeric_field_contract_gate + capacity_reconciliation_gate + single_writer_core_ledger_gate",
     },
     {
         "order": 6,
         "id": "canonical_facts",
         "output": "canonical_facts.json + fact_freeze.json + contradiction_queue.json",
-        "gate": "canonical_fact_freeze_gate",
+        "gate": "canonical_fact_freeze_gate + fact_freeze_projection_gate",
     },
     {
         "order": 7,
@@ -1446,7 +1456,7 @@ V4_REPORT_GENERATION_PIPELINE = [
         "order": 11,
         "id": "full_report",
         "output": "{slug}-report.md",
-        "gate": "report_audit_gate + release_gate + no_strategy_recommendation_gate + scope_disclosure_gate + unit_arithmetic_gate + release_cleanliness_gate",
+        "gate": "report_audit_gate + cross_chapter_audit_content_gate + release_gate + no_strategy_recommendation_gate + scope_disclosure_gate + unit_arithmetic_gate + release_cleanliness_gate",
     },
     {
         "order": 12,
@@ -1478,7 +1488,8 @@ SCHEDULER_GATES = {
         "blocks": ["chapter_drafting", "chapter_verification", "cross_chapter_audit", "full_report_release"],
     },
     "chapter_no_external_fact_gate": {
-        "rule": "Chapter writers may not search, recalculate capacity, choose policy targets, change project status, explain auction gaps outside frozen facts, or copy deprecated numbers from old reports. Missing facts become chapter gap tasks.",
+        "rule": "Chapter writers may not search, recalculate capacity, choose policy targets, change project status, explain auction gaps outside frozen facts, or copy deprecated numbers from old reports. Source Markdown must use manifest-allowed {{fact:...}}, {{metric:...}}, {{project:...}}, {{policy:...}}, {{auction:...}}, and {{oem:...}} markers for key claims. Missing facts become chapter gap tasks.",
+        "schema": "skills/renewable-market-research/schema/chapter-input-manifest.schema.json",
         "blocks": ["chapter_drafting_acceptance", "cross_chapter_audit", "full_report_release"],
     },
     "stale_artifact_gate": {
@@ -1486,9 +1497,16 @@ SCHEDULER_GATES = {
         "blocks": ["full_report_release", "lite_report_release"],
     },
     "cross_chapter_audit_gate": {
-        "rule": "Before release, an audit must compare all chapter drafts against canonical_facts, project_ledger, metric_ledger, policy_target_ledger, auction_ledger, oem_allocation_ledger, and deprecated values. Any contradiction must be repaired or routed as a blocking gap.",
+        "rule": "Before release, an audit must compare all chapter drafts against canonical_facts, project_ledger, metric_ledger, policy_target_ledger, auction_ledger, oem_allocation_ledger, and deprecated values. The audit content must have status=passed, zero critical/high issues, current freezeId, checked chapter/metric/project IDs, and no open repair tasks.",
         "requires": ["canonical_facts.json", "chapter_drafts/*.md", "audits/*cross_chapter_audit*.json"],
+        "schema": "skills/renewable-market-research/schema/cross-chapter-audit.schema.json",
         "blocks": ["executive_summary", "full_report_release", "lite_report_release"],
+    },
+    "cross_chapter_audit_content_gate": {
+        "rule": "Release gate must read the cross_chapter_audit JSON content. File existence or phase-state labels alone do not pass the gate.",
+        "schema": "skills/renewable-market-research/schema/cross-chapter-audit.schema.json",
+        "validatorGap": "releaseGaps",
+        "blocks": ["full_report_release", "lite_report_release", "final_delivery"],
     },
     "cross_chapter_metric_consistency_gate": {
         "rule": "Scan all report/chapter occurrences of the same metricId. The same metricId cannot carry different normalized numeric values across chapters, the metric ledger, or the final report.",
@@ -1506,9 +1524,14 @@ SCHEDULER_GATES = {
         "blocks": ["canonical_fact_freeze", "chapter_input_manifest", "full_report_release", "lite_report_release"],
     },
     "oem_share_gate": {
-        "rule": "Within one statistical layer, OEM share totals must not exceed 100%. Firm MW share denominators must not include Influenced MW, and Influenced MW cannot be mixed into Firm MW.",
+        "rule": "Within one statistical layer, OEM share totals must not exceed 100%. sharePercent must be recomputed from mw / denominatorMetricId, one group must use one denominator, Firm MW share denominators must not include Influenced MW, and Influenced MW cannot be mixed into Firm MW.",
         "validatorGap": "oemShareGaps",
         "blocks": ["oem_competition_matrix", "chapter_9", "full_report_release"],
+    },
+    "numeric_field_contract_gate": {
+        "rule": "Core numeric fields in project, metric, capacity, auction, policy-target, and OEM ledgers must be number or null. Unknown values use valueStatus/displayValue or field-specific status/display fields; strings like unknown, N/A, or not found cannot be silently interpreted as zero.",
+        "validatorGap": "numericFieldGaps",
+        "blocks": ["ledger_build", "capacity_reconciliation", "canonical_fact_freeze", "full_report_release"],
     },
     "project_status_uniqueness_gate": {
         "rule": "A project may have only one current status across ledgers and chapter tables. It cannot simultaneously appear as active, paused, cancelled, and watchlist in different current-status sections.",
@@ -1620,7 +1643,7 @@ SCHEDULER_GATES = {
         "rule": "Capacity totals must be computed from project_ledger, not manually copied into report prose.",
     },
     "project_ledger_schema_gate": {
-        "rule": "Every ledger project must include the full project ledger fields plus split status fields: developmentStage, activityStatus, ledgerTreatment, capacityTreatment, capacityScope, oemRelationshipType, and oemRelationshipStatus. The legacy projectStage field cannot substitute for these fields.",
+        "rule": "Every ledger project must include the full project ledger fields plus split status fields: developmentStage, activityStatus, ledgerTreatment, projectCapacityTreatment, oemCapacityTreatment, capacityScope, oemRelationshipType, and oemRelationshipStatus. The legacy projectStage/capacityTreatment fields cannot substitute for these fields.",
         "schema": "skills/renewable-market-research/schema/project-ledger.schema.json",
         "blocks": ["capacity_reconciliation", "project_cards", "full_report"],
     },
@@ -1628,14 +1651,14 @@ SCHEDULER_GATES = {
         "rule": "Confirmed capacity, opportunity MW, watchlist capacity, excluded inactive MW, and OEM relationship MW buckets must be recalculated from project_ledger. National targets and auction totals remain separate and must not be mixed into project pipeline capacity.",
         "schema": "skills/renewable-market-research/schema/capacity-reconciliation.schema.json",
         "formula": {
-            "confirmedCapacityMW": "sum(capacityMW where countedInConfirmedCapacity == true and capacityTreatment == confirmed_capacity)",
-            "opportunityCapacityMW": "sum(opportunityMW where countedInOpportunityCapacity == true and capacityTreatment == opportunity_capacity)",
-            "watchlistCapacityMW": "sum(capacityMW where capacityTreatment == watchlist_capacity)",
-            "excludedInactiveMW": "sum(capacityMW where activityStatus in [paused, withdrawn, cancelled, superseded] or capacityTreatment == excluded_inactive)",
-            "firmMW": "sum(oemExposureMW or capacityMW where oemRelationshipType == firm_supply_contract and oemRelationshipStatus == active and project is not inactive)",
-            "committedMW": "sum(oemExposureMW or capacityMW where oemRelationshipType in [preferred_supplier, conditional_reservation_or_cra] and project is not inactive)",
-            "influencedMW": "sum(oemExposureMW or capacityMW where oemRelationshipType in [framework_agreement, technology_partnership, reported_preference] and project is not inactive)",
-            "unallocatedMW": "sum(oemExposureMW or capacityMW where oemRelationshipType in [unallocated, unknown] and project is active/delayed/unknown)",
+            "confirmedCapacityMW": "sum(capacityMW where countedInConfirmedCapacity == true and projectCapacityTreatment == confirmed_capacity)",
+            "opportunityCapacityMW": "sum(opportunityMW where countedInOpportunityCapacity == true and projectCapacityTreatment == opportunity_capacity)",
+            "watchlistCapacityMW": "sum(capacityMW where projectCapacityTreatment == watchlist_capacity)",
+            "excludedInactiveMW": "sum(capacityMW where activityStatus in [paused, withdrawn, cancelled, superseded] or projectCapacityTreatment == excluded_inactive)",
+            "firmMW": "sum(oemExposureMW or capacityMW where oemCapacityTreatment == firm_mw and project is not inactive)",
+            "committedMW": "sum(oemExposureMW or capacityMW where oemCapacityTreatment == committed_mw and project is not inactive)",
+            "influencedMW": "sum(oemExposureMW or capacityMW where oemCapacityTreatment == influenced_mw and project is not inactive)",
+            "unallocatedMW": "sum(oemExposureMW or capacityMW where oemCapacityTreatment == unallocated_mw and project is active/delayed/unknown)",
             "nationalTargetCapacityMW": "separate policy/target field, never included in pipeline totals",
         },
         "validator": "scripts/validate_market_integrity.py --project-ledger ... --capacity-reconciliation ...",
@@ -1662,12 +1685,12 @@ SCHEDULER_GATES = {
         "blocks": ["full_report"],
     },
     "evidence_boundary_gate": {
-        "rule": "Key conclusions must have conclusion-level evidence records, especially developmentStage, activityStatus, capacityTreatment, capacity MW, OEM relationship type/status, tariff, financing close, PPA signing, procurement window, and Mingyang relevance.",
+        "rule": "Key conclusions must have conclusion-level evidence records, especially developmentStage, activityStatus, projectCapacityTreatment, oemCapacityTreatment, capacity MW, OEM relationship type/status, tariff, financing close, PPA signing, procurement window, and Mingyang relevance.",
         "schema": "skills/renewable-market-research/schema/evidence-table.schema.json",
         "blocks": ["full_report", "lite_report", "executive_brief"],
     },
     "canonical_fact_freeze_gate": {
-        "rule": "After source_trace/evidence_table, rich master JSON, project_ledger, metric_ledger, policy_target_ledger, auction_ledger, oem_allocation_ledger, and capacity_reconciliation are built by the main agent, canonical_facts.json and fact_freeze.json freeze contested capacity scopes, policy statuses, project-status definitions, auction/project deltas, and OEM relationship categories. Chapters must cite frozen IDs instead of recalculating scopes.",
+        "rule": "After source_trace/evidence_table, rich master JSON, project_ledger, metric_ledger, policy_target_ledger, auction_ledger, oem_allocation_ledger, and capacity_reconciliation are built by the main agent, canonical_facts.json freezes contested facts as the sole source of truth. fact_freeze.json is a generated compatibility projection with generatedFrom, canonicalFreezeId, and canonicalFactsHash. Fact-type requirements come from the run's factProfile/requiredFactTypes/notApplicableFactTypes.",
         "schema": "skills/renewable-market-research/schema/canonical-facts.schema.json",
         "legacyAliasSchema": "skills/renewable-market-research/schema/fact-freeze.schema.json",
         "contract": FACT_FREEZE_CONTRACT,
@@ -1681,8 +1704,14 @@ SCHEDULER_GATES = {
             "lite_report",
         ],
     },
+    "fact_freeze_projection_gate": {
+        "rule": "fact_freeze.json must be generated from canonical_facts.json and carry generatedFrom, canonicalFreezeId, and canonicalFactsHash. The validator compares freezeId, hash, fact IDs, fact values, deprecatedValues, and repairRouting before chapters can read it.",
+        "schema": "skills/renewable-market-research/schema/fact-freeze.schema.json",
+        "validatorGap": "factFreezeGaps",
+        "blocks": ["chapter_input_manifest", "chapter_drafting", "full_report", "lite_report"],
+    },
     "fact_freeze_gate": {
-        "rule": "Compatibility alias for canonical_fact_freeze_gate. Do not run fact freeze before core ledgers; fact freeze is the post-ledger canonical reconciliation layer.",
+        "rule": "Compatibility alias for canonical_fact_freeze_gate. fact_freeze.json must be generated from canonical_facts.json and validated by freezeId/hash/fact parity; it is not a second editable fact source.",
         "schema": "skills/renewable-market-research/schema/fact-freeze.schema.json",
         "contract": FACT_FREEZE_CONTRACT,
         "requires": FACT_FREEZE_CONTRACT["freezeRequiredAfter"],
@@ -1715,7 +1744,7 @@ SCHEDULER_GATES = {
         "blocks": ["full_report"],
     },
     "oem_opportunity_consistency_gate": {
-        "rule": "OEM competition tables must reconcile with project_ledger oemRelationshipType/oemRelationshipStatus and may only use Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW. Do not use ambiguous locked MW.",
+        "rule": "OEM competition tables must reconcile with project_ledger oemRelationshipType, oemRelationshipStatus, and oemCapacityTreatment and may only use Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW. Expired/terminated OEM agreements on active projects normally flow to Unallocated MW, not Excluded inactive MW. Do not use ambiguous locked MW.",
         "blocks": ["procurement_window_table", "full_report"],
     },
     "procurement_window_gate": {

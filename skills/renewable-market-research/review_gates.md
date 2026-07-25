@@ -9,7 +9,7 @@ Rules:
 - Final summaries, conclusions, project counts, capacity totals, procurement-window statements, and any separate recommendations must trace to the latest canonical facts, core ledgers, or reviewed synthesis.
 - The executive summary must be written or refreshed after all downstream chapters, cross-chapter audit, canonical facts, and project ledger changes are complete.
 - No chapter may maintain a separate project pipeline table that diverges from `{slug}-pipeline-ledger.json`, `{slug}-project_ledger.json`, canonical facts, or the master JSON.
-- No chapter may use facts outside its `chapter-input-manifest.json`.
+- No chapter may use facts outside its `chapter-input-manifest.json`; key claims in source Markdown must carry manifest-allowed `{{fact:...}}`, `{{metric:...}}`, `{{project:...}}`, `{{policy:...}}`, `{{auction:...}}`, or `{{oem:...}}` markers.
 - Every final project claim must include a source trace from depth record -> canonical ledger -> synthesis/report section.
 - The master JSON, not the compact ledger, is the rich report data source. Depth records must be cross-read before project cards and deep-dive chapters are finalized.
 - If a depth record contains a richer project-card field than the master JSON, update the master JSON first, then rebuild/refresh the ledger and synthesis.
@@ -20,7 +20,7 @@ Pass criteria:
 - The report's executive summary, project cards or compact project index, procurement-window section, risk section, and source-confidence appendix use the same project count, capacity totals, status buckets, and key caveats.
 - Any changed downstream chapter has either updated the summary or recorded why the summary is unaffected.
 - `scripts/validate_market_integrity.py --depth-dir ...` returns no `depthPropagationGaps` or `reportCardFieldGaps`.
-- `scripts/validate_market_integrity.py --phase-state ... --artifact-manifest ... --project-ledger ... --metric-ledger ... --capacity-reconciliation ... --oem-allocation-ledger ... --project-cards ... --evidence-table ... --canonical-facts ... --fact-freeze ... --chapter-input-dir ... --chapter-drafts-dir ... --audits-dir ... --full-report ...` returns a `gateSummary` with zero gaps for phase order, artifact ownership, canonical facts, chapter input manifests, metric consistency, scope disclosure, capacity arithmetic, OEM share, project status conflicts, parent/phase rollup, unit arithmetic, release cleanliness, deprecated values in drafts, release gates, project ledger fields, project-card completeness, capacity reconciliation, evidence boundary, strategy leakage, and baseline inheritance.
+- `scripts/validate_market_integrity.py --phase-state ... --artifact-manifest ... --project-ledger ... --metric-ledger ... --capacity-reconciliation ... --oem-allocation-ledger ... --project-cards ... --evidence-table ... --canonical-facts ... --fact-freeze ... --chapter-input-dir ... --chapter-drafts-dir ... --audits-dir ... --full-report ...` returns a `gateSummary` with zero gaps for phase order, artifact ownership, canonical facts, fact-freeze projection, chapter input manifests, external chapter IDs, metric consistency, scope disclosure, capacity arithmetic, OEM share/recompute, numeric field contracts, project status conflicts, parent/phase rollup, unit arithmetic, release cleanliness, deprecated values in drafts, audit-content release gates, project ledger fields, project-card completeness, capacity reconciliation, evidence boundary, strategy leakage, and baseline inheritance.
 
 Remediation:
 
@@ -135,7 +135,7 @@ Rules:
 - Critical blockers include: missing mandatory search lane, confirmed critical fields supported only by discovery snippets, unreconciled duplicate projects, confirmed/watchlist leakage, missing source-to-final trace, stale executive summary, missing 0-16 full-report structure, missing full project ledger, missing project-card fields without gap notes, recommendation leakage inside the full report, generic participant profiles, missing chapter input manifests, chapter facts outside frozen inputs, metricId value conflicts, scope-less aggregate capacity metrics, failed capacity arithmetic, OEM share totals above 100%, Influenced MW mixed into Firm MW denominator, project current-status conflicts, unresolved parent/phase rollup, unit arithmetic errors, release-forbidden markup/artifacts, stale chapter drafts after canonical-facts refresh, or benchmark sections included without explicit request.
 - Search/tool blockers include: treating Exa boundary as completion before Chrome verification, missing `chrome-verification` for required lanes, or failing to record `tool_unavailable=chrome-mcp` with affected fields when Chrome is unavailable.
 - Agent blockers include: using the 10-agent Standard profile for a full report without explicit user reduction, fewer than 15 logical roles without a recorded collapsed-sequential reason, missing chapter owner for any Chapter 0-16 section, or missing independent verification artifacts for Chapters 1, 3, 4, 5, 6, 9, 13, 14, or 16.
-- Gate blockers include nonzero `phaseOrderGaps`, `artifactOwnershipGaps`, `canonicalFactsGaps`, `chapterInputManifestGaps`, `chapterExternalFactGaps`, `metricConsistencyGaps`, `scopeDisclosureGaps`, `capacityArithmeticGaps`, `oemShareGaps`, `projectStatusConflictGaps`, `parentPhaseRollupGaps`, `unitArithmeticGaps`, `releaseCleanlinessGaps`, `releaseGaps`, `projectLedgerFieldGaps`, `projectCardCompletenessGaps`, `capacityReconciliationGaps`, `evidenceBoundaryGaps`, `strategyRecommendationGaps`, or `baselineInheritanceGaps` in `{slug}-integrity.json`.
+- Gate blockers include nonzero `phaseOrderGaps`, `artifactOwnershipGaps`, `canonicalFactsGaps`, `factFreezeGaps`, `chapterInputManifestGaps`, `chapterExternalFactGaps`, `metricConsistencyGaps`, `scopeDisclosureGaps`, `capacityArithmeticGaps`, `oemShareGaps`, `numericFieldGaps`, `projectStatusConflictGaps`, `parentPhaseRollupGaps`, `unitArithmeticGaps`, `releaseCleanlinessGaps`, `releaseGaps`, `projectLedgerFieldGaps`, `projectCardCompletenessGaps`, `capacityReconciliationGaps`, `evidenceBoundaryGaps`, `strategyRecommendationGaps`, or `baselineInheritanceGaps` in `{slug}-integrity.json`.
 - If a stage fails, the reviewer must write executable gap tasks with owner lane, missing artifact, required evidence method, and acceptance criterion.
 
 Default score thresholds:
@@ -208,6 +208,8 @@ Rules:
 - Scope disclosure: aggregate metrics must state scope, time, and basis. `全国海风装机：230MW，截至2024年底` and `重点商业项目账本运营容量：96MW` are acceptable; `韩国运营海风：96MW` is not.
 - Capacity aggregation: project subtotals equal ledger aggregates; official auction/award total minus identifiable project capacity equals unresolved gap; active pipeline excludes paused, withdrawn, cancelled, and superseded projects.
 - OEM share: within one statistical layer, OEM shares total no more than 100%; Influenced MW cannot be mixed into the Firm MW denominator.
+- OEM share recompute: `sharePercent` must equal `mw / denominatorMetricValue * 100`; the denominator metric ID must exist and one scope/layer group must not mix denominators.
+- Numeric field contract: core ledger numeric fields must be `number` or `null`; missing public values require status/display metadata and cannot be encoded as `unknown`, `N/A`, or `not found`.
 - Project status uniqueness: one project cannot be active, paused, cancelled, and watchlist across different current-status sections.
 - Parent/phase rollup: government zones, developer portfolios, parent projects, phases, and concrete projects require explicit relationship treatment before any capacity sum.
 - Unit arithmetic: visible calculations across MW/GW, percentages, KRW 亿/万亿, USD/KRW, project counts, and subtotals must reconcile.
@@ -215,7 +217,8 @@ Rules:
 
 Pass criteria:
 
-- `gateSummary` has zero gaps for `metricConsistencyGaps`, `scopeDisclosureGaps`, `capacityArithmeticGaps`, `oemShareGaps`, `projectStatusConflictGaps`, `parentPhaseRollupGaps`, `unitArithmeticGaps`, and `releaseCleanlinessGaps`.
+- `gateSummary` has zero gaps for `metricConsistencyGaps`, `scopeDisclosureGaps`, `capacityArithmeticGaps`, `oemShareGaps`, `numericFieldGaps`, `projectStatusConflictGaps`, `parentPhaseRollupGaps`, `unitArithmeticGaps`, `releaseCleanlinessGaps`, and `releaseGaps`.
+- `audits/{slug}-cross_chapter_audit.json` follows `schema/cross-chapter-audit.schema.json`, has `status=passed`, zero critical/high issues, current `freezeId`, checked chapter/metric/project IDs, and no open repair tasks.
 
 Remediation:
 

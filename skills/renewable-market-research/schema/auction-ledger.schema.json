@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Metric Ledger",
+  "title": "Auction Ledger",
   "type": "object",
   "required": [
     "version",
     "slug",
-    "metrics"
+    "auctions"
   ],
   "properties": {
     "version": {
@@ -20,28 +20,56 @@
         "null"
       ]
     },
-    "metrics": {
+    "auctions": {
       "type": "array",
       "items": {
         "type": "object",
         "required": [
-          "metricId",
-          "label",
-          "value",
-          "unit",
+          "auctionId",
+          "auctionRound",
+          "auctionStatus",
+          "officialAuctionTotalMW",
+          "identifiableProjectCapacityMW",
+          "unresolvedGapMW",
           "scope",
           "timeBasis",
+          "allocationStatus",
+          "projectIds",
           "sourceIds",
+          "evidenceIds",
           "confidence"
         ],
         "properties": {
-          "metricId": {
+          "auctionId": {
             "type": "string"
           },
-          "label": {
+          "auctionRound": {
             "type": "string"
           },
-          "value": {
+          "auctionStatus": {
+            "enum": [
+              "announced",
+              "open",
+              "awarded",
+              "cancelled",
+              "paused",
+              "not_applicable",
+              "unknown"
+            ]
+          },
+          "officialAuctionTotalMW": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "identifiableProjectCapacityMW": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "unresolvedGapMW": {
             "type": [
               "number",
               "null"
@@ -63,42 +91,34 @@
               "null"
             ]
           },
-          "unit": {
-            "type": "string"
-          },
           "scope": {
             "type": "string"
-          },
-          "scopeId": {
-            "type": [
-              "string",
-              "null"
-            ]
           },
           "timeBasis": {
             "type": "string"
           },
-          "calculationBasis": {
-            "type": [
-              "string",
-              "array",
-              "object",
-              "null"
+          "allocationStatus": {
+            "enum": [
+              "fully_identified",
+              "partially_identified",
+              "unresolved_gap",
+              "not_applicable",
+              "unknown"
             ]
           },
-          "includedIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "excludedIds": {
+          "projectIds": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
           "sourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidenceIds": {
             "type": "array",
             "items": {
               "type": "string"

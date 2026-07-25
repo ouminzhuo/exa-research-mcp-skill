@@ -31,77 +31,66 @@
     "officialAuctionTotalMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "identifiableProjectCapacityMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "unresolvedGapMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "confirmedCapacityMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "opportunityCapacityMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "watchlistCapacityMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "excludedInactiveMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "firmMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "committedMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "influencedMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },
     "unallocatedMW": {
       "type": [
         "number",
-        "string",
         "null"
       ]
     },

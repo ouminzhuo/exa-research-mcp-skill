@@ -1,0 +1,25 @@
+{
+  "chapterId": "4",
+  "chapterTitle": "Market capacity definitions and project segmentation",
+  "inputFreezeId": "freeze-kor-001",
+  "allowedFactIds": [
+    "FACT-KOR-CONFIRMED-001"
+  ],
+  "allowedMetricIds": [
+    "KOR-OFFSHORE-NATIONAL-2024"
+  ],
+  "allowedProjectIds": [
+    "KOR-EXPIRED-OEM-ACTIVE"
+  ],
+  "allowedPolicyTargetIds": [],
+  "allowedAuctionIds": [],
+  "allowedOemAllocationIds": [],
+  "prohibitedDeprecatedValues": [
+    "韩国运营海风：96MW"
+  ],
+  "requiredDisclosures": [
+    "scope and time basis required for all aggregate MW claims"
+  ],
+  "mustNotInferBeyondManifest": true,
+  "repairIfContradictionFound": "block_release"
+}

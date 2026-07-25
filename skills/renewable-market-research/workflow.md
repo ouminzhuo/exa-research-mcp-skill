@@ -91,7 +91,7 @@ Core state-machine rule: work inside the same phase may run in parallel, but cro
 | 2 | Recall | Yes | recall workers | `candidate_project_pool.json`, `search_frontier.json`, `depth/*.json` |
 | 3 | Verification and Evidence | Yes | verification workers | `source_trace.json`, `evidence_table.json`, `verification/*.json` |
 | 4 | Rich Master and Core Ledgers | No | main agent | `{slug}.json`, project/metric/policy/auction/OEM ledgers, capacity reconciliation |
-| 5 | Canonical Reconciliation and Fact Freeze | No | main agent | `canonical_facts.json`, `fact_freeze.json`, deprecated values, repair routing |
+| 5 | Canonical Reconciliation and Fact Freeze | No | main agent | `canonical_facts.json` as sole fact source, generated `fact_freeze.json` projection, deprecated values, repair routing |
 | 6 | Chapter Input Manifest and Chapter Writing | Yes | main agent then chapter writers | `chapter_inputs/*.json`, `chapter_drafts/*.md`, chapter gap tasks |
 | 7 | Cross-Chapter Audit and Repair | Yes | audit/reviewer plus main agent | `audits/*cross_chapter_audit*.json`, repaired drafts or blocking gaps, eight report-audit checks |
 | 8 | Release | No | main agent | refreshed executive summary, full report, lite report derived from full after zero audit gaps |
@@ -100,7 +100,7 @@ Core artifact ownership:
 
 - Workers may write only `depth/`, `verification/`, `chapter_inputs/`, `chapter_drafts/`, and `audits/` artifacts assigned to their phase.
 - Only the main agent may write `{slug}.json`, `project_ledger.json`, `metric_ledger.json`, `policy_target_ledger.json`, `auction_ledger.json`, `oem_allocation_ledger.json`, `canonical_facts.json`, `fact_freeze.json`, `phase_state.json`, `artifact_manifest.json`, and released reports.
-- Chapter writers read only `canonical_facts.json` and their `chapter-input-manifest.json`. They must not search, recalculate capacity, choose policy targets, change project status, interpret auction deltas outside frozen facts, or copy deprecated values from old reports.
+- Chapter writers read only `canonical_facts.json` and their `chapter-input-manifest.json`. They must not search, recalculate capacity, choose policy targets, change project status, interpret auction deltas outside frozen facts, or copy deprecated values from old reports. Source Markdown must keep machine-readable markers such as `{{metric:...}}`, `{{project:...}}`, and `{{fact:...}}` so the validator can compare used IDs against the manifest.
 
 Agent topology:
 
@@ -143,8 +143,8 @@ Heavy Workflow stage loop:
 
 1. Plan reflection: reviewer checks phase state, artifact manifest, local-language coverage, Chinese-capital search, new-entrant search, anomaly hunting, official-source backtrace, and mandatory evidence thresholds before workers start.
 2. Recall/evidence reflection: reviewer checks depth and verification files for coverage, source quality, search passes, critical-field verification, Exa-to-Chrome handoff, and unexplained blind spots.
-3. Ledger/fact-freeze reflection: reviewer checks main-agent single writing, canonical IDs, alias merging, confirmed/watchlist/duplicate/rejected buckets, split project status fields, OEM relationship fields, capacity totals, rich-field propagation, source-to-final continuity, and frozen deprecated values.
-4. Chapter/audit reflection: reviewer checks the 0-16 chapter structure, chapter-input manifests, full project ledger, project cards, developer/OEM depth, logistics, tariff/bankability status, procurement-window table, source-confidence appendix, summary freshness, no deprecated values, absence of benchmark sections unless requested, and the eight release audit classes: metric consistency, scope disclosure, capacity aggregation, OEM share, project status uniqueness, parent/phase rollup, unit arithmetic, and release cleanliness.
+3. Ledger/fact-freeze reflection: reviewer checks main-agent single writing, canonical IDs, alias merging, confirmed/watchlist/duplicate/rejected buckets, split project status fields, split project/OEM capacity treatments, capacity totals, rich-field propagation, source-to-final continuity, factProfile applicability, fact_freeze projection hash, and frozen deprecated values.
+4. Chapter/audit reflection: reviewer checks the 0-16 chapter structure, chapter-input manifests, required source Markdown markers, full project ledger, project cards, developer/OEM depth, logistics, tariff/bankability status, procurement-window table, source-confidence appendix, summary freshness, no deprecated values, absence of benchmark sections unless requested, and the release audit classes: metric consistency, scope disclosure, capacity aggregation, OEM share/recompute, numeric field contracts, project status uniqueness, parent/phase rollup, unit arithmetic, release cleanliness, and audit-content pass.
 
 Stage advancement rules:
 

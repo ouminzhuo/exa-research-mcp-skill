@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "slug": "korea-wind",
+  "updatedAt": "2026-07-24T00:00:00+09:00",
+  "capacityReconciliation": {
+    "confirmedCapacityMW": 0,
+    "opportunityCapacityMW": 0,
+    "watchlistCapacityMW": 0,
+    "excludedInactiveMW": 340,
+    "firmMW": 0,
+    "committedMW": 0,
+    "influencedMW": 0,
+    "unallocatedMW": 0
+  },
+  "projects": [
+    {
+      "projectId": "KOR-EXPIRED-OEM-ACTIVE",
+      "aliasGroupId": "KOR-ALIAS-001",
+      "canonicalProjectName": "Geumodo Offshore Wind",
+      "projectAliases": [
+        "Geumodo Offshore Wind",
+        "Geumodo"
+      ],
+      "capacityMW": 340,
+      "opportunityMW": 340,
+      "developmentStage": "auction_awarded",
+      "activityStatus": "active",
+      "ledgerTreatment": "confirmed",
+      "projectCapacityTreatment": "opportunity_capacity",
+      "oemCapacityTreatment": "excluded_inactive_mw",
+      "capacityScope": "opportunity_capacity",
+      "statusBasis": "Fixture: active project with expired OEM agreement should not be excluded inactive.",
+      "countedInConfirmedCapacity": false,
+      "countedInOpportunityCapacity": true,
+      "sponsorOwner": "Fixture Developer",
+      "spv": "Fixture SPV",
+      "equityStructure": "not public",
+      "oem": "Former OEM",
+      "oemRelationshipType": "firm_supply_contract",
+      "oemRelationshipStatus": "expired",
+      "procurementStatus": "pending_verification",
+      "turbineModel": "not public",
+      "epc": "not public",
+      "omParty": "not public",
+      "financiers": "not public",
+      "ppaOfftaker": "not public",
+      "tariff": "not public",
+      "codTimeline": "not public",
+      "nextMilestone": "retender OEM",
+      "decisionMaker": "not public",
+      "keyEvidence": [
+        "E-KOR-001"
+      ],
+      "fieldConfidence": {
+        "activityStatus": "low",
+        "oemRelationshipStatus": "medium"
+      },
+      "pendingVerification": [
+        "confirm new OEM tender"
+      ],
+      "mingyangRelevance": "pending",
+      "mainRisks": [
+        "OEM allocation unresolved"
+      ]
+    }
+  ]
+}

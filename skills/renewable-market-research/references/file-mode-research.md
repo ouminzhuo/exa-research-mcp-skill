@@ -163,7 +163,7 @@ Record convergence in `index.json` and `{slug}-frontier_convergence.json` with `
 
 Before report writing, merge all project-like records into `candidate_project_pool.json`, then into the rich `{slug}.json`. This master JSON is the report-ready data source and must preserve rich card fields from depth records, including annual generation, annual CO2 reduction, investment, turbine model/count/specs, storage, coordinates, site area, logistics, jobs/community/ESG, and personnel/developer data when found.
 
-After the master JSON and evidence table are complete, derive `{slug}-pipeline-ledger.json`, `{slug}-project_ledger.json`, and the other core ledgers from the validated master JSON and source/evidence records. Then derive `{slug}-canonical_facts.json` and `{slug}-fact_freeze.json` from the reconciled ledgers before any chapter manifest or draft.
+After the master JSON and evidence table are complete, derive `{slug}-pipeline-ledger.json`, `{slug}-project_ledger.json`, and the other core ledgers from the validated master JSON and source/evidence records. Then derive `{slug}-canonical_facts.json` as the sole frozen fact source and generate `{slug}-fact_freeze.json` as its hash-checked compatibility projection before any chapter manifest or draft.
 
 Each canonical project should include:
 
@@ -177,12 +177,12 @@ Each canonical project should include:
 - `developmentStage` as `operational`, `partial_operation`, `under_construction`, `construction_ready`, `financial_close`, `contracted`, `auction_awarded`, `permitted`, `pre_auction`, `early_development`, `watchlist`, or `unverified`;
 - `activityStatus` as `active`, `delayed`, `paused`, `withdrawn`, `cancelled`, `superseded`, or `unknown`;
 - `ledgerTreatment` as `confirmed`, `watchlist`, `duplicate`, `rejected`, or `unresolved`;
-- `capacityTreatment` and `capacityScope` for MW arithmetic;
-- `oemRelationshipType` and `oemRelationshipStatus` for OEM relationship MW buckets;
+- `projectCapacityTreatment` and `capacityScope` for project MW arithmetic;
+- `oemRelationshipType`, `oemRelationshipStatus`, and `oemCapacityTreatment` for OEM relationship MW buckets;
 - evidence grade;
 - confirmed-pipeline eligibility and exclusion reason when not eligible.
 
-No chapter may maintain an independent project list after aggregation. Chapters read rich report fields from the master JSON, cite frozen Fact IDs, and use the ledger for canonical IDs, status buckets, dedupe decisions, and watchlist/rejected/unresolved state. If a new chapter discovers a project candidate, alias, or richer field, it must update the candidate pool and master JSON first, refresh fact freeze, refresh the ledger, then refresh synthesis and summary.
+No chapter may maintain an independent project list after aggregation. Chapters read rich report fields from the master JSON, cite frozen Fact IDs, retain source Markdown markers, and use the ledger for canonical IDs, status buckets, dedupe decisions, and watchlist/rejected/unresolved state. If a new chapter discovers a project candidate, alias, or richer field, it must update the candidate pool and master JSON first, refresh core ledgers, refresh `canonical_facts.json` and its `fact_freeze.json` projection, then refresh synthesis and summary.
 
 P0/P1 ledger admission:
 

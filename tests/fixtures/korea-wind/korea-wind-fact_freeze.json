@@ -1,0 +1,58 @@
+{
+  "version": "1.0",
+  "slug": "korea-wind",
+  "generatedFrom": "canonical_facts.json",
+  "canonicalFreezeId": "freeze-kor-001",
+  "canonicalFactsHash": "intentionally-wrong-hash",
+  "factProfile": "wind_full_report",
+  "requiredFactTypes": [
+    "confirmed_project_capacity_mw"
+  ],
+  "conditionalFactTypes": [
+    "official_auction_total_mw",
+    "auction_allocation",
+    "oem_firm_order"
+  ],
+  "notApplicableFactTypes": [
+    "political_statement_target"
+  ],
+  "freezeId": "freeze-kor-001",
+  "frozenAt": "2026-07-24T00:00:00+09:00",
+  "basedOnLedgers": [
+    "main_json",
+    "project_ledger",
+    "metric_ledger",
+    "policy_target_ledger",
+    "auction_ledger",
+    "oem_allocation_ledger",
+    "capacity_reconciliation"
+  ],
+  "facts": [
+    {
+      "factId": "FACT-KOR-CONFIRMED-001",
+      "factType": "confirmed_project_capacity_mw",
+      "statement": "Fixture confirmed capacity is zero.",
+      "value": 0,
+      "unit": "MW",
+      "scope": "fixture project ledger confirmed capacity",
+      "includedProjectIds": [],
+      "excludedProjectIds": [
+        "KOR-EXPIRED-OEM-ACTIVE"
+      ],
+      "evidenceIds": [
+        "E-KOR-005"
+      ],
+      "confidence": "medium",
+      "frozenAt": "2026-07-24T00:00:00+09:00"
+    }
+  ],
+  "deprecatedValues": [
+    {
+      "value": "韩国运营海风：96MW",
+      "replacement": "重点商业项目账本运营容量：96MW"
+    }
+  ],
+  "repairRouting": {
+    "scopeMismatch": "return_to_phase_5"
+  }
+}

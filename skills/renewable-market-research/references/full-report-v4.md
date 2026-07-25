@@ -27,7 +27,7 @@ The full report must not make final go/no-go, factory-build, pricing, or bid-str
 
 Hard rule: key project-card fields must not be deleted because the body text is compressed. The main body may summarize; the project-card appendix or card block must preserve complete fields, with `not found`, `unavailable`, or `not applicable` when evidence is absent.
 
-Before any chapter draft, generate `canonical_facts.json` and `fact_freeze.json` after source trace, evidence table, rich master JSON, project ledger, metric ledger, policy target ledger, auction ledger, OEM allocation ledger, and capacity reconciliation are current. Chapters must cite frozen IDs for contested capacity, policy, project-status, auction/project-delta, and OEM-relationship claims. A chapter may summarize the frozen fact, but it must not recalculate capacity scopes, upgrade draft targets into enacted policy, treat political statements as policy targets, explain auction differences outside frozen facts, or turn strategic OEM preference into firm orders.
+Before any chapter draft, generate `canonical_facts.json` after source trace, evidence table, rich master JSON, project ledger, metric ledger, policy target ledger, auction ledger, OEM allocation ledger, and capacity reconciliation are current. `canonical_facts.json` is the only editable frozen fact source. `fact_freeze.json` is a generated compatibility projection and must carry `generatedFrom`, `canonicalFreezeId`, and `canonicalFactsHash`. Chapters must cite frozen IDs for contested capacity, policy, project-status, auction/project-delta, and OEM-relationship claims. A chapter may summarize the frozen fact, but it must not recalculate capacity scopes, upgrade draft targets into enacted policy, treat political statements as policy targets, explain auction differences outside frozen facts, or turn strategic OEM preference into firm orders.
 
 ## Chapter Contract
 
@@ -77,11 +77,11 @@ The main integrator is the single writer for `{slug}.json`, project/metric/polic
 | 15 | `chapter_15_risk_matrix_worker` | reviewer pass |
 | 16 | `chapter_16_evidence_appendix_worker` | independent verification + reviewer pass |
 
-Critical chapter verification means the chapter writer cannot self-release the chapter. The verifier must check source-to-field continuity, capacity treatment, evidence confidence, pending-verification notes, and contradiction status before the main integrator assembles the full report.
+Critical chapter verification means the chapter writer cannot self-release the chapter. The verifier must check source-to-field continuity, `projectCapacityTreatment`, `oemCapacityTreatment`, evidence confidence, pending-verification notes, and contradiction status before the main integrator assembles the full report.
 
-Every chapter must have a `chapter_inputs/{slug}-chapter-*-input-manifest.json` with allowed fact IDs, metric IDs, project IDs, policy target IDs, auction IDs, OEM allocation IDs, prohibited deprecated values, and required disclosures. Chapter agents must not search, calculate capacity, choose policy targets, change project status, explain auction deltas beyond frozen facts, or copy old deprecated numbers. Missing facts become gap tasks.
+Every chapter must have a `chapter_inputs/{slug}-chapter-*-input-manifest.json` with allowed fact IDs, metric IDs, project IDs, policy target IDs, auction IDs, OEM allocation IDs, prohibited deprecated values, and required disclosures. Chapter agents must not search, calculate capacity, choose policy targets, change project status, explain auction deltas beyond frozen facts, or copy old deprecated numbers. Source Markdown must mark key claims with `{{fact:FACT-ID}}`, `{{metric:METRIC-ID|value=123|unit=MW}}`, `{{project:PROJECT-ID}}`, `{{policy:POLICY-TARGET-ID}}`, `{{auction:AUCTION-ID}}`, and `{{oem:OEM-ALLOCATION-ID}}`; the release validator compares used IDs against the manifest allow-list. Missing facts become gap tasks.
 
-Before full-report release, run the eight release audit checks across chapter drafts and assembled prose: metricId consistency, scope disclosure, capacity aggregation, OEM share, project current-status uniqueness, parent/phase rollup deduplication, unit arithmetic, and release cleanliness. Any nonzero gap blocks release and lite extraction.
+Before full-report release, run the release audit checks across chapter drafts and assembled prose: metricId consistency, scope disclosure, capacity aggregation, OEM share and share recompute, numeric field contracts, project current-status uniqueness, parent/phase rollup deduplication, unit arithmetic, release cleanliness, and cross-chapter audit content. `cross_chapter_audit.json` must match the current freezeId, have `status=passed`, zero critical/high issues, checked IDs, and no open repair tasks. Any nonzero gap blocks release and lite extraction.
 
 ## Chapter Requirements
 
@@ -104,7 +104,8 @@ Required project status fields:
 | `developmentStage` | operational, partial_operation, under_construction, construction_ready, financial_close, contracted, auction_awarded, permitted, pre_auction, early_development, watchlist, unverified | Evidence-backed development milestone |
 | `activityStatus` | active, delayed, paused, withdrawn, cancelled, superseded, unknown | Current activity condition |
 | `ledgerTreatment` | confirmed, watchlist, duplicate, rejected, unresolved | How the candidate is carried in the ledger |
-| `capacityTreatment` | confirmed_capacity, opportunity_capacity, watchlist_capacity, excluded_inactive, excluded_duplicate, excluded_unverified, policy_target_only, auction_total_only | How the MW is allowed to enter reconciliation |
+| `projectCapacityTreatment` | confirmed_capacity, opportunity_capacity, watchlist_capacity, excluded_inactive, excluded_duplicate, excluded_unverified, policy_target_only, auction_total_only | How the project MW is allowed to enter reconciliation |
+| `oemCapacityTreatment` | firm_mw, committed_mw, influenced_mw, unallocated_mw, excluded_inactive_mw, unknown | How the OEM-related MW is allowed to enter Firm/Committed/Influenced/Unallocated/Excluded inactive buckets |
 
 ### 1. Executive Summary
 
@@ -225,9 +226,9 @@ Required modules:
 
 | Module | Fields |
 |---|---|
-| Basic information | project name, capacity, location, stage, developmentStage, activityStatus, ledgerTreatment, capacityTreatment, COD |
+| Basic information | project name, capacity, location, stage, developmentStage, activityStatus, ledgerTreatment, projectCapacityTreatment, COD |
 | Owner structure | developer, SPV, equity, government counterpart |
-| Technical plan | OEM, oemRelationshipType, oemRelationshipStatus, turbine model, turbine count, BESS, transmission line |
+| Technical plan | OEM, oemRelationshipType, oemRelationshipStatus, oemCapacityTreatment, turbine model, turbine count, BESS, transmission line |
 | Commercial structure | PPA, offtaker, tariff, tenor, guarantee |
 | Financing structure | total investment, lenders, financial-close status |
 | Development flow | land, ESIA, interconnection, construction permit, electricity license |
@@ -267,10 +268,11 @@ Required tables:
 - Committed MW table: preferred supplier or conditional reservation/CRA, project, capacity, condition, evidence boundary.
 - Influenced MW table: framework agreement, technology partnership, or reported preference, project, capacity, influence basis, confidence.
 - Unallocated MW table: active or delayed projects with unallocated/unknown OEM relationship, capacity, procurement status.
-- Excluded inactive MW table: paused, withdrawn, cancelled, superseded, expired, or terminated cases and the reason they are excluded.
+- Excluded inactive MW table: paused, withdrawn, cancelled, or superseded projects and the reason the project activity status excludes their MW.
+- Expired/terminated OEM relation table: active or delayed projects whose prior OEM agreement expired, terminated, or was superseded; these normally move to Unallocated MW, not Excluded inactive MW, unless the project itself is paused, withdrawn, cancelled, or superseded.
 - OEM competition status table: existing record, developer relationship, financing precedent, risk.
 
-Do not use ambiguous `locked MW`. It must be decomposed into Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW.
+Do not use ambiguous `locked MW`. It must be decomposed into Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW. Project inactivity is decided by `activityStatus`; OEM exposure is decided by `oemRelationshipStatus` plus `oemCapacityTreatment`.
 
 ### 10. EPC, Financiers, O&M, And Supply-Chain Network
 
@@ -367,14 +369,14 @@ Evidence requirements by conclusion type:
 | O&M arrangement | contract, developer announcement, or project document is stronger |
 | Mingyang relevance | usually inference; must mark basis and confidence |
 
-Capacity and OEM conclusion evidence must cite frozen IDs from `canonical_facts.json`/`fact_freeze.json` when the claim uses a contested scope or status. For example, 230MW, 326MW, 340MW, and 96MW may all appear only if each number has a distinct frozen scope, included/excluded project list, and evidence boundary.
+Capacity and OEM conclusion evidence must cite frozen IDs from `canonical_facts.json` and manifest-allowed source markers when the claim uses a contested scope or status. For example, 230MW, 326MW, 340MW, and 96MW may all appear only if each number has a distinct frozen scope, included/excluded project list, and evidence boundary.
 
 ## Writer Flow
 
 1. Start from source trace, evidence table, validated rich master JSON, core ledgers, and depth records.
-2. Generate `canonical_facts.json` and `fact_freeze.json` after core ledgers and capacity reconciliation are current.
+2. Generate `canonical_facts.json` after core ledgers and capacity reconciliation are current, then generate `fact_freeze.json` as a hash-checked projection.
 3. Generate a `chapter-input-manifest.json` for every chapter from frozen fact, metric, project, policy, auction, and OEM allocation IDs.
-4. Write Chapter 0 from the frozen facts so capacity, status, OEM, and confidence rules are fixed.
+4. Write Chapter 0 from the frozen facts so capacity, status, OEM, and confidence rules are fixed. Keep source Markdown markers such as `{{metric:METRIC-ID|value=123|unit=MW}}`; rendering may hide them, but the source Markdown must retain them for validation.
 5. Build Chapters 5 and 6 from the manifest-listed master JSON, project ledger, project-card JSON, and matching depth records. If depth records contain richer fields, update the master JSON, rebuild the affected ledger/freeze/manifest, or mark the field as unavailable before drafting.
 6. Write Chapters 7-14 from manifest-listed participant, technology, grid, tariff, localization, and procurement-window records. Avoid generic company profiles.
 7. Run cross-chapter audit and repair before final assembly.

@@ -199,11 +199,12 @@ Keep these as hard gates for a JS scheduler or equivalent deterministic runner, 
 - `phase_order_gate`: Heavy work follows the 8-phase state machine. Same-phase tasks can run in parallel; cross-phase tasks cannot start until the prior phase exit gate passes.
 - `single_writer_core_ledger_gate`: only the main agent may write rich master JSON, core ledgers, canonical facts, phase state, artifact manifest, and released reports.
 - `chapter_input_manifest_gate`: every chapter requires a frozen `chapter-input-manifest.json` before drafting.
-- `chapter_no_external_fact_gate`: chapter writers cannot search, recalculate capacity, choose policy targets, change project status, explain auction deltas beyond frozen facts, or copy deprecated values.
+- `chapter_no_external_fact_gate`: chapter writers cannot search, recalculate capacity, choose policy targets, change project status, explain auction deltas beyond frozen facts, copy deprecated values, or cite IDs outside their manifest. Source Markdown must retain `{{fact:...}}`, `{{metric:...}}`, `{{project:...}}`, `{{policy:...}}`, `{{auction:...}}`, and `{{oem:...}}` markers for key claims.
 - `stale_artifact_gate`: if `canonical_facts.json` or `fact_freeze.json` changes, dependent manifests, drafts, audits, executive summary, full report, and lite report become stale until refreshed.
 - `cross_chapter_audit_gate`: all chapter drafts must be audited against canonical facts, ledgers, and deprecated values before release.
-- `release_gate`: release requires cross-chapter audit pass, critical chapter verification pass, executive summary generated last, no strategy leakage, and lite derived from full.
-- `report_audit_gate`: release also requires the eight report-audit checks: cross-chapter metric consistency, scope disclosure, capacity aggregation, OEM share, project current-status uniqueness, parent/phase rollup deduplication, unit arithmetic, and release cleanliness.
+- `cross_chapter_audit_content_gate`: release must read the audit JSON content, requiring `status=passed`, current `freezeId`, zero critical/high issues, checked IDs, and no open repair tasks.
+- `release_gate`: release requires cross-chapter audit content pass, critical chapter verification pass, executive summary generated last, no strategy leakage, and lite derived from full.
+- `report_audit_gate`: release also requires metric consistency, scope disclosure, capacity aggregation, OEM share/recompute, numeric field contracts, project current-status uniqueness, parent/phase rollup deduplication, unit arithmetic, and release cleanliness.
 - `entity_extraction_gate`: every search result is scanned for project, company, SPV, law/decree, region, authority-source, and institution names.
 - `alias_expansion_gate`: each material entry receives English, local-language, Russian when relevant, Chinese, transliteration, SPV, and decree/order variants where discoverable.
 - `frontier_priority_gate`: every frontier entry receives P0/P1/P2/P3/P4, wind linkage, expansion allowance, expansion depth, defer reason, and promotion reason.
@@ -217,15 +218,17 @@ Keep these as hard gates for a JS scheduler or equivalent deterministic runner, 
 - `frontier_exhaustion_gate`: after round five, Recall continues until all P0/P1 frontier entries are processed and two consecutive expansion rounds add zero P0/P1 entries.
 - `verification_gate`: ledger-admitted projects must have `sourceTrace`, `evidenceGrade`, field-level verification for present critical fields, and P0/P1 execution/evaluation status that permits ledger admission.
 - `exa_boundary_chrome_handoff_gate`: Exa search/quota/no-more-results boundary triggers Chrome verification or an explicit Chrome-unavailable gap record; it does not release the run by itself.
-- `canonical_fact_freeze_gate`: `canonical_facts.json` and `fact_freeze.json` must exist after source_trace/evidence_table, rich master JSON, project ledger, metric ledger, policy target ledger, auction ledger, OEM allocation ledger, and capacity reconciliation. Chapters cite frozen IDs instead of recalculating capacity scopes, policy status, project activity status, auction/project deltas, or OEM relationship categories.
-- `fact_freeze_gate`: compatibility alias for `canonical_fact_freeze_gate`; it must not run before core ledgers.
+- `canonical_fact_freeze_gate`: `canonical_facts.json` must exist after source_trace/evidence_table, rich master JSON, project ledger, metric ledger, policy target ledger, auction ledger, OEM allocation ledger, and capacity reconciliation. It is the sole editable fact source and carries `factProfile`, `requiredFactTypes`, `conditionalFactTypes`, and `notApplicableFactTypes`.
+- `fact_freeze_projection_gate`: `fact_freeze.json` must be generated from `canonical_facts.json` and pass freezeId/hash/fact/deprecatedValues/repairRouting parity checks.
+- `fact_freeze_gate`: compatibility alias for the projection gate; it must not run before core ledgers.
+- `numeric_field_contract_gate`: core numeric ledger fields are `number | null`; unknown values use status/display metadata, not strings that can be silently counted as zero.
 - `capacity_sum_gate`: confirmed pipeline, opportunity, watchlist, excluded inactive, and OEM relationship MW totals must be computed from `project_ledger`, not manually in report prose.
 - `duplicate_gate`: aliases and renamed phases must merge or receive explicit duplicate/rejected decisions.
 - `opportunity_gate`: OEM opportunity tables may include only projects where OEM is TBD, unconfirmed, undisclosed, or covered by a non-final framework.
 - `project_ledger_schema_gate`: every ledger project must satisfy `schema/project-ledger.schema.json`.
 - `capacity_reconciliation_gate`: confirmed capacity, opportunity MW, watchlist capacity, excluded inactive MW, Firm MW, Committed MW, Influenced MW, and Unallocated MW must be recalculated from `project_ledger`; national targets and auction totals remain separate.
 - `project_card_completeness_gate`: every key project card must satisfy `schema/project-card.schema.json`; unknown values may be marked as pending/unavailable, but fields cannot disappear.
-- `evidence_boundary_gate`: every key conclusion must have conclusion-level evidence in `schema/evidence-table.schema.json`, especially developmentStage, activityStatus, capacityTreatment, capacity MW, OEM relationship type/status, tariff, financing, PPA/offtaker, procurement window, and Mingyang relevance.
+- `evidence_boundary_gate`: every key conclusion must have conclusion-level evidence in `schema/evidence-table.schema.json`, especially developmentStage, activityStatus, projectCapacityTreatment, oemCapacityTreatment, capacity MW, OEM relationship type/status, tariff, financing, PPA/offtaker, procurement window, and Mingyang relevance.
 - `source_trace_evidence_boundary_gate`: source_trace and evidence_table must exist before rich master JSON, core ledgers, canonical facts/fact freeze, detailed project cards, and report prose.
 - `no_strategy_recommendation_gate`: full report prose cannot contain strategy-action language such as building a factory, must enter, recommended bid, binding an EPC, or investing resources.
 - `baseline_inheritance_gate`: all baseline/candidate projects must flow into confirmed, watchlist, duplicate, rejected, or unresolved outcomes.

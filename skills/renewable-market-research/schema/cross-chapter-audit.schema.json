@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-Chapter Audit",
+  "type": "object",
+  "required": [
+    "version",
+    "slug",
+    "freezeId",
+    "status",
+    "criticalIssues",
+    "highIssues",
+    "mediumIssues",
+    "checkedChapterIds",
+    "checkedMetricIds",
+    "checkedProjectIds",
+    "repairTasks"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "auditType": {
+      "enum": [
+        "cross_chapter_audit"
+      ]
+    },
+    "freezeId": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "passed",
+        "blocked"
+      ]
+    },
+    "criticalIssues": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "highIssues": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "mediumIssues": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "checkedChapterIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checkedMetricIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checkedProjectIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checkedFactIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checkedPolicyTargetIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checkedAuctionIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checkedOemAllocationIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "repairTasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "taskId",
+          "severity",
+          "status"
+        ],
+        "properties": {
+          "taskId": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "status": {
+            "enum": [
+              "open",
+              "blocked",
+              "closed",
+              "resolved",
+              "applied",
+              "not_applicable"
+            ]
+          },
+          "chapterId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

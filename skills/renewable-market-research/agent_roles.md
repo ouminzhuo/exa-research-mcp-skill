@@ -8,7 +8,7 @@ The workflow separates writers, reviewers, synthesizers, and executive compressi
 - Reviewer agents challenge evidence quality and contradictions.
 - The main/orchestrator agent owns phase state, artifact manifest, rich master JSON aggregation, core ledgers, canonical facts/fact freeze, chapter input manifests, released reports, and source-to-final continuity.
 - Worker agents may write only assigned `depth/`, `verification/`, `chapter_inputs/`, `chapter_drafts/`, or `audits/` artifacts. They must not write core ledgers, canonical facts, or released reports.
-- Chapter writers read only their frozen `chapter-input-manifest.json` plus the referenced frozen inputs. Missing facts become gap tasks, not ad hoc search or recalculation.
+- Chapter writers read only their frozen `chapter-input-manifest.json` plus the referenced frozen inputs. They must retain source Markdown markers such as `{{fact:...}}`, `{{metric:...}}`, `{{project:...}}`, `{{policy:...}}`, `{{auction:...}}`, and `{{oem:...}}` for key claims. Missing facts become gap tasks, not ad hoc search or recalculation.
 - Synthesis agents combine only reviewed findings, the latest validated master JSON, and the canonical ledger into decision-useful outputs in the order: wind project ledger, participant/competitor map, procurement-window/factual relevance view, then optional sales judgment for a separate brief.
 - Executive agents compress reviewed conclusions into management-ready judgments only after the final backpropagation pass.
 

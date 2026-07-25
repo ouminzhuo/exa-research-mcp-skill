@@ -31,7 +31,7 @@ Return or write machine-readable JSON with this shape:
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
 - Convert important facts into report implications: project status, capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
 - Build an OEM/supplier panorama as completely as the evidence allows, not only a top-five list. Capture turbine model, MW class, hub height, rotor/blade diameter, climate/logistics fit, localization position, product roadmap, and market-share trend from BNEF or other credible sources when available.
-- Segment OEM relationships by `oemRelationshipType` and `oemRelationshipStatus`, then report only Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW. Do not use ambiguous locked MW.
+- Segment OEM relationships by `oemRelationshipType`, `oemRelationshipStatus`, and `oemCapacityTreatment`, then report only Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW. Do not use ambiguous locked MW. Expired, terminated, or superseded OEM agreements normally move active-project OEM exposure to Unallocated MW; they do not by themselves make the project inactive.
 - Tie each OEM to project MW, owner/EPC relationship, procurement influence, relationship evidence boundary, and remaining unallocated MW.
 
 ## Allowed Actions

@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "slug": "korea-wind",
+  "metrics": [
+    {
+      "metricId": "KOR-OFFSHORE-NATIONAL-2024",
+      "label": "National offshore wind installed capacity by end 2024",
+      "value": 230,
+      "unit": "MW",
+      "scope": "national offshore wind installed capacity",
+      "timeBasis": "as of end-2024",
+      "sourceIds": [
+        "E-KOR-001"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "metricId": "KOR-DENOM-FIRM",
+      "label": "Firm MW denominator",
+      "value": 1000,
+      "unit": "MW",
+      "scope": "fixture firm denominator",
+      "timeBasis": "fixture",
+      "sourceIds": [
+        "E-KOR-002"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "metricId": "KOR-UNKNOWN-NUMERIC",
+      "label": "Bad numeric placeholder",
+      "value": "unknown",
+      "unit": "MW",
+      "scope": "fixture",
+      "timeBasis": "fixture",
+      "sourceIds": [
+        "E-KOR-003"
+      ],
+      "confidence": "low"
+    }
+  ]
+}

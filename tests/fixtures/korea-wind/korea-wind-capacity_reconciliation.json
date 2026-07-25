@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "slug": "korea-wind",
+  "officialAuctionTotalMW": "1786",
+  "identifiableProjectCapacityMW": 1626,
+  "unresolvedGapMW": 100,
+  "confirmedCapacityMW": 0,
+  "opportunityCapacityMW": 0,
+  "watchlistCapacityMW": 0,
+  "excludedInactiveMW": 340,
+  "firmMW": 0,
+  "committedMW": 0,
+  "influencedMW": 0,
+  "unallocatedMW": 0,
+  "calculationBasis": [
+    {
+      "metric": "auction unresolved gap",
+      "formula": "officialAuctionTotalMW - identifiableProjectCapacityMW",
+      "includedProjectIds": [
+        "KOR-EXPIRED-OEM-ACTIVE"
+      ],
+      "excludedProjectIds": []
+    }
+  ]
+}

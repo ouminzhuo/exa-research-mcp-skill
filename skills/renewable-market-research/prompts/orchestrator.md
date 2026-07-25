@@ -47,8 +47,8 @@ Return or write machine-readable JSON with this shape:
 - Move weak, conflicting, duplicate, or unverified material into `rejected_claims`, watchlists, or `next_questions`.
 - Produce business implications only when they are traceable to findings and evidence.
 - Build or refresh the rich master JSON first, then derive or refresh core ledgers before canonical facts, synthesis, and final report writing.
-- Generate or refresh `canonical_facts.json` and `fact_freeze.json` only after `source_trace/evidence_table`, rich master JSON, `project_ledger`, `metric_ledger`, `policy_target_ledger`, `auction_ledger`, `oem_allocation_ledger`, and capacity reconciliation are current. Chapters must cite frozen IDs and must not recalculate frozen scopes.
-- Create `chapter-input-manifest.json` for every chapter before chapter writing. A chapter writer may use only the allowed frozen fact IDs, metric IDs, project IDs, policy target IDs, auction IDs, OEM allocation IDs, required disclosures, and source artifacts listed in that manifest.
+- Generate or refresh `canonical_facts.json` only after `source_trace/evidence_table`, rich master JSON, `project_ledger`, `metric_ledger`, `policy_target_ledger`, `auction_ledger`, `oem_allocation_ledger`, and capacity reconciliation are current. Treat it as the only editable frozen fact source. Generate `fact_freeze.json` from it as a compatibility projection with `generatedFrom`, `canonicalFreezeId`, and `canonicalFactsHash`; chapters must cite frozen IDs and must not recalculate frozen scopes.
+- Create `chapter-input-manifest.json` for every chapter before chapter writing. A chapter writer may use only the allowed frozen fact IDs, metric IDs, project IDs, policy target IDs, auction IDs, OEM allocation IDs, required disclosures, and source artifacts listed in that manifest. Source Markdown must keep claim markers such as `{{fact:...}}`, `{{metric:...|value=...|unit=...}}`, `{{project:...}}`, `{{policy:...}}`, `{{auction:...}}`, and `{{oem:...}}`.
 - If canonical facts change after chapter manifests or drafts exist, mark dependent manifests, drafts, audits, summaries, full report, and lite report stale until regenerated or repaired.
 - Require a participant-role matrix before final writing: each material owner, developer, OEM, EPC, financier, and channel actor must be tied to project role, MW exposure, procurement influence, relationship strength, factual relevance, and evidence confidence.
 - Require report writers to cross-read project depth records before writing cards or deep-dive chapters. If depth contains richer project-card fields than the master JSON, update the master JSON and rerun integrity validation first.
@@ -64,6 +64,7 @@ Return or write machine-readable JSON with this shape:
 - Enforce the generation order before full-report prose: phase state/artifact manifest, candidate project pool, source trace/evidence table, rich master JSON, core ledgers, canonical facts/fact freeze, derived tables/project cards, chapter input manifests, chapter drafts, cross-chapter audit/repair, full report, then lite report.
 - Require `scripts/validate_market_integrity.py` with `--phase-state`, `--artifact-manifest`, `--candidate-pool`, `--project-ledger`, `--metric-ledger`, `--capacity-reconciliation`, `--oem-allocation-ledger`, `--project-cards`, `--evidence-table`, `--canonical-facts`, `--fact-freeze`, `--chapter-input-dir`, `--chapter-drafts-dir`, `--audits-dir`, and `--full-report` before releasing the full report. Nonzero gate gaps block release.
 - Treat the eight release audit checks as hard blockers: cross-chapter metric consistency, scope disclosure, capacity aggregation, OEM share, project current-status uniqueness, parent/phase rollup deduplication, unit arithmetic, and release cleanliness. Do not derive the lite report until all eight pass.
+- Require `audits/{slug}-cross_chapter_audit.json` to pass by content, not by file existence: `status=passed`, zero critical/high issues, matching current `freezeId`, checked chapter/metric/project IDs, and no open repair tasks.
 
 ## Prohibited Actions
 
@@ -76,10 +77,12 @@ Return or write machine-readable JSON with this shape:
 - Do not accept generic company profiles in final deliverables unless the company is tied to specific projects, roles, MW exposure, procurement influence, factual relevance, or pending verification.
 - Do not overwrite other agents' files or expand beyond the assigned scope without recording the reason.
 - Do not let chapters maintain separate project pipeline tables that bypass the canonical ledger.
-- Do not let chapters recalculate frozen capacity scopes, policy status, project activity status, or OEM relationship categories outside `canonical_facts.json`/`fact_freeze.json`.
+- Do not let chapters recalculate frozen capacity scopes, policy status, project activity status, or OEM relationship categories outside `canonical_facts.json`; `fact_freeze.json` is only a generated compatibility projection.
 - Do not let chapter writers search, calculate capacity, choose policy targets, change project status, explain auction deltas beyond frozen facts, or copy deprecated values from older reports.
 - Do not let final reports use `{slug}-pipeline-ledger.json` as a substitute for the rich master JSON.
 - Do not hand off a final report with confirmed-project critical fields that remain discovery-only.
+- Do not put strings such as `unknown`, `N/A`, `not found`, or `unavailable` into core numeric ledger fields. Use `null` plus `valueStatus`/`displayValue` or field-specific status/display fields.
+- Do not treat an expired, terminated, or superseded OEM agreement as project inactivity. Project inactivity comes from `activityStatus`; expired OEM exposure normally becomes `oemCapacityTreatment=unallocated_mw`.
 - Do not allow scope-less aggregate metrics, mixed capacity scopes, mixed OEM denominators, unresolved parent/phase rollups, visible arithmetic errors, or release artifacts such as internal version labels, repairs-applied notes, deletion markup, TODO/FIXME, unconverted footnotes, or raw JSON in released reports.
 - Do not allow worker agents to edit the rich master JSON, core ledgers, canonical facts, final reports, PDFs, harness state, scripts, or another worker's artifact.
 - Do not let the reviewer rewrite the report. The reviewer scores, blocks, and creates gap tasks; the main agent performs fixes.

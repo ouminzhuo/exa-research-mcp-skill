@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "slug": "korea-wind",
+  "allocations": [
+    {
+      "allocationId": "KOR-OEM-001",
+      "scopeId": "firm-layer",
+      "oem": "Fixture OEM",
+      "capacityLayer": "firm_mw",
+      "mw": 600,
+      "sharePercent": 70,
+      "denominatorMetricId": "KOR-DENOM-FIRM",
+      "projectIds": [
+        "KOR-EXPIRED-OEM-ACTIVE"
+      ],
+      "relationshipTypes": [
+        "firm_supply_contract"
+      ],
+      "relationshipStatuses": [
+        "active"
+      ],
+      "sourceIds": [
+        "E-KOR-004"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "allocationId": "KOR-OEM-002",
+      "scopeId": "firm-layer",
+      "oem": "Second Fixture OEM",
+      "capacityLayer": "firm_mw",
+      "mw": 500,
+      "sharePercent": 50,
+      "denominatorMetricId": "KOR-DENOM-FIRM",
+      "projectIds": [
+        "KOR-EXPIRED-OEM-ACTIVE"
+      ],
+      "relationshipTypes": [
+        "firm_supply_contract"
+      ],
+      "relationshipStatuses": [
+        "active"
+      ],
+      "sourceIds": [
+        "E-KOR-004"
+      ],
+      "confidence": "medium"
+    }
+  ]
+}

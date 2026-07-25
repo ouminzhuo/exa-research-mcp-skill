@@ -1,10 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "canonical-facts.schema.json",
   "title": "Canonical Facts",
   "type": "object",
   "required": [
     "version",
     "slug",
+    "factProfile",
+    "requiredFactTypes",
+    "conditionalFactTypes",
+    "notApplicableFactTypes",
     "freezeId",
     "frozenAt",
     "basedOnLedgers",
@@ -16,6 +21,27 @@
     },
     "slug": {
       "type": "string"
+    },
+    "factProfile": {
+      "type": "string"
+    },
+    "requiredFactTypes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "conditionalFactTypes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notApplicableFactTypes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "freezeId": {
       "type": "string"
@@ -44,76 +70,7 @@
     "facts": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": [
-          "factId",
-          "factType",
-          "statement",
-          "value",
-          "scope",
-          "evidenceIds",
-          "confidence",
-          "frozenAt"
-        ],
-        "properties": {
-          "factId": {
-            "type": "string"
-          },
-          "factType": {
-            "type": "string"
-          },
-          "statement": {
-            "type": "string"
-          },
-          "value": {
-            "type": [
-              "number",
-              "string",
-              "boolean",
-              "object",
-              "array",
-              "null"
-            ]
-          },
-          "unit": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "scope": {
-            "type": "string"
-          },
-          "includedIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "excludedIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "evidenceIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "confidence": {
-            "enum": [
-              "high",
-              "medium",
-              "low",
-              "unknown"
-            ]
-          },
-          "frozenAt": {
-            "type": "string"
-          }
-        }
+        "$ref": "#/$defs/canonicalFact"
       }
     },
     "deprecatedValues": {
@@ -127,6 +84,144 @@
     },
     "repairRouting": {
       "type": "object"
+    }
+  },
+  "$defs": {
+    "canonicalFact": {
+      "type": "object",
+      "required": [
+        "factId",
+        "factType",
+        "statement",
+        "value",
+        "scope",
+        "evidenceIds",
+        "confidence",
+        "frozenAt"
+      ],
+      "properties": {
+        "factId": {
+          "type": "string"
+        },
+        "factType": {
+          "type": "string"
+        },
+        "statement": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ]
+        },
+        "valueStatus": {
+          "enum": [
+            "public",
+            "estimated",
+            "not_public",
+            "not_applicable",
+            "pending_verification",
+            "unknown"
+          ]
+        },
+        "displayValue": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "scope": {
+          "type": "string"
+        },
+        "includedIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excludedIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "includedProjectIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excludedProjectIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exclusionBasis": {
+          "type": [
+            "array",
+            "string",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "policyStatus": {
+          "enum": [
+            "enacted",
+            "draft",
+            "political_statement",
+            "auction_allocation",
+            "not_applicable",
+            "unknown"
+          ]
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sourceTrace": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "unknown"
+          ]
+        },
+        "pendingVerification": {
+          "type": [
+            "array",
+            "string",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "frozenAt": {
+          "type": "string"
+        }
+      }
     }
   }
 }

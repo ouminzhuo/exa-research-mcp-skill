@@ -58,15 +58,33 @@
           "mw": {
             "type": [
               "number",
-              "string",
               "null"
+            ]
+          },
+          "mwStatus": {
+            "enum": [
+              "public",
+              "estimated",
+              "not_public",
+              "not_applicable",
+              "pending_verification",
+              "unknown"
             ]
           },
           "sharePercent": {
             "type": [
               "number",
-              "string",
               "null"
+            ]
+          },
+          "sharePercentStatus": {
+            "enum": [
+              "public",
+              "estimated",
+              "not_public",
+              "not_applicable",
+              "pending_verification",
+              "unknown"
             ]
           },
           "denominatorMetricId": {

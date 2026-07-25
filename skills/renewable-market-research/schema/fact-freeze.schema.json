@@ -5,6 +5,13 @@
   "required": [
     "version",
     "slug",
+    "generatedFrom",
+    "canonicalFreezeId",
+    "canonicalFactsHash",
+    "factProfile",
+    "requiredFactTypes",
+    "conditionalFactTypes",
+    "notApplicableFactTypes",
     "freezeId",
     "frozenAt",
     "basedOnLedgers",
@@ -16,6 +23,37 @@
     },
     "slug": {
       "type": "string"
+    },
+    "generatedFrom": {
+      "description": "Compatibility projection source. Must reference canonical_facts.json.",
+      "type": "string"
+    },
+    "canonicalFreezeId": {
+      "type": "string"
+    },
+    "canonicalFactsHash": {
+      "type": "string"
+    },
+    "factProfile": {
+      "type": "string"
+    },
+    "requiredFactTypes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "conditionalFactTypes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notApplicableFactTypes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "freezeId": {
       "type": "string"
@@ -44,134 +82,7 @@
     "facts": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": [
-          "factId",
-          "factType",
-          "statement",
-          "value",
-          "scope",
-          "evidenceIds",
-          "confidence",
-          "frozenAt"
-        ],
-        "properties": {
-          "factId": {
-            "type": "string"
-          },
-          "factType": {
-            "enum": [
-              "official_auction_total_mw",
-              "identifiable_project_capacity_mw",
-              "confirmed_project_capacity_mw",
-              "opportunity_mw",
-              "watchlist_mw",
-              "suspended_or_paused_mw",
-              "enacted_policy_target",
-              "draft_target",
-              "political_statement_target",
-              "auction_allocation",
-              "oem_firm_order",
-              "oem_preferred_supplier",
-              "oem_conditional_reservation_or_cra",
-              "oem_framework_agreement",
-              "oem_technology_partnership",
-              "oem_reported_preference",
-              "oem_unallocated",
-              "paused_or_suspended_project",
-              "project_status_definition",
-              "oem_status_definition",
-              "capacity_scope_definition"
-            ]
-          },
-          "statement": {
-            "type": "string"
-          },
-          "value": {
-            "type": [
-              "number",
-              "string",
-              "boolean",
-              "object",
-              "array",
-              "null"
-            ]
-          },
-          "unit": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "scope": {
-            "type": "string"
-          },
-          "includedProjectIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "excludedProjectIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "exclusionBasis": {
-            "type": [
-              "array",
-              "string",
-              "null"
-            ],
-            "items": {
-              "type": "string"
-            }
-          },
-          "policyStatus": {
-            "enum": [
-              "enacted",
-              "draft",
-              "political_statement",
-              "auction_allocation",
-              "not_applicable",
-              "unknown"
-            ]
-          },
-          "evidenceIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "sourceTrace": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          },
-          "confidence": {
-            "enum": [
-              "high",
-              "medium",
-              "low",
-              "unknown"
-            ]
-          },
-          "pendingVerification": {
-            "type": [
-              "array",
-              "string",
-              "null"
-            ],
-            "items": {
-              "type": "string"
-            }
-          },
-          "frozenAt": {
-            "type": "string"
-          }
-        }
+        "$ref": "canonical-facts.schema.json#/$defs/canonicalFact"
       }
     },
     "chapterUseRules": {

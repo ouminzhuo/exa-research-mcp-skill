@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "slug": "korea-wind",
+  "currentPhase": "phase_8_release",
+  "completedPhases": [
+    "phase_1_plan",
+    "phase_2_recall",
+    "phase_3_verification_and_evidence",
+    "phase_4_rich_master_and_core_ledgers",
+    "phase_5_canonical_reconciliation_and_fact_freeze",
+    "phase_6_chapter_input_manifest_and_writing",
+    "phase_7_cross_chapter_audit_and_repair",
+    "phase_8_release"
+  ],
+  "phaseHistory": []
+}

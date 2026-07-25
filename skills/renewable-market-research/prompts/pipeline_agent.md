@@ -31,9 +31,9 @@ Return or write machine-readable JSON with this shape:
 - Separate verified facts, assumptions, and inference.
 - Prefer official, regulator, auction, grid-operator, MDB, owner, and audited company evidence.
 - Include source URL, title, publisher, access date, source type, and collection method for each evidence item.
-- Convert important facts into report implications: project status, capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
+- Convert important facts into report implications: project status, project capacity treatment, OEM capacity treatment, procurement window, product-fit relevance, risk judgment, pending verification, or executive decision context.
 - Preserve broad discovery but classify every project-like record into confirmed, watchlist, duplicate, rejected, official target, auction target, or optimistic scenario.
-- Split every project state into `developmentStage`, `activityStatus`, `ledgerTreatment`, `capacityTreatment`, and `capacityScope`. Do not use one ambiguous status field as the sole project state.
+- Split every project state into `developmentStage`, `activityStatus`, `ledgerTreatment`, `projectCapacityTreatment`, `oemCapacityTreatment`, and `capacityScope`. Do not use one ambiguous status field as the sole project state.
 
 ## Pipeline Rules
 
@@ -47,6 +47,7 @@ Return or write machine-readable JSON with this shape:
 - If a storage, solar, hydrogen, ammonia, methanol, green-power, or industrial offtake fact appears, attach it to the specific wind project or portfolio it changes. Otherwise mark it as adjacent context, not a pipeline claim.
 - For confirmed-pipeline candidates, verify present critical fields with `chrome-mcp`, `exa-fetch`, or `manual-file`, and record field-level `criticalFieldVerification` or equivalent `sourceTrace`. `exa-search` alone is not final verification.
 - Separate development stage from activity status. A project can be `auction_awarded` and `paused`; that project must remain visible but cannot enter active opportunity totals.
+- Separate project capacity treatment from OEM capacity treatment. An expired, terminated, or superseded OEM agreement normally makes OEM MW unallocated again; it does not make an active project paused, withdrawn, cancelled, or excluded inactive.
 
 ## Success Definition
 

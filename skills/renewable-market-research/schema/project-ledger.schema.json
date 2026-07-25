@@ -33,77 +33,66 @@
         "officialAuctionTotalMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "identifiableProjectCapacityMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "confirmedCapacityMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "opportunityCapacityMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "watchlistCapacityMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "suspendedOrPausedMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "excludedInactiveMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "firmMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "committedMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "influencedMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
         "unallocatedMW": {
           "type": [
             "number",
-            "string",
             "null"
           ]
         },
@@ -128,7 +117,8 @@
           "developmentStage",
           "activityStatus",
           "ledgerTreatment",
-          "capacityTreatment",
+          "projectCapacityTreatment",
+          "oemCapacityTreatment",
           "capacityScope",
           "statusBasis",
           "countedInConfirmedCapacity",
@@ -174,14 +164,12 @@
           "capacityMW": {
             "type": [
               "number",
-              "string",
               "null"
             ]
           },
           "opportunityMW": {
             "type": [
               "number",
-              "string",
               "null"
             ]
           },
@@ -253,7 +241,20 @@
               "unresolved"
             ]
           },
+          "projectCapacityTreatment": {
+            "enum": [
+              "confirmed_capacity",
+              "opportunity_capacity",
+              "watchlist_capacity",
+              "excluded_inactive",
+              "excluded_duplicate",
+              "excluded_unverified",
+              "policy_target_only",
+              "auction_total_only"
+            ]
+          },
           "capacityTreatment": {
+            "description": "Legacy compatibility alias only. New records must use projectCapacityTreatment.",
             "enum": [
               "confirmed_capacity",
               "opportunity_capacity",
@@ -334,13 +335,25 @@
               "unknown"
             ]
           },
-          "oemCapacityBucket": {
+          "oemCapacityTreatment": {
             "enum": [
               "firm_mw",
               "committed_mw",
               "influenced_mw",
               "unallocated_mw",
-              "excluded_inactive_mw"
+              "excluded_inactive_mw",
+              "unknown"
+            ]
+          },
+          "oemCapacityBucket": {
+            "description": "Legacy compatibility alias only. New records must use oemCapacityTreatment.",
+            "enum": [
+              "firm_mw",
+              "committed_mw",
+              "influenced_mw",
+              "unallocated_mw",
+              "excluded_inactive_mw",
+              "unknown"
             ]
           },
           "procurementStatus": {

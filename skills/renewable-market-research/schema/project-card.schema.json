@@ -32,7 +32,7 @@
         "developmentStage",
         "activityStatus",
         "ledgerTreatment",
-        "capacityTreatment",
+        "projectCapacityTreatment",
         "cod"
       ]
     },
@@ -51,6 +51,7 @@
         "oem",
         "oemRelationshipType",
         "oemRelationshipStatus",
+        "oemCapacityTreatment",
         "turbineModel",
         "turbineCount",
         "bess",

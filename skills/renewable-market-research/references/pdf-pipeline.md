@@ -147,6 +147,8 @@ Default final package:
 2. HTML (`.html`) is the layout-control format for card layout, table alignment, typography, page breaks, and print styles.
 3. PDF (`.pdf`) should normally be rendered from the controlled HTML file, not directly from raw Markdown.
 
+The source Markdown must retain machine-readable claim markers for key facts, metrics, projects, policy targets, auctions, and OEM allocations, for example `{{metric:METRIC-ID|value=123|unit=MW}}` or `{{project:PROJECT-ID}}`. HTML/PDF rendering may hide these markers with comments, spans, or pre-export cleanup, but the validated Markdown source must keep them so `validate_market_integrity.py` can enforce chapter-input manifests and cross-chapter metric consistency.
+
 Recommended fonts:
 
 - Chinese: `Microsoft YaHei`, `微软雅黑`, fallback `SimHei`, `SimSun`, sans-serif.
@@ -263,7 +265,7 @@ On Linux/macOS, detect available CJK fonts and update the renderer tokens accord
 ## Validation
 
 - Confirm full and lite MD files exist and are non-empty.
-- Run the integrity validator before layout export and confirm the eight release audit checks have zero gaps: metric consistency, scope disclosure, capacity arithmetic, OEM share, project status conflicts, parent/phase rollup, unit arithmetic, and release cleanliness.
+- Run the integrity validator before layout export and confirm the release audit checks have zero gaps: metric consistency, scope disclosure, capacity arithmetic, OEM share/recompute, numeric field contracts, project status conflicts, parent/phase rollup, unit arithmetic, release cleanliness, and audit-content release gates.
 - Do not render or hand off final PDF/HTML when the report still contains internal version labels, repairs-applied notes, deletion markup, TODO/FIXME, unconverted footnotes, raw JSON, or unrepaired arithmetic/scope gaps.
 - Confirm PDFs exist only if rendering was requested and the PDF stack is available. On Windows, also confirm the renderer can access configured CJK fonts.
 - Open or inspect PDF metadata/size when possible.

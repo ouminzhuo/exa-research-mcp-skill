@@ -29,15 +29,15 @@ Also produce:
 - `{country}-{technology}-agent_plan.json`: generated role/phase assignment plan for the run.
 - `{country}-{technology}-pipeline-ledger.json`: compact canonical project registry for identity, dedupe, evidence layers, and confirmed/watchlist/rejected state.
 - `{country}-{technology}-project_ledger.json`: full project ledger using `schema/project-ledger.schema.json`; this is the project database core.
-- `{country}-{technology}-metric_ledger.json`, `{country}-{technology}-policy_target_ledger.json`, `{country}-{technology}-auction_ledger.json`, and `{country}-{technology}-oem_allocation_ledger.json`: core ledgers for reusable facts that should not be recomputed by chapters. Metric and OEM allocation ledgers should follow `schema/metric-ledger.schema.json` and `schema/oem-allocation-ledger.schema.json`.
+- `{country}-{technology}-metric_ledger.json`, `{country}-{technology}-policy_target_ledger.json`, `{country}-{technology}-auction_ledger.json`, and `{country}-{technology}-oem_allocation_ledger.json`: core ledgers for reusable facts that should not be recomputed by chapters. They should follow `schema/metric-ledger.schema.json`, `schema/policy-target-ledger.schema.json`, `schema/auction-ledger.schema.json`, and `schema/oem-allocation-ledger.schema.json`.
 - `{country}-{technology}-capacity_reconciliation.json`: machine-readable capacity arithmetic using `schema/capacity-reconciliation.schema.json`, including project subtotals, official auction/award totals, identifiable project capacity, unresolved gap, and active/inactive exclusions.
 - `{country}-{technology}-canonical_facts.json`: post-ledger fact freeze using `schema/canonical-facts.schema.json`.
 - `{country}-{technology}-project_cards.json`: complete project cards using `schema/project-card.schema.json`; report prose may summarize, but this file must preserve all card fields.
 - `{country}-{technology}-evidence_table.json`: conclusion-level evidence table using `schema/evidence-table.schema.json`; this is required for evidence-boundary checks.
-- `{country}-{technology}-fact_freeze.json`: compatibility frozen fact contract using `schema/fact-freeze.schema.json`; chapters must cite frozen IDs and must not recalculate capacity, policy status, project activity status, auction/project deltas, or OEM relationship categories.
+- `{country}-{technology}-fact_freeze.json`: compatibility projection using `schema/fact-freeze.schema.json`; it must be generated from `{slug}-canonical_facts.json` with `generatedFrom`, `canonicalFreezeId`, and `canonicalFactsHash`. Chapters may read it only as a projection and must not treat it as a second editable fact source.
 - `chapter_inputs/{slug}-chapter-*-input-manifest.json`: per-chapter frozen input contract using `schema/chapter-input-manifest.schema.json`.
 - `chapter_drafts/{slug}-chapter-*.md`: per-chapter drafts written from manifests before final assembly.
-- `audits/{slug}-cross_chapter_audit.json`: cross-chapter consistency audit and repair state.
+- `audits/{slug}-cross_chapter_audit.json`: cross-chapter consistency audit and repair state using `schema/cross-chapter-audit.schema.json`.
 - `{country}-{technology}-participant_ledger.json`, `{country}-{technology}-oem_competition.json`, `{country}-{technology}-procurement_window.json`, `{country}-{technology}-risk_matrix.json`, and `{country}-{technology}-tracking_watchlist.json` when enough data exists.
 - `{country}-{technology}-integrity.json`: output from `scripts/validate_market_integrity.py`.
 
@@ -55,7 +55,7 @@ Also produce:
 | `{slug}-canonical_facts.json` | Unified fact freeze built after rich master JSON and core ledgers. It owns contested capacity scopes, policy status, auction/project differences, project status split, OEM relationship split, deprecated values, and repair routing. | Yes as the main chapter dependency contract. |
 | `{slug}-project_cards.json` | Complete project-card objects. Unknown values are allowed only as explicit `待核`, `unavailable`, `not found`, or equivalent markers. | Yes for Chapter 6/project-card appendix. |
 | `{slug}-evidence_table.json` | Conclusion-level evidence records linking claims to source grade, direct proof, confidence, related field, and pending verification action. | Yes for Chapter 16/source-confidence appendix. |
-| `{slug}-fact_freeze.json` | Compatibility view of frozen facts for runners that still expect the old filename. | Yes as a precondition, but it must be generated after core ledgers. |
+| `{slug}-fact_freeze.json` | Compatibility view of frozen facts for runners that still expect the old filename. It must include `generatedFrom`, `canonicalFreezeId`, and `canonicalFactsHash` and match `canonical_facts.json` by freeze ID, hash, fact IDs, fact values, deprecated values, and repair routing. | Yes as a precondition, but it must be generated after core ledgers from `canonical_facts.json`. |
 | `chapter_inputs/*.json` | Per-chapter allowed fact/project/metric/policy/auction/OEM IDs, prohibited deprecated values, and required disclosures. | Yes. A chapter cannot draft outside its manifest. |
 | `chapter_drafts/*.md` | Chapter prose drafts produced from frozen manifests. | No. Drafts require verification/audit and main-agent assembly before release. |
 | `audits/*.json` | Cross-chapter audit, stale artifact detection, repair routing, and release blockers. | No. It gates release. |
@@ -88,12 +88,12 @@ phase_state / artifact_manifest / agent_plan
 
 Do not let an agent write `{slug}-report.md` directly from notes or depth files. The report writer reads the gate artifacts and expresses the current market status; it does not become the database.
 
-Before any chapter draft, generate `{slug}-canonical_facts.json` and `{slug}-fact_freeze.json` after the rich master JSON and core ledgers. They must freeze:
+Before any chapter draft, generate `{slug}-canonical_facts.json` after the rich master JSON and core ledgers, then generate `{slug}-fact_freeze.json` as its compatibility projection. The canonical file must carry `factProfile`, `requiredFactTypes`, `conditionalFactTypes`, and `notApplicableFactTypes`; do not fabricate zero-valued auction, paused-project, OEM, draft-target, or political-target facts for markets where those fact types are not applicable. The freeze must cover:
 
 - capacity scopes: official auction total, identifiable project capacity, confirmed project capacity, Opportunity MW, watchlist MW, suspended/paused MW;
 - policy status: enacted target, draft target, political statement target, and auction allocation;
-- project state: `developmentStage`, `activityStatus`, `ledgerTreatment`, and `capacityTreatment`;
-- OEM relationship: `oemRelationshipType` and `oemRelationshipStatus`.
+- project state: `developmentStage`, `activityStatus`, `ledgerTreatment`, and `projectCapacityTreatment`;
+- OEM relationship: `oemRelationshipType`, `oemRelationshipStatus`, and `oemCapacityTreatment`.
 - deprecated values from older reports, plus repair routing when a chapter finds a contradiction.
 
 Hard boundaries:
@@ -101,8 +101,24 @@ Hard boundaries:
 - official auction total is not identifiable project capacity;
 - policy target is not draft target or political statement;
 - firm OEM order is not strategic preference;
+- expired, terminated, or superseded OEM contracts do not make an active project inactive; they usually flow to Unallocated MW unless project `activityStatus` itself is inactive;
 - paused, withdrawn, cancelled, or superseded projects cannot enter active opportunity totals;
 - do not use ambiguous `locked MW`; use only Firm MW, Committed MW, Influenced MW, Unallocated MW, and Excluded inactive MW.
+
+Core numeric fields in `project_ledger`, `metric_ledger`, `policy_target_ledger`, `auction_ledger`, `oem_allocation_ledger`, and `capacity_reconciliation` must be `number` or `null`. Unknown, not-public, and not-applicable values use `valueStatus`/`displayValue` or field-specific status/display fields, not strings in numeric fields.
+
+Chapter source Markdown must retain machine-readable references for key claims:
+
+```text
+{{fact:FACT-ID}}
+{{metric:METRIC-ID|value=123|unit=MW}}
+{{project:PROJECT-ID}}
+{{policy:POLICY-TARGET-ID}}
+{{auction:AUCTION-ID}}
+{{oem:OEM-ALLOCATION-ID}}
+```
+
+The validator extracts these IDs and compares them with each chapter's `chapter-input-manifest.json`. HTML/PDF rendering may hide markers, but the source Markdown must keep them.
 
 Release audit boundaries:
 
@@ -219,7 +235,8 @@ Run `scripts/validate_market_integrity.py --depth-dir data/renewable-market/dept
       "developmentStage": "operational",
       "activityStatus": "active",
       "ledgerTreatment": "confirmed",
-      "capacityTreatment": "confirmed_capacity",
+      "projectCapacityTreatment": "confirmed_capacity",
+      "oemCapacityTreatment": "firm_mw",
       "capacityScope": "confirmed_project_capacity",
       "developer": "Masdar",
       "developerCountry": "UAE",
@@ -376,10 +393,11 @@ Use `{slug}-pipeline-ledger.json` as the canonical registry for project identity
       "developmentStage": "operational",
       "activityStatus": "active",
       "ledgerTreatment": "confirmed",
-      "capacityTreatment": "confirmed_capacity",
+      "projectCapacityTreatment": "confirmed_capacity",
       "capacityScope": "confirmed_project_capacity",
       "oemRelationshipType": "firm_supply_contract",
       "oemRelationshipStatus": "active",
+      "oemCapacityTreatment": "firm_mw",
       "confirmedPipelineEligible": true,
       "evidenceLayers": ["owner-announcement", "financing-closed", "cod-operational"],
       "duplicateResolution": "merged",

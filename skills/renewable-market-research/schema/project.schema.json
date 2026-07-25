@@ -274,6 +274,26 @@
         "unknown"
       ]
     },
+    "oemCapacityTreatment": {
+      "enum": [
+        "firm_mw",
+        "committed_mw",
+        "influenced_mw",
+        "unallocated_mw",
+        "excluded_inactive_mw",
+        "unknown"
+      ]
+    },
+    "oem_capacity_treatment": {
+      "enum": [
+        "firm_mw",
+        "committed_mw",
+        "influenced_mw",
+        "unallocated_mw",
+        "excluded_inactive_mw",
+        "unknown"
+      ]
+    },
     "oemShortlist": {
       "type": [
         "array",
@@ -474,7 +494,32 @@
         "unresolved"
       ]
     },
+    "projectCapacityTreatment": {
+      "enum": [
+        "confirmed_capacity",
+        "opportunity_capacity",
+        "watchlist_capacity",
+        "excluded_inactive",
+        "excluded_duplicate",
+        "excluded_unverified",
+        "policy_target_only",
+        "auction_total_only"
+      ]
+    },
+    "project_capacity_treatment": {
+      "enum": [
+        "confirmed_capacity",
+        "opportunity_capacity",
+        "watchlist_capacity",
+        "excluded_inactive",
+        "excluded_duplicate",
+        "excluded_unverified",
+        "policy_target_only",
+        "auction_total_only"
+      ]
+    },
     "capacityTreatment": {
+      "description": "Legacy compatibility alias only. New records must use projectCapacityTreatment.",
       "enum": [
         "confirmed_capacity",
         "opportunity_capacity",
@@ -487,6 +532,7 @@
       ]
     },
     "capacity_treatment": {
+      "description": "Legacy compatibility alias only. New records must use project_capacity_treatment.",
       "enum": [
         "confirmed_capacity",
         "opportunity_capacity",

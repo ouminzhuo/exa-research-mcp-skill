@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Metric Ledger",
+  "title": "Policy Target Ledger",
   "type": "object",
   "required": [
     "version",
     "slug",
-    "metrics"
+    "targets"
   ],
   "properties": {
     "version": {
@@ -20,32 +20,46 @@
         "null"
       ]
     },
-    "metrics": {
+    "targets": {
       "type": "array",
       "items": {
         "type": "object",
         "required": [
-          "metricId",
-          "label",
+          "policyTargetId",
+          "targetType",
           "value",
           "unit",
+          "valueStatus",
+          "displayValue",
           "scope",
           "timeBasis",
+          "policyStatus",
           "sourceIds",
+          "evidenceIds",
           "confidence"
         ],
         "properties": {
-          "metricId": {
+          "policyTargetId": {
             "type": "string"
           },
-          "label": {
-            "type": "string"
+          "targetType": {
+            "enum": [
+              "enacted_policy_target",
+              "draft_target",
+              "political_statement_target",
+              "auction_allocation",
+              "not_applicable",
+              "unknown"
+            ]
           },
           "value": {
             "type": [
               "number",
               "null"
             ]
+          },
+          "unit": {
+            "type": "string"
           },
           "valueStatus": {
             "enum": [
@@ -63,42 +77,40 @@
               "null"
             ]
           },
-          "unit": {
-            "type": "string"
-          },
           "scope": {
             "type": "string"
-          },
-          "scopeId": {
-            "type": [
-              "string",
-              "null"
-            ]
           },
           "timeBasis": {
             "type": "string"
           },
-          "calculationBasis": {
+          "policyStatus": {
+            "enum": [
+              "enacted",
+              "draft",
+              "political_statement",
+              "not_applicable",
+              "unknown"
+            ]
+          },
+          "policyInstrument": {
             "type": [
               "string",
-              "array",
-              "object",
               "null"
             ]
           },
-          "includedIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "excludedIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "effectiveDate": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "sourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidenceIds": {
             "type": "array",
             "items": {
               "type": "string"

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import re
@@ -21,8 +22,8 @@ SOURCE_FIELD_ALIASES = [
     ("collectionMethod", "collection_method"),
 ]
 
-PROJECT_NAME_FIELDS = ("canonicalName", "canonical_name", "project_name", "name")
-PROJECT_ID_FIELDS = ("canonicalProjectId", "canonical_project_id", "id", "project_id")
+PROJECT_NAME_FIELDS = ("canonicalProjectName", "canonicalName", "projectName", "canonical_name", "project_name", "name")
+PROJECT_ID_FIELDS = ("projectId", "canonicalProjectId", "canonical_project_id", "id", "project_id")
 DEDUP_FIELD_ALIASES = ("dedupeKey", "dedupe_key")
 SOURCE_TRACE_ALIASES = ("sourceTrace", "source_trace")
 NAME_VARIANT_ALIASES = ("nameVariants", "name_variants", "aliases")
@@ -56,6 +57,15 @@ CAPACITY_TREATMENTS = {
     "policy_target_only",
     "auction_total_only",
 }
+PROJECT_CAPACITY_TREATMENTS = CAPACITY_TREATMENTS
+OEM_CAPACITY_TREATMENTS = {
+    "firm_mw",
+    "committed_mw",
+    "influenced_mw",
+    "unallocated_mw",
+    "excluded_inactive_mw",
+    "unknown",
+}
 CAPACITY_SCOPES = {
     "official_auction_total",
     "identifiable_project_capacity",
@@ -85,23 +95,67 @@ UNALLOCATED_OEM_TYPES = {"unallocated", "unknown"}
 ACTIVE_OEM_STATUSES = {"active"}
 COUNTABLE_OEM_STATUSES = {"active", "conditional", "unknown"}
 EXCLUDED_OEM_STATUSES = {"expired", "terminated", "superseded"}
-FACT_FREEZE_REQUIRED_TYPES = {
-    "official_auction_total_mw",
-    "identifiable_project_capacity_mw",
-    "confirmed_project_capacity_mw",
-    "opportunity_mw",
-    "watchlist_mw",
-    "suspended_or_paused_mw",
-    "enacted_policy_target",
-    "draft_target",
-    "political_statement_target",
-    "auction_allocation",
-    "oem_firm_order",
-    "oem_preferred_supplier",
-    "oem_framework_agreement",
-    "oem_reported_preference",
-    "paused_or_suspended_project",
+FACT_PROFILE_DEFAULTS = {
+    "wind_full_report": {
+        "requiredFactTypes": [
+            "confirmed_project_capacity_mw",
+            "opportunity_mw",
+            "watchlist_mw",
+            "capacity_scope_definition",
+            "project_status_definition",
+            "oem_status_definition",
+        ],
+        "conditionalFactTypes": [
+            "official_auction_total_mw",
+            "identifiable_project_capacity_mw",
+            "suspended_or_paused_mw",
+            "enacted_policy_target",
+            "draft_target",
+            "political_statement_target",
+            "auction_allocation",
+            "oem_firm_order",
+            "oem_preferred_supplier",
+            "oem_conditional_reservation_or_cra",
+            "oem_framework_agreement",
+            "oem_technology_partnership",
+            "oem_reported_preference",
+            "oem_unallocated",
+            "paused_or_suspended_project",
+        ],
+        "notApplicableFactTypes": [],
+    }
 }
+PROJECT_LEDGER_NUMERIC_FIELDS = (
+    "capacityMW",
+    "opportunityMW",
+    "oemExposureMW",
+    "officialAuctionTotalMW",
+    "identifiableProjectCapacityMW",
+    "confirmedCapacityMW",
+    "opportunityCapacityMW",
+    "watchlistCapacityMW",
+    "suspendedOrPausedMW",
+    "excludedInactiveMW",
+    "firmMW",
+    "committedMW",
+    "influencedMW",
+    "unallocatedMW",
+)
+METRIC_LEDGER_NUMERIC_FIELDS = ("value",)
+CAPACITY_RECONCILIATION_NUMERIC_FIELDS = (
+    "officialAuctionTotalMW",
+    "identifiableProjectCapacityMW",
+    "unresolvedGapMW",
+    "confirmedCapacityMW",
+    "opportunityCapacityMW",
+    "watchlistCapacityMW",
+    "excludedInactiveMW",
+    "firmMW",
+    "committedMW",
+    "influencedMW",
+    "unallocatedMW",
+)
+OEM_ALLOCATION_NUMERIC_FIELDS = ("mw", "sharePercent")
 V4_LEDGER_REQUIRED_FIELDS = [
     "projectId",
     "aliasGroupId",
@@ -111,7 +165,8 @@ V4_LEDGER_REQUIRED_FIELDS = [
     "developmentStage",
     "activityStatus",
     "ledgerTreatment",
-    "capacityTreatment",
+    "projectCapacityTreatment",
+    "oemCapacityTreatment",
     "capacityScope",
     "statusBasis",
     "countedInConfirmedCapacity",
@@ -146,7 +201,7 @@ V4_PROJECT_CARD_REQUIRED_PATHS = [
     "basicInformation.developmentStage",
     "basicInformation.activityStatus",
     "basicInformation.ledgerTreatment",
-    "basicInformation.capacityTreatment",
+    "basicInformation.projectCapacityTreatment",
     "basicInformation.cod",
     "ownerStructure.developer",
     "ownerStructure.spv",
@@ -155,6 +210,7 @@ V4_PROJECT_CARD_REQUIRED_PATHS = [
     "technicalPlan.oem",
     "technicalPlan.oemRelationshipType",
     "technicalPlan.oemRelationshipStatus",
+    "technicalPlan.oemCapacityTreatment",
     "technicalPlan.turbineModel",
     "technicalPlan.turbineCount",
     "technicalPlan.bess",
@@ -201,7 +257,8 @@ V4_PROJECT_CARD_REQUIRED_PATHS = [
 V4_EVIDENCE_REQUIRED_FIELDS = [
     "developmentStage",
     "activityStatus",
-    "capacityTreatment",
+    "projectCapacityTreatment",
+    "oemCapacityTreatment",
     "capacityMW",
     "oem",
     "oemRelationshipType",
@@ -426,6 +483,22 @@ REPORT_AUDIT_CHECK_NAMES = [
     "unit_arithmetic",
     "release_cleanliness",
 ]
+REFERENCE_MARKER_TYPES = {
+    "fact": "allowedFactIds",
+    "metric": "allowedMetricIds",
+    "project": "allowedProjectIds",
+    "policy": "allowedPolicyTargetIds",
+    "policytarget": "allowedPolicyTargetIds",
+    "policy_target": "allowedPolicyTargetIds",
+    "auction": "allowedAuctionIds",
+    "oem": "allowedOemAllocationIds",
+    "oemallocation": "allowedOemAllocationIds",
+    "oem_allocation": "allowedOemAllocationIds",
+}
+KEY_NUMERIC_CLAIM_RE = re.compile(
+    r"\d[\d,]*(?:\.\d+)?\s*(?:GW|MW|吉瓦|兆瓦|%|percent|percentage|KRW|USD|亿|万亿|million|billion|trillion|个|项|projects?)",
+    re.IGNORECASE,
+)
 CAPACITY_VALUE_RE = re.compile(r"~?\d[\d,]*(?:\.\d+)?\s*(?:GW|MW|吉瓦|兆瓦)", re.IGNORECASE)
 AGGREGATE_SCOPE_KEYWORDS = (
     "运营海风",
@@ -692,6 +765,29 @@ def as_number(value: Any) -> float:
     return 0.0
 
 
+def numeric_scalar(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        match = re.fullmatch(r"\s*-?\d+(?:,\d{3})*(?:\.\d+)?\s*", value)
+        if match:
+            return float(value.replace(",", "").strip())
+    return None
+
+
+def unavailable_status_for_field(record: dict[str, Any], field: str) -> str:
+    direct = record.get(f"{field}Status")
+    if isinstance(direct, str) and direct.strip():
+        return direct.strip()
+    for key in ("valueStatus", "value_status", "status"):
+        value = record.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
 def normalize_stage(value: Any) -> str:
     return str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
 
@@ -711,6 +807,39 @@ def project_opportunity_mw(project: dict[str, Any]) -> float:
 def project_oem_exposure_mw(project: dict[str, Any]) -> float:
     value = as_number(project.get("oemExposureMW") or project.get("oem_exposure_mw"))
     return value if value else project_capacity(project)
+
+
+def project_capacity_treatment(project: dict[str, Any]) -> str:
+    return normalize_enum(
+        project.get("projectCapacityTreatment")
+        or project.get("project_capacity_treatment")
+        or project.get("capacityTreatment")
+        or project.get("capacity_treatment")
+    )
+
+
+def oem_capacity_treatment(project: dict[str, Any]) -> str:
+    explicit = normalize_enum(
+        project.get("oemCapacityTreatment")
+        or project.get("oem_capacity_treatment")
+        or project.get("oemCapacityBucket")
+        or project.get("oem_capacity_bucket")
+    )
+    if explicit:
+        return explicit
+    relationship_type = normalize_enum(project.get("oemRelationshipType") or project.get("oem_relationship_type"))
+    relationship_status = normalize_enum(project.get("oemRelationshipStatus") or project.get("oem_relationship_status"))
+    if relationship_status in EXCLUDED_OEM_STATUSES:
+        return "unallocated_mw"
+    if relationship_type in FIRM_OEM_TYPES and relationship_status in ACTIVE_OEM_STATUSES:
+        return "firm_mw"
+    if relationship_type in COMMITTED_OEM_TYPES:
+        return "committed_mw"
+    if relationship_type in INFLUENCED_OEM_TYPES:
+        return "influenced_mw"
+    if relationship_type in UNALLOCATED_OEM_TYPES:
+        return "unallocated_mw"
+    return "unknown"
 
 
 def is_inactive_project(project: dict[str, Any]) -> bool:
@@ -1303,7 +1432,8 @@ def validate_project_ledger_gate(result: dict[str, Any], ledger: Any) -> list[di
             ("developmentStage", DEVELOPMENT_STAGES),
             ("activityStatus", ACTIVITY_STATUSES),
             ("ledgerTreatment", LEDGER_TREATMENTS),
-            ("capacityTreatment", CAPACITY_TREATMENTS),
+            ("projectCapacityTreatment", PROJECT_CAPACITY_TREATMENTS),
+            ("oemCapacityTreatment", OEM_CAPACITY_TREATMENTS),
             ("capacityScope", CAPACITY_SCOPES),
             ("oemRelationshipType", OEM_RELATIONSHIP_TYPES),
             ("oemRelationshipStatus", OEM_RELATIONSHIP_STATUSES),
@@ -1321,22 +1451,23 @@ def validate_project_ledger_gate(result: dict[str, Any], ledger: Any) -> list[di
                         f"project ledger {pid} has invalid {field}: {project.get(field)}",
                     )
         activity_status = normalize_enum(project.get("activityStatus"))
-        capacity_treatment = normalize_enum(project.get("capacityTreatment"))
+        project_treatment = project_capacity_treatment(project)
+        oem_treatment = oem_capacity_treatment(project)
         oem_relationship_status = normalize_enum(project.get("oemRelationshipStatus"))
         if activity_status in INACTIVE_ACTIVITY_STATUSES:
-            if capacity_treatment != "excluded_inactive":
+            if project_treatment != "excluded_inactive":
                 gap = {
                     "projectId": pid,
                     "activityStatus": activity_status,
-                    "capacityTreatment": capacity_treatment,
-                    "issue": "inactive project must use excluded_inactive capacityTreatment",
+                    "projectCapacityTreatment": project_treatment,
+                    "issue": "inactive project must use excluded_inactive projectCapacityTreatment",
                 }
                 gaps.append(gap)
                 add_gate_gap(
                     result,
                     "projectLedgerStateGaps",
                     gap,
-                    f"project ledger {pid} inactive activityStatus must be excluded from active capacity treatment",
+                    f"project ledger {pid} inactive activityStatus must be excluded from active project capacity treatment",
                 )
             if project.get("countedInConfirmedCapacity") is True or project.get("countedInOpportunityCapacity") is True:
                 gap = {
@@ -1353,19 +1484,63 @@ def validate_project_ledger_gate(result: dict[str, Any], ledger: Any) -> list[di
                     gap,
                     f"project ledger {pid} inactive project is counted in active capacity totals",
                 )
-        if oem_relationship_status in EXCLUDED_OEM_STATUSES and capacity_treatment != "excluded_inactive":
+        elif project_treatment == "excluded_inactive":
             gap = {
                 "projectId": pid,
-                "oemRelationshipStatus": oem_relationship_status,
-                "capacityTreatment": capacity_treatment,
-                "issue": "expired/terminated/superseded OEM relationship cannot be treated as active OEM MW",
+                "activityStatus": activity_status,
+                "projectCapacityTreatment": project_treatment,
+                "issue": "active/delayed project cannot be excluded inactive without inactive activityStatus",
             }
             gaps.append(gap)
             add_gate_gap(
                 result,
                 "projectLedgerStateGaps",
                 gap,
-                f"project ledger {pid} excluded OEM relationship status needs inactive/excluded treatment",
+                f"project ledger {pid} uses excluded_inactive project treatment without inactive activity status",
+            )
+        if oem_relationship_status in EXCLUDED_OEM_STATUSES and activity_status not in INACTIVE_ACTIVITY_STATUSES:
+            if project_treatment == "excluded_inactive":
+                gap = {
+                    "projectId": pid,
+                    "activityStatus": activity_status,
+                    "oemRelationshipStatus": oem_relationship_status,
+                    "projectCapacityTreatment": project_treatment,
+                    "issue": "expired/terminated/superseded OEM relationship cannot drive project inactive treatment",
+                }
+                gaps.append(gap)
+                add_gate_gap(
+                    result,
+                    "projectLedgerStateGaps",
+                    gap,
+                    f"project ledger {pid} treats an OEM-status issue as project inactive capacity",
+                )
+            if oem_treatment != "unallocated_mw":
+                gap = {
+                    "projectId": pid,
+                    "oemRelationshipStatus": oem_relationship_status,
+                    "oemCapacityTreatment": oem_treatment,
+                    "issue": "expired/terminated/superseded OEM relationship should flow to unallocated_mw unless the project itself is inactive",
+                }
+                gaps.append(gap)
+                add_gate_gap(
+                    result,
+                    "projectLedgerStateGaps",
+                    gap,
+                    f"project ledger {pid} expired OEM relationship must be separated from project capacity treatment",
+                )
+        if activity_status in INACTIVE_ACTIVITY_STATUSES and oem_treatment != "excluded_inactive_mw":
+            gap = {
+                "projectId": pid,
+                "oemRelationshipStatus": oem_relationship_status,
+                "oemCapacityTreatment": oem_treatment,
+                "issue": "inactive project OEM MW should flow to excluded_inactive_mw",
+            }
+            gaps.append(gap)
+            add_gate_gap(
+                result,
+                "projectLedgerStateGaps",
+                gap,
+                f"project ledger {pid} inactive project OEM capacity must use excluded_inactive_mw",
             )
     return gaps
 
@@ -1408,29 +1583,27 @@ def ledger_capacity_reconciliation(ledger: Any) -> dict[str, float]:
         oem_exposure_mw = project_oem_exposure_mw(project)
         stage = normalize_stage(project.get("projectStage") or project.get("pipelineBucket") or project.get("status"))
         activity_status = normalize_enum(project.get("activityStatus") or project.get("activity_status"))
-        capacity_treatment = normalize_enum(project.get("capacityTreatment") or project.get("capacity_treatment"))
-        oem_relationship_type = normalize_enum(project.get("oemRelationshipType") or project.get("oem_relationship_type"))
-        oem_relationship_status = normalize_enum(project.get("oemRelationshipStatus") or project.get("oem_relationship_status"))
-        inactive = activity_status in INACTIVE_ACTIVITY_STATUSES or capacity_treatment == "excluded_inactive"
+        project_treatment = project_capacity_treatment(project)
+        oem_treatment = oem_capacity_treatment(project)
+        inactive = activity_status in INACTIVE_ACTIVITY_STATUSES or project_treatment == "excluded_inactive"
         if project.get("countedInConfirmedCapacity") is True:
             confirmed += capacity
         if project.get("countedInOpportunityCapacity") is True:
             opportunity += opportunity_mw
-        if capacity_treatment == "watchlist_capacity" or "watchlist" in stage:
+        if project_treatment == "watchlist_capacity" or "watchlist" in stage:
             watchlist += capacity
         if inactive:
             excluded_inactive += capacity
+            if oem_treatment == "excluded_inactive_mw":
+                continue
             continue
-        if oem_relationship_status not in COUNTABLE_OEM_STATUSES:
-            excluded_inactive += capacity
-            continue
-        if oem_relationship_type in FIRM_OEM_TYPES and oem_relationship_status in ACTIVE_OEM_STATUSES:
+        if oem_treatment == "firm_mw":
             firm += oem_exposure_mw
-        elif oem_relationship_type in COMMITTED_OEM_TYPES:
+        elif oem_treatment == "committed_mw":
             committed += oem_exposure_mw
-        elif oem_relationship_type in INFLUENCED_OEM_TYPES:
+        elif oem_treatment == "influenced_mw":
             influenced += oem_exposure_mw
-        elif oem_relationship_type in UNALLOCATED_OEM_TYPES:
+        elif oem_treatment in {"unallocated_mw", "unknown"}:
             unallocated += oem_exposure_mw
     return {
         "computedConfirmedCapacityMW": confirmed,
@@ -1488,6 +1661,76 @@ def validate_capacity_reconciliation_gate(result: dict[str, Any], ledger: Any, t
             )
     result["computedCapacityReconciliation"] = computed
     return computed
+
+
+def has_null_value_contract(record: dict[str, Any], field: str) -> bool:
+    status_keys = (
+        f"{field}Status",
+        f"{field}_status",
+        "valueStatus",
+        "value_status",
+    )
+    display_keys = (
+        f"{field}DisplayValue",
+        f"{field}_display_value",
+        "displayValue",
+        "display_value",
+    )
+    has_status = any(present_or_unknown(record.get(key)) for key in status_keys)
+    has_display = any(present_or_unknown(record.get(key)) for key in display_keys)
+    return has_status and has_display
+
+
+def validate_numeric_field_gate(
+    result: dict[str, Any],
+    artifact_name: str,
+    data: Any,
+    field_names: tuple[str, ...],
+) -> list[dict[str, Any]]:
+    gaps: list[dict[str, Any]] = []
+    for record, location in iter_json_records(data):
+        record_id = str(
+            get_any(
+                record,
+                (
+                    "projectId",
+                    "metricId",
+                    "allocationId",
+                    "auctionId",
+                    "policyTargetId",
+                    "factId",
+                    "id",
+                    "slug",
+                ),
+            )
+            or location
+        )
+        for field in field_names:
+            if field not in record:
+                continue
+            value = record.get(field)
+            if isinstance(value, bool) or isinstance(value, str) or (value is not None and numeric_scalar(value) is None):
+                gap = {
+                    "artifact": artifact_name,
+                    "location": location,
+                    "recordId": record_id,
+                    "field": field,
+                    "value": value,
+                    "issue": "core numeric field must be number or null, not string/object/list/bool",
+                }
+                gaps.append(gap)
+                add_gate_gap(result, "numericFieldGaps", gap, f"{artifact_name} {record_id} has non-numeric core field {field}")
+            elif value is None and not has_null_value_contract(record, field):
+                gap = {
+                    "artifact": artifact_name,
+                    "location": location,
+                    "recordId": record_id,
+                    "field": field,
+                    "issue": "null core numeric field requires valueStatus and displayValue contract",
+                }
+                gaps.append(gap)
+                add_gate_gap(result, "numericFieldGaps", gap, f"{artifact_name} {record_id} null {field} lacks valueStatus/displayValue")
+    return gaps
 
 
 def validate_evidence_boundary_gate(result: dict[str, Any], evidence_table: Any) -> list[dict[str, Any]]:
@@ -1548,14 +1791,183 @@ def fact_freeze_type(item: dict[str, Any]) -> str:
     return normalize_enum(item.get("factType") or item.get("fact_type") or item.get("type") or item.get("category"))
 
 
+def fact_id(item: dict[str, Any], index: int | None = None) -> str:
+    value = item.get("factId") or item.get("fact_id") or item.get("id")
+    if value:
+        return str(value)
+    return f"index-{index}" if index is not None else ""
+
+
 def fact_freeze_type_set(fact_freeze: Any) -> set[str]:
     types = {fact_freeze_type(item) for item in collect_fact_freeze_items(fact_freeze)}
-    if isinstance(fact_freeze, dict):
-        types.update(key for key in fact_freeze if key in FACT_FREEZE_REQUIRED_TYPES)
     return {item for item in types if item}
 
 
-def validate_fact_freeze_gate(result: dict[str, Any], fact_freeze: Any) -> list[dict[str, Any]]:
+def configured_fact_types(*artifacts: Any) -> dict[str, set[str] | str]:
+    profile_name = ""
+    explicit_config_seen = False
+    required: set[str] = set()
+    conditional: set[str] = set()
+    not_applicable: set[str] = set()
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            continue
+        raw_profile = artifact.get("factProfile") or artifact.get("fact_profile")
+        if isinstance(raw_profile, str) and raw_profile.strip():
+            profile_name = raw_profile.strip()
+        elif isinstance(raw_profile, dict):
+            profile_name = str(raw_profile.get("profileId") or raw_profile.get("id") or profile_name)
+            for key, target in (
+                ("requiredFactTypes", required),
+                ("conditionalFactTypes", conditional),
+                ("notApplicableFactTypes", not_applicable),
+            ):
+                if key in raw_profile:
+                    explicit_config_seen = True
+                    target.update(normalize_enum(item) for item in as_list(raw_profile.get(key)) if normalize_enum(item))
+        for key, target in (
+            ("requiredFactTypes", required),
+            ("conditionalFactTypes", conditional),
+            ("notApplicableFactTypes", not_applicable),
+        ):
+            snake_key = re.sub(r"([A-Z])", r"_\1", key).lower()
+            if key in artifact or snake_key in artifact:
+                explicit_config_seen = True
+                target.update(normalize_enum(item) for item in as_list(artifact.get(key) or artifact.get(snake_key)) if normalize_enum(item))
+    if not explicit_config_seen:
+        defaults = FACT_PROFILE_DEFAULTS.get(profile_name or "wind_full_report", {})
+        required.update(normalize_enum(item) for item in as_list(defaults.get("requiredFactTypes")) if normalize_enum(item))
+        conditional.update(normalize_enum(item) for item in as_list(defaults.get("conditionalFactTypes")) if normalize_enum(item))
+        not_applicable.update(normalize_enum(item) for item in as_list(defaults.get("notApplicableFactTypes")) if normalize_enum(item))
+    return {
+        "profile": profile_name or "wind_full_report",
+        "required": required - not_applicable,
+        "conditional": conditional - not_applicable,
+        "notApplicable": not_applicable,
+    }
+
+
+def stable_json_hash(value: Any) -> str:
+    encoded = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def canonical_fact_hash_payload(canonical_facts: Any) -> dict[str, Any]:
+    if not isinstance(canonical_facts, dict):
+        return {}
+    facts = collect_fact_freeze_items(canonical_facts)
+    facts_by_id = {
+        fact_id(fact, index): normalized_fact_compare_payload(fact)
+        for index, fact in enumerate(facts)
+        if isinstance(fact, dict)
+    }
+    return {
+        "freezeId": canonical_freeze_id(canonical_facts),
+        "facts": facts_by_id,
+        "deprecatedValues": canonical_facts.get("deprecatedValues") or canonical_facts.get("deprecated_values") or [],
+        "repairRouting": canonical_facts.get("repairRouting") or canonical_facts.get("repair_routing") or {},
+    }
+
+
+def canonical_facts_hash(canonical_facts: Any) -> str:
+    return stable_json_hash(canonical_fact_hash_payload(canonical_facts))
+
+
+def normalized_fact_compare_payload(fact: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "factId": fact.get("factId") or fact.get("fact_id") or fact.get("id"),
+        "factType": fact.get("factType") or fact.get("fact_type") or fact.get("type") or fact.get("category"),
+        "statement": fact.get("statement"),
+        "value": fact.get("value"),
+        "valueStatus": fact.get("valueStatus") or fact.get("value_status"),
+        "displayValue": fact.get("displayValue") or fact.get("display_value"),
+        "unit": fact.get("unit"),
+        "scope": fact.get("scope"),
+        "includedIds": fact.get("includedIds") or fact.get("includedProjectIds") or fact.get("included_ids") or fact.get("included_project_ids") or [],
+        "excludedIds": fact.get("excludedIds") or fact.get("excludedProjectIds") or fact.get("excluded_ids") or fact.get("excluded_project_ids") or [],
+        "evidenceIds": fact.get("evidenceIds") or fact.get("evidence_ids") or [],
+        "confidence": fact.get("confidence"),
+    }
+
+
+def compare_fact_freeze_projection(
+    result: dict[str, Any],
+    fact_freeze: dict[str, Any],
+    canonical_facts: Any | None,
+) -> list[dict[str, Any]]:
+    gaps: list[dict[str, Any]] = []
+    generated_from = str(fact_freeze.get("generatedFrom") or fact_freeze.get("generated_from") or "")
+    if not generated_from.endswith("canonical_facts.json"):
+        gap = {"field": "generatedFrom", "value": generated_from, "issue": "fact_freeze must declare canonical_facts.json as source"}
+        gaps.append(gap)
+        add_gate_gap(result, "factFreezeGaps", gap, "fact_freeze missing generatedFrom canonical_facts.json projection marker")
+    canonical_freeze = str(fact_freeze.get("canonicalFreezeId") or fact_freeze.get("canonical_freeze_id") or "")
+    if not canonical_freeze:
+        gap = {"field": "canonicalFreezeId", "issue": "missing canonical freeze id"}
+        gaps.append(gap)
+        add_gate_gap(result, "factFreezeGaps", gap, "fact_freeze missing canonicalFreezeId")
+    projected_hash = str(fact_freeze.get("canonicalFactsHash") or fact_freeze.get("canonical_facts_hash") or "")
+    if not projected_hash:
+        gap = {"field": "canonicalFactsHash", "issue": "missing canonical facts hash"}
+        gaps.append(gap)
+        add_gate_gap(result, "factFreezeGaps", gap, "fact_freeze missing canonicalFactsHash")
+    if not isinstance(canonical_facts, dict):
+        return gaps
+    expected_freeze = canonical_freeze_id(canonical_facts)
+    if canonical_freeze and expected_freeze and canonical_freeze != expected_freeze:
+        gap = {"field": "canonicalFreezeId", "value": canonical_freeze, "expected": expected_freeze}
+        gaps.append(gap)
+        add_gate_gap(result, "factFreezeGaps", gap, "fact_freeze canonicalFreezeId does not match canonical_facts freezeId")
+    freeze_id = canonical_freeze_id(fact_freeze)
+    if freeze_id and expected_freeze and freeze_id != expected_freeze:
+        gap = {"field": "freezeId", "value": freeze_id, "expected": expected_freeze}
+        gaps.append(gap)
+        add_gate_gap(result, "factFreezeGaps", gap, "fact_freeze freezeId does not match canonical_facts freezeId")
+    expected_hash = canonical_facts_hash(canonical_facts)
+    if projected_hash and projected_hash != expected_hash:
+        gap = {"field": "canonicalFactsHash", "value": projected_hash, "expected": expected_hash}
+        gaps.append(gap)
+        add_gate_gap(result, "factFreezeGaps", gap, "fact_freeze canonicalFactsHash does not match canonical_facts")
+    canonical_items = {
+        fact_id(item, index): normalized_fact_compare_payload(item)
+        for index, item in enumerate(collect_fact_freeze_items(canonical_facts))
+        if isinstance(item, dict)
+    }
+    freeze_items = {
+        fact_id(item, index): normalized_fact_compare_payload(item)
+        for index, item in enumerate(collect_fact_freeze_items(fact_freeze))
+        if isinstance(item, dict)
+    }
+    canonical_ids = set(canonical_items)
+    freeze_ids = set(freeze_items)
+    if canonical_ids != freeze_ids:
+        gap = {
+            "missingInFactFreeze": sorted(canonical_ids - freeze_ids),
+            "extraInFactFreeze": sorted(freeze_ids - canonical_ids),
+            "issue": "fact_freeze facts must be a one-to-one projection of canonical_facts",
+        }
+        gaps.append(gap)
+        add_gate_gap(result, "factFreezeGaps", gap, "fact_freeze fact IDs do not match canonical_facts")
+    for item_id in sorted(canonical_ids & freeze_ids):
+        if stable_json_hash(canonical_items[item_id]) != stable_json_hash(freeze_items[item_id]):
+            gap = {"factId": item_id, "issue": "projected fact differs from canonical fact"}
+            gaps.append(gap)
+            add_gate_gap(result, "factFreezeGaps", gap, f"fact_freeze fact {item_id} differs from canonical_facts")
+    for field in ("deprecatedValues", "repairRouting"):
+        canonical_value = canonical_facts.get(field) or canonical_facts.get(re.sub(r"([A-Z])", r"_\1", field).lower()) or ([] if field == "deprecatedValues" else {})
+        freeze_value = fact_freeze.get(field) or fact_freeze.get(re.sub(r"([A-Z])", r"_\1", field).lower()) or ([] if field == "deprecatedValues" else {})
+        if stable_json_hash(canonical_value) != stable_json_hash(freeze_value):
+            gap = {"field": field, "issue": "projection field differs from canonical_facts"}
+            gaps.append(gap)
+            add_gate_gap(result, "factFreezeGaps", gap, f"fact_freeze {field} differs from canonical_facts")
+    return gaps
+
+
+def validate_fact_freeze_gate(
+    result: dict[str, Any],
+    fact_freeze: Any,
+    canonical_facts: Any | None = None,
+) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
     if not isinstance(fact_freeze, dict):
         gap = {"gate": "fact_freeze_gate", "issue": "fact_freeze must be a JSON object"}
@@ -1567,7 +1979,12 @@ def validate_fact_freeze_gate(result: dict[str, Any], fact_freeze: Any) -> list[
         gaps.append(gap)
         add_gate_gap(result, "factFreezeGaps", gap, "fact_freeze has no facts array")
     present_types = fact_freeze_type_set(fact_freeze)
-    for required_type in sorted(FACT_FREEZE_REQUIRED_TYPES):
+    profile = configured_fact_types(fact_freeze, canonical_facts)
+    if not (fact_freeze.get("factProfile") or fact_freeze.get("fact_profile")):
+        gap = {"field": "factProfile", "issue": "missing run-level fact profile"}
+        gaps.append(gap)
+        add_gate_gap(result, "factFreezeGaps", gap, "fact_freeze missing factProfile configuration")
+    for required_type in sorted(profile["required"]):
         if required_type not in present_types:
             gap = {"factType": required_type, "issue": "missing required frozen fact type"}
             gaps.append(gap)
@@ -1577,9 +1994,25 @@ def validate_fact_freeze_gate(result: dict[str, Any], fact_freeze: Any) -> list[
                 gap,
                 f"fact_freeze missing required fact type {required_type}",
             )
+    for not_applicable_type in sorted(profile["notApplicable"]):
+        if not_applicable_type in present_types:
+            gap = {"factType": not_applicable_type, "issue": "fact type is marked not applicable but appears in freeze"}
+            gaps.append(gap)
+            add_gate_gap(
+                result,
+                "factFreezeGaps",
+                gap,
+                f"fact_freeze contains notApplicable fact type {not_applicable_type}",
+            )
     for index, item in enumerate(items):
         for required in ("factId", "factType", "statement", "value", "scope", "confidence", "frozenAt"):
-            if required not in item or not present_or_unknown(item.get(required)):
+            if required == "value":
+                value_missing = required not in item or (
+                    item.get(required) is None and not has_null_value_contract(item, required)
+                )
+            else:
+                value_missing = required not in item or not present_or_unknown(item.get(required))
+            if value_missing:
                 gap = {"itemIndex": index, "field": required}
                 gaps.append(gap)
                 add_gate_gap(result, "factFreezeGaps", gap, f"fact_freeze item {index} missing {required}")
@@ -1594,6 +2027,7 @@ def validate_fact_freeze_gate(result: dict[str, Any], fact_freeze: Any) -> list[
                 gap,
                 f"fact_freeze item {index} lacks evidenceIds or sourceTrace",
             )
+    gaps.extend(compare_fact_freeze_projection(result, fact_freeze, canonical_facts))
     return gaps
 
 
@@ -1884,6 +2318,32 @@ def validate_canonical_facts_gate(result: dict[str, Any], canonical_facts: Any) 
         gap = {"field": "facts", "issue": "missing or empty facts array"}
         gaps.append(gap)
         add_gate_gap(result, "canonicalFactsGaps", gap, "canonical_facts has no facts array")
+    if not (canonical_facts.get("factProfile") or canonical_facts.get("fact_profile")):
+        gap = {"field": "factProfile", "issue": "missing run-level fact profile"}
+        gaps.append(gap)
+        add_gate_gap(result, "canonicalFactsGaps", gap, "canonical_facts missing factProfile configuration")
+    profile = configured_fact_types(canonical_facts)
+    present_types = fact_freeze_type_set(canonical_facts)
+    for required_type in sorted(profile["required"]):
+        if required_type not in present_types:
+            gap = {"factType": required_type, "issue": "missing required canonical fact type"}
+            gaps.append(gap)
+            add_gate_gap(
+                result,
+                "canonicalFactsGaps",
+                gap,
+                f"canonical_facts missing required fact type {required_type}",
+            )
+    for not_applicable_type in sorted(profile["notApplicable"]):
+        if not_applicable_type in present_types:
+            gap = {"factType": not_applicable_type, "issue": "fact type is marked not applicable but appears in canonical facts"}
+            gaps.append(gap)
+            add_gate_gap(
+                result,
+                "canonicalFactsGaps",
+                gap,
+                f"canonical_facts contains notApplicable fact type {not_applicable_type}",
+            )
     return gaps
 
 
@@ -1917,6 +2377,8 @@ def validate_chapter_input_manifest_gate(
             add_gate_gap(result, "chapterInputManifestGaps", gap, f"{path} is not a JSON object")
             continue
         chapter_id = str(manifest.get("chapterId") or manifest.get("chapter_id") or "")
+        if chapter_id.isdigit():
+            chapter_id = str(int(chapter_id))
         if chapter_id:
             seen_chapters.add(chapter_id)
         for field in CHAPTER_MANIFEST_REQUIRED_FIELDS:
@@ -1963,6 +2425,62 @@ def validate_chapter_input_manifest_gate(
     return gaps
 
 
+def chapter_id_from_path(path: Path) -> str:
+    normalized = path.stem.lower()
+    match = re.search(r"chapter[-_ ]?(\d{1,2})(?:\D|$)", normalized)
+    if match:
+        return str(int(match.group(1)))
+    match = re.search(r"(?:^|[-_])ch[-_]?(\d{1,2})(?:\D|$)", normalized)
+    if match:
+        return str(int(match.group(1)))
+    return ""
+
+
+def chapter_manifest_by_id(manifests: list[tuple[Path, Any]]) -> dict[str, dict[str, Any]]:
+    index: dict[str, dict[str, Any]] = {}
+    for path, manifest in manifests:
+        if not isinstance(manifest, dict):
+            continue
+        chapter_id = str(manifest.get("chapterId") or manifest.get("chapter_id") or chapter_id_from_path(path) or "")
+        if chapter_id.isdigit():
+            chapter_id = str(int(chapter_id))
+        if chapter_id:
+            index[chapter_id] = manifest
+    return index
+
+
+def normalize_marker_type(value: str) -> str:
+    return normalize_enum(value).replace("-", "_")
+
+
+def extract_reference_markers(text: str) -> dict[str, set[str]]:
+    markers: dict[str, set[str]] = {field: set() for field in set(REFERENCE_MARKER_TYPES.values())}
+    marker_pattern = re.compile(
+        r"(?:\{\{(?P<brace_type>fact|metric|project|policy(?:_?target)?|auction|oem(?:_?allocation)?):(?P<brace_id>[^}|]+)(?:\|[^}]*)?\}\}"
+        r"|\[(?P<bracket_type>fact|metric|project|policy(?:_?target)?|auction|oem(?:_?allocation)?):(?P<bracket_id>[^\]|]+)(?:\|[^\]]*)?\]"
+        r"|<!--\s*(?P<comment_type>fact|metric|project|policy(?:_?target)?|auction|oem(?:_?allocation)?):(?P<comment_id>.*?)\s*-->)",
+        re.IGNORECASE | re.DOTALL,
+    )
+    for match in marker_pattern.finditer(text):
+        raw_type = match.group("brace_type") or match.group("bracket_type") or match.group("comment_type") or ""
+        raw_id = match.group("brace_id") or match.group("bracket_id") or match.group("comment_id") or ""
+        allowed_field = REFERENCE_MARKER_TYPES.get(normalize_marker_type(raw_type))
+        reference_id = raw_id.strip()
+        if allowed_field and reference_id:
+            markers.setdefault(allowed_field, set()).add(reference_id)
+    attr_pattern = re.compile(
+        r"data-(fact|metric|project|policy-target|policy|auction|oem-allocation|oem)-id\s*=\s*['\"]([^'\"]+)['\"]",
+        re.IGNORECASE,
+    )
+    for match in attr_pattern.finditer(text):
+        raw_type = match.group(1).replace("-", "_")
+        allowed_field = REFERENCE_MARKER_TYPES.get(normalize_marker_type(raw_type))
+        reference_id = match.group(2).strip()
+        if allowed_field and reference_id:
+            markers.setdefault(allowed_field, set()).add(reference_id)
+    return markers
+
+
 def validate_chapter_no_external_fact_gate(
     result: dict[str, Any],
     manifests: list[tuple[Path, Any]],
@@ -1978,8 +2496,49 @@ def validate_chapter_no_external_fact_gate(
                 item
                 for item in (deprecated_value_text(value) for value in as_list(manifest.get("prohibitedDeprecatedValues")))
                 if item
-            )
+                )
+    manifests_by_id = chapter_manifest_by_id(manifests)
     for path, text in draft_texts:
+        chapter_id = chapter_id_from_path(path)
+        manifest = manifests_by_id.get(chapter_id) if chapter_id else None
+        if manifest is None:
+            gap = {"draft": str(path), "chapterId": chapter_id, "issue": "no matching chapter input manifest"}
+            gaps.append(gap)
+            add_gate_gap(result, "chapterExternalFactGaps", gap, f"{path} has no matching chapter input manifest")
+            continue
+        used_markers = extract_reference_markers(text)
+        for allowed_field in sorted(set(REFERENCE_MARKER_TYPES.values())):
+            allowed_ids = {str(item) for item in as_list(manifest.get(allowed_field)) if str(item)}
+            external_ids = sorted(used_markers.get(allowed_field, set()) - allowed_ids)
+            if external_ids:
+                gap = {
+                    "draft": str(path),
+                    "chapterId": chapter_id,
+                    "manifestField": allowed_field,
+                    "externalIds": external_ids,
+                    "issue": "chapter cites IDs outside its manifest allow-list",
+                }
+                gaps.append(gap)
+                add_gate_gap(
+                    result,
+                    "chapterExternalFactGaps",
+                    gap,
+                    f"{path} uses {allowed_field} outside its chapter input manifest",
+                )
+        if KEY_NUMERIC_CLAIM_RE.search(text) and as_list(manifest.get("allowedMetricIds")) and not used_markers.get("allowedMetricIds"):
+            gap = {
+                "draft": str(path),
+                "chapterId": chapter_id,
+                "manifestField": "allowedMetricIds",
+                "issue": "numeric claims require explicit metric reference markers",
+            }
+            gaps.append(gap)
+            add_gate_gap(
+                result,
+                "chapterExternalFactGaps",
+                gap,
+                f"{path} contains key numeric claims without metric reference markers",
+            )
         for value in prohibited:
             if value and value in text:
                 gap = {"draft": str(path), "deprecatedValue": value}
@@ -1993,11 +2552,36 @@ def validate_chapter_no_external_fact_gate(
     return gaps
 
 
+def audit_issue_count(value: Any) -> int:
+    if value in (None, "", []):
+        return 0
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, list):
+        return len(value)
+    if isinstance(value, dict):
+        count = get_any(value, ("count", "total", "length"))
+        if isinstance(count, (int, float)):
+            return int(count)
+        return len(value)
+    if isinstance(value, str):
+        parsed = numeric_scalar(value)
+        if parsed is not None:
+            return int(parsed)
+        return 1
+    return 1
+
+
 def validate_release_gate(
     result: dict[str, Any],
     phase_state: Any | None,
     audits_dir: Path | None,
     full_report_path: Path | None,
+    expected_freeze_id: str | None = None,
 ) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
     if not full_report_path:
@@ -2016,10 +2600,87 @@ def validate_release_gate(
         gap = {"gate": "release_gate", "phase": "phase_8_release", "status": release_status or "missing"}
         gaps.append(gap)
         add_gate_gap(result, "releaseGaps", gap, "full report provided without release phase state")
-    if audits_dir and not audit_files:
+    if audits_dir is None:
+        gap = {"gate": "cross_chapter_audit_gate", "issue": "audits directory argument is required for full-report release"}
+        gaps.append(gap)
+        add_gate_gap(result, "releaseGaps", gap, "full report provided without --audits-dir for cross-chapter audit content")
+    elif not audit_files:
         gap = {"gate": "cross_chapter_audit_gate", "path": str(audits_dir), "issue": "no audit json files found"}
         gaps.append(gap)
         add_gate_gap(result, "releaseGaps", gap, "full report provided but audits directory has no audit JSON")
+    if audit_files:
+        cross_audits: list[tuple[Path, Any]] = []
+        for audit_file in audit_files:
+            try:
+                audit_data = read_json_file(audit_file)
+            except Exception as exc:  # noqa: BLE001
+                gap = {"gate": "cross_chapter_audit_gate", "path": str(audit_file), "issue": f"invalid audit JSON: {exc}"}
+                gaps.append(gap)
+                add_gate_gap(result, "releaseGaps", gap, f"{audit_file} is not readable audit JSON")
+                continue
+            audit_type = normalize_enum(get_any(audit_data, ("auditType", "audit_type", "type")) or "") if isinstance(audit_data, dict) else ""
+            if "cross_chapter" in audit_type or "cross_chapter_audit" in audit_file.name.lower():
+                cross_audits.append((audit_file, audit_data))
+        if not cross_audits:
+            gap = {
+                "gate": "cross_chapter_audit_gate",
+                "path": str(audits_dir),
+                "issue": "no formal cross_chapter_audit JSON found",
+            }
+            gaps.append(gap)
+            add_gate_gap(result, "releaseGaps", gap, "audits directory has audit JSON but no cross_chapter_audit artifact")
+        for audit_file, audit_data in cross_audits:
+            if not isinstance(audit_data, dict):
+                gap = {"gate": "cross_chapter_audit_gate", "path": str(audit_file), "issue": "audit must be a JSON object"}
+                gaps.append(gap)
+                add_gate_gap(result, "releaseGaps", gap, f"{audit_file} audit content is not a JSON object")
+                continue
+            status = normalize_enum(audit_data.get("status"))
+            if status not in PHASE_PASSED_STATUSES:
+                gap = {"gate": "cross_chapter_audit_gate", "path": str(audit_file), "status": status or "missing"}
+                gaps.append(gap)
+                add_gate_gap(result, "releaseGaps", gap, f"{audit_file} cross-chapter audit did not pass")
+            critical_count = audit_issue_count(audit_data.get("criticalIssues") or audit_data.get("critical_issues"))
+            high_count = audit_issue_count(audit_data.get("highIssues") or audit_data.get("high_issues"))
+            if critical_count:
+                gap = {"gate": "cross_chapter_audit_gate", "path": str(audit_file), "criticalIssues": critical_count}
+                gaps.append(gap)
+                add_gate_gap(result, "releaseGaps", gap, f"{audit_file} cross-chapter audit has critical issues")
+            if high_count:
+                gap = {"gate": "cross_chapter_audit_gate", "path": str(audit_file), "highIssues": high_count}
+                gaps.append(gap)
+                add_gate_gap(result, "releaseGaps", gap, f"{audit_file} cross-chapter audit has high issues")
+            audit_freeze_id = str(audit_data.get("freezeId") or audit_data.get("freeze_id") or "")
+            if expected_freeze_id and audit_freeze_id != expected_freeze_id:
+                gap = {
+                    "gate": "cross_chapter_audit_gate",
+                    "path": str(audit_file),
+                    "freezeId": audit_freeze_id or "missing",
+                    "expectedFreezeId": expected_freeze_id,
+                }
+                gaps.append(gap)
+                add_gate_gap(result, "releaseGaps", gap, f"{audit_file} cross-chapter audit freezeId does not match current freeze")
+            checked_chapters = {str(int(item)) if str(item).isdigit() else str(item) for item in as_list(audit_data.get("checkedChapterIds") or audit_data.get("checked_chapter_ids"))}
+            missing_chapters = sorted(REQUIRED_FULL_REPORT_CHAPTER_IDS - checked_chapters, key=int)
+            if missing_chapters:
+                gap = {"gate": "cross_chapter_audit_gate", "path": str(audit_file), "missingChapterIds": missing_chapters}
+                gaps.append(gap)
+                add_gate_gap(result, "releaseGaps", gap, f"{audit_file} cross-chapter audit did not check every required chapter")
+            for field in ("checkedMetricIds", "checkedProjectIds"):
+                if field not in audit_data and re.sub(r"([A-Z])", r"_\1", field).lower() not in audit_data:
+                    gap = {"gate": "cross_chapter_audit_gate", "path": str(audit_file), "field": field}
+                    gaps.append(gap)
+                    add_gate_gap(result, "releaseGaps", gap, f"{audit_file} cross-chapter audit missing {field}")
+            open_repairs = [
+                task
+                for task in as_list(audit_data.get("repairTasks") or audit_data.get("repair_tasks"))
+                if not isinstance(task, dict)
+                or normalize_enum(task.get("status")) not in {"closed", "resolved", "applied", "passed", "not_applicable"}
+            ]
+            if open_repairs:
+                gap = {"gate": "cross_chapter_audit_gate", "path": str(audit_file), "openRepairTasks": len(open_repairs)}
+                gaps.append(gap)
+                add_gate_gap(result, "releaseGaps", gap, f"{audit_file} has unresolved repair tasks")
     return gaps
 
 
@@ -2244,11 +2905,31 @@ def collect_oem_allocation_records(data: Any) -> list[dict[str, Any]]:
     return []
 
 
-def validate_oem_share_gate(result: dict[str, Any], oem_allocation_ledger: Any | None, tolerance: float = 0.1) -> list[dict[str, Any]]:
+def metric_value_lookup(metric_ledger: Any | None) -> dict[str, float]:
+    lookup: dict[str, float] = {}
+    for record in collect_metric_records(metric_ledger):
+        metric_id = get_any(record, ("metricId", "metric_id", "id", "factId", "fact_id"))
+        if not metric_id:
+            continue
+        raw_value = get_any(record, ("value", "metricValue", "metric_value", "amount"))
+        parsed, _ = parse_report_number(raw_value, get_any(record, ("unit", "metricUnit", "metric_unit")))
+        if parsed is not None:
+            lookup[str(metric_id)] = parsed
+    return lookup
+
+
+def validate_oem_share_gate(
+    result: dict[str, Any],
+    oem_allocation_ledger: Any | None,
+    metric_ledger: Any | None = None,
+    tolerance: float = 0.1,
+) -> list[dict[str, Any]]:
     gaps: list[dict[str, Any]] = []
     records = collect_oem_allocation_records(oem_allocation_ledger)
+    denominators = metric_value_lookup(metric_ledger)
     share_groups: dict[str, float] = defaultdict(float)
     group_records: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    group_denominators: dict[str, set[str]] = defaultdict(set)
     for index, record in enumerate(records):
         scope = str(
             get_any(record, ("scopeId", "scope_id", "statisticalScope", "statistical_scope", "denominatorMetricId", "denominator_metric_id"))
@@ -2258,9 +2939,41 @@ def validate_oem_share_gate(result: dict[str, Any], oem_allocation_ledger: Any |
         share_group_key = f"{scope}|{layer or 'all'}"
         share = find_alias_value(record, ("sharePercent", "share_percent", "percentage", "percent", "marketSharePercent"))
         denominator = str(get_any(record, ("denominatorMetricId", "denominator_metric_id", "denominator", "shareDenominator")) or "")
+        mw = find_alias_value(record, ("mw", "capacityMW", "capacity_mw", "allocationMW", "allocation_mw"))
         if share is not None:
             share_groups[share_group_key] += as_number(share)
             group_records[share_group_key].append({"index": index, "sharePercent": as_number(share), "record": record})
+        if denominator:
+            group_denominators[share_group_key].add(denominator)
+            if denominator not in denominators and metric_ledger is not None:
+                gap = {
+                    "recordIndex": index,
+                    "scope": scope,
+                    "bucket": layer,
+                    "denominatorMetricId": denominator,
+                    "issue": "denominatorMetricId is not present in metric_ledger",
+                }
+                gaps.append(gap)
+                add_gate_gap(result, "oemShareGaps", gap, "OEM share denominatorMetricId missing from metric_ledger")
+            elif denominator in denominators and share is not None and mw is not None:
+                denominator_value = denominators[denominator]
+                if denominator_value:
+                    expected_share = as_number(mw) / denominator_value * 100
+                    declared_share = as_number(share)
+                    if abs(expected_share - declared_share) > max(tolerance, 0.05):
+                        gap = {
+                            "recordIndex": index,
+                            "scope": scope,
+                            "bucket": layer,
+                            "mw": as_number(mw),
+                            "denominatorMetricId": denominator,
+                            "denominatorValue": denominator_value,
+                            "declaredSharePercent": declared_share,
+                            "computedSharePercent": expected_share,
+                            "issue": "sharePercent does not equal mw / denominatorMetricValue * 100",
+                        }
+                        gaps.append(gap)
+                        add_gate_gap(result, "oemShareGaps", gap, "OEM sharePercent does not reconcile to MW and denominator metric")
         denominator_text = normalize_text(denominator)
         if layer in {"firm_mw", "firm", "firm_supply_contract"} and "influenced" in denominator_text:
             gap = {
@@ -2277,6 +2990,11 @@ def validate_oem_share_gate(result: dict[str, Any], oem_allocation_ledger: Any |
             gap = {"scope": scope, "sharePercentTotal": total_share, "records": group_records[scope]}
             gaps.append(gap)
             add_gate_gap(result, "oemShareGaps", gap, f"OEM share total exceeds 100% for scope {scope}: {total_share}")
+    for scope, denominator_ids in group_denominators.items():
+        if len(denominator_ids) > 1:
+            gap = {"scope": scope, "denominatorMetricIds": sorted(denominator_ids)}
+            gaps.append(gap)
+            add_gate_gap(result, "oemShareGaps", gap, f"OEM share group {scope} uses mixed denominators")
     return gaps
 
 
@@ -2477,6 +3195,7 @@ def update_v4_gate_status(result: dict[str, Any]) -> None:
         "scopeDisclosureGaps",
         "capacityArithmeticGaps",
         "oemShareGaps",
+        "numericFieldGaps",
         "projectStatusConflictGaps",
         "parentPhaseRollupGaps",
         "unitArithmeticGaps",
@@ -2547,15 +3266,24 @@ def main() -> int:
     if args.project_ledger:
         ledger_data = read_json_file(args.project_ledger)
         validate_project_ledger_gate(result, ledger_data)
+        validate_numeric_field_gate(result, "project_ledger", ledger_data, PROJECT_LEDGER_NUMERIC_FIELDS)
         validate_capacity_reconciliation_gate(result, ledger_data)
         validate_parent_phase_rollup_gate(result, ledger_data)
     if args.metric_ledger:
         metric_ledger_data = read_json_file(args.metric_ledger)
+        validate_numeric_field_gate(result, "metric_ledger", metric_ledger_data, METRIC_LEDGER_NUMERIC_FIELDS)
     if args.capacity_reconciliation:
         capacity_reconciliation_data = read_json_file(args.capacity_reconciliation)
+        validate_numeric_field_gate(
+            result,
+            "capacity_reconciliation",
+            capacity_reconciliation_data,
+            CAPACITY_RECONCILIATION_NUMERIC_FIELDS,
+        )
     if args.oem_allocation_ledger:
         oem_allocation_ledger_data = read_json_file(args.oem_allocation_ledger)
-        validate_oem_share_gate(result, oem_allocation_ledger_data)
+        validate_numeric_field_gate(result, "oem_allocation_ledger", oem_allocation_ledger_data, OEM_ALLOCATION_NUMERIC_FIELDS)
+        validate_oem_share_gate(result, oem_allocation_ledger_data, metric_ledger_data)
     if args.project_cards:
         validate_project_card_completeness_gate(result, read_json_file(args.project_cards))
     if args.evidence_table:
@@ -2564,7 +3292,7 @@ def main() -> int:
         canonical_facts_data = read_json_file(args.canonical_facts)
         validate_canonical_facts_gate(result, canonical_facts_data)
     if args.fact_freeze:
-        validate_fact_freeze_gate(result, read_json_file(args.fact_freeze))
+        validate_fact_freeze_gate(result, read_json_file(args.fact_freeze), canonical_facts_data)
     if args.chapter_input_manifest or args.chapter_input_dir:
         chapter_manifests = collect_chapter_input_manifests(args.chapter_input_manifest, args.chapter_input_dir)
         validate_chapter_input_manifest_gate(result, chapter_manifests, canonical_freeze_id(canonical_facts_data))
@@ -2581,7 +3309,7 @@ def main() -> int:
         validate_scope_disclosure_gate(result, full_report_text)
         validate_unit_arithmetic_gate(result, full_report_text)
         validate_release_cleanliness_gate(result, full_report_text)
-        validate_release_gate(result, phase_state_data, args.audits_dir, args.full_report)
+        validate_release_gate(result, phase_state_data, args.audits_dir, args.full_report, canonical_freeze_id(canonical_facts_data))
         if ledger_data is not None:
             validate_project_status_uniqueness_gate(result, ledger_data, full_report_text)
     metric_texts: list[tuple[str, str]] = []
@@ -2632,6 +3360,7 @@ def main() -> int:
         or result.get("scopeDisclosureGaps")
         or result.get("capacityArithmeticGaps")
         or result.get("oemShareGaps")
+        or result.get("numericFieldGaps")
         or result.get("projectStatusConflictGaps")
         or result.get("parentPhaseRollupGaps")
         or result.get("unitArithmeticGaps")
